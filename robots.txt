@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Allow: /intake.html
+Disallow: /result.html
+
+Sitemap: https://callbridge.vercel.app/sitemap.xml

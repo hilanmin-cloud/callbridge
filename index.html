@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>CallBridge｜電話でしか予約できない韓国のレストランを代わりに予約します</title>
+<meta name="description" content="韓国の人気店の多くは電話でしか予約を受け付けません。CallBridgeが韓国語で電話し、席を確保して、お店の利用方法までお伝えします。予約が取れなければ料金はいただきません。">
+<meta name="keywords" content="韓国 レストラン 予約代行, 한국 식당 예약 대행, Korea restaurant booking service, 韓國餐廳訂位代訂">
+<link rel="canonical" href="https://callbridge.vercel.app/">
+
+<link rel="alternate" hreflang="ja" href="https://callbridge.vercel.app/?lang=ja">
+<link rel="alternate" hreflang="zh-Hant" href="https://callbridge.vercel.app/?lang=zh-TW">
+<link rel="alternate" hreflang="zh-Hans" href="https://callbridge.vercel.app/?lang=zh-CN">
+<link rel="alternate" hreflang="en" href="https://callbridge.vercel.app/?lang=en">
+<link rel="alternate" hreflang="ko" href="https://callbridge.vercel.app/?lang=ko">
+<link rel="alternate" hreflang="x-default" href="https://callbridge.vercel.app/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CallBridge">
+<meta property="og:title" content="電話でしか予約できない韓国のレストランを代わりに予約します">
+<meta property="og:description" content="韓国語で私たちが電話し、席を確保します。予約が取れなければ料金はいただきません。">
+<meta property="og:url" content="https://callbridge.vercel.app/">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CallBridge｜韓国レストラン予約代行">
+<meta name="twitter:description" content="電話でしか予約できないお店に、韓国語で代わりに電話します。">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0F5E5C">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://callbridge.vercel.app/#service",
+      "name": "CallBridge — 韓国レストラン電話予約代行",
+      "serviceType": "Restaurant reservation by phone on behalf of foreign travellers",
+      "description": "韓国で電話でしか予約を受け付けないレストランに、訪韓外国人旅行者の代わりに韓国語で電話し、予約を確定してお店の利用方法まで案内するサービス。",
+      "areaServed": { "@type": "Country", "name": "South Korea" },
+      "availableLanguage": ["ja", "zh-Hant", "zh-Hans", "en", "ko"],
+      "provider": { "@type": "Organization", "name": "CallBridge", "url": "https://callbridge.vercel.app/" },
+      "offers": {
+        "@type": "Offer",
+        "price": "9900",
+        "priceCurrency": "KRW",
+        "description": "レストラン予約1件。予約が取れなかった場合は全額返金。"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://callbridge.vercel.app/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "予約が取れなかった場合はどうなりますか？",
+          "acceptedAnswer": { "@type": "Answer", "text": "料金は全額返金いたします。あわせて、そのお店が空いている時間をお知らせしますので、別の日時で再度ご依頼いただけます。" }
+        },
+        {
+          "@type": "Question",
+          "name": "韓国の電話番号がなくても利用できますか？",
+          "acceptedAnswer": { "@type": "Answer", "text": "はい。お店にはCallBridgeの番号を予約連絡先としてお伝えします。お店からの確認の電話も私たちが受けて、内容をお客様にお伝えします。" }
+        },
+        {
+          "@type": "Question",
+          "name": "希望の時間が満席だった場合は？",
+          "acceptedAnswer": { "@type": "Answer", "text": "ご依頼時に第2・第3希望をお伺いします。その範囲内であれば、通話中にその場で確定しますので、改めてご確認をお願いすることはありません。" }
+        },
+        {
+          "@type": "Question",
+          "name": "誰が電話をかけるのですか？",
+          "acceptedAnswer": { "@type": "Answer", "text": "AIアシスタントが身元を明かした上で韓国語で電話します。お店が人との通話を希望された場合や、やりとりが複雑な場合は担当者が引き継ぎます。" }
+        }
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://callbridge.vercel.app/#howto",
+      "name": "CallBridgeでレストランを予約する方法",
+      "step": [
+        { "@type": "HowToStep", "position": 1, "name": "リクエストを送る", "text": "地図のリンクまたは店名、希望日時、人数を入力します。第1希望が満席だった場合に受け入れられる条件もあわせてお知らせください。" },
+        { "@type": "HowToStep", "position": 2, "name": "韓国語で電話します", "text": "お店が落ち着いている時間帯に電話し、席やお店のルールを確認したうえで、お知らせいただいた範囲内で予約を確定します。" },
+        { "@type": "HowToStep", "position": 3, "name": "結果を受け取る", "text": "確定内容をご自身の言語でお送りします。あわせて、そのお店の利用方法と、入口で見せるための韓国語の案内もお渡しします。" }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root {
+    color-scheme: light;
+    --teal: #0F5E5C; --teal-d: #0A4443; --gold: #C08A2E; --gold-l: #E8B55A;
+    --ink: #15211F; --muted: #5A6A67; --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF;
+    --warm: #FBF4E6; --warmink: #4A3A10;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --teal: #4E8F8C; --teal-d: #6FA9A6; --gold: #D9A450; --gold-l: #E8B55A;
+      --ink: #E8EFEE; --muted: #9FB0AD; --line: #2A3836; --soft: #16211F; --bg: #0E1716;
+      --warm: #26210F; --warmink: #E2CF9E;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --teal: #4E8F8C; --teal-d: #6FA9A6; --gold: #D9A450; --gold-l: #E8B55A;
+    --ink: #E8EFEE; --muted: #9FB0AD; --line: #2A3836; --soft: #16211F; --bg: #0E1716;
+    --warm: #26210F; --warmink: #E2CF9E;
+  }
+  * { box-sizing: inherit; }
+  html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", "Noto Sans KR", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.7; }
+
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 12px; top: 12px; z-index: 100; background: var(--teal); color: #fff;
+    padding: 10px 16px; border-radius: 8px; }
+
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: var(--bg); border-bottom: 1px solid var(--line); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+    background: var(--bg); z-index: 21; }
+  .bar .inner { max-width: 1080px; margin: 0 auto; padding: 12px 20px;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .brand { font-size: 19px; font-weight: 700; color: var(--teal); text-decoration: none; }
+  .langs { display: flex; gap: 5px; flex-wrap: wrap; }
+  .langs button { font: inherit; font-size: 12.5px; min-height: 36px; padding: 0 11px; border-radius: 18px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+  .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 0 20px 60px; }
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: 0; }
+  h1 { margin: 0 0 18px; font-size: clamp(28px, 5.4vw, 46px); line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { margin: 0 0 24px; font-size: clamp(21px, 3.4vw, 30px); line-height: 1.4; }
+  h3 { margin: 0 0 8px; font-size: 18px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: clamp(16px, 2.2vw, 19px); color: var(--muted); max-width: 60ch; }
+
+  .hero { display: flex; flex-wrap: wrap; gap: 36px; align-items: center; padding-top: 48px; }
+  .hero > div:first-child { flex: 999 1 340px; min-width: 0; }
+  .hero > aside { flex: 1 1 290px; min-width: 0; }
+  .kicker { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: 1.2px;
+    color: var(--gold); margin-bottom: 12px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 54px;
+    padding: 0 28px; border-radius: 10px; text-decoration: none; font-size: 17px; font-weight: 600;
+    background: var(--teal); color: #fff; border: 1px solid var(--teal); }
+  .btn:hover { background: var(--teal-d); border-color: var(--teal-d); }
+  .btn.ghost { background: transparent; color: var(--teal); }
+  .btn.gold { background: var(--gold-l); border-color: var(--gold-l); color: #2E2305; }
+  .cta small { font-size: 14px; color: var(--muted); }
+
+  .sample { border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--bg); }
+  .sample .tag { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: var(--muted); }
+  .sample strong { display: block; font-size: 19px; margin: 6px 0 2px; }
+  .sample .sub { font-size: 15px; color: var(--muted); }
+  .sample hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+  .sample .rule { font-size: 14.5px; line-height: 1.65; color: var(--ink); }
+
+  .steps { display: flex; flex-wrap: wrap; gap: 20px; list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { flex: 1 1 260px; min-width: 0; background: var(--soft); border-radius: 14px; padding: 26px; }
+  .steps li::before { counter-increment: s; content: counter(s, decimal-leading-zero);
+    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+    border-radius: 20px; background: var(--teal); color: #fff; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+  .steps p { margin: 0; font-size: 15.5px; color: var(--muted); }
+
+  .prices { display: flex; flex-wrap: wrap; gap: 16px; }
+  .prices > div { flex: 1 1 210px; min-width: 0; border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .prices > div.main { border: 2px solid var(--teal); background: var(--soft); }
+  .prices .amt { display: block; font-size: 27px; font-weight: 700; margin: 6px 0; }
+  .prices .desc { font-size: 14px; color: var(--muted); }
+  .prices .soon { display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 11px;
+    background: var(--soft); color: var(--muted); margin-bottom: 6px; }
+
+  details.faq { border-bottom: 1px solid var(--line); padding: 16px 0; }
+  details.faq summary { cursor: pointer; font-size: 17px; font-weight: 600; list-style: none; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary::after { content: "+"; float: right; color: var(--teal); font-weight: 400; }
+  details.faq[open] summary::after { content: "−"; }
+  details.faq p { margin: 12px 0 0; color: var(--muted); font-size: 15.5px; }
+
+  .close { background: var(--teal); border-radius: 18px; padding: 44px 32px; color: #fff;
+    display: flex; flex-wrap: wrap; gap: 22px; align-items: center; justify-content: space-between; }
+  .close h2 { margin: 0 0 6px; color: #fff; }
+  .close p { margin: 0; color: #D7E6E5; }
+
+  footer { max-width: 1080px; margin: 0 auto; padding: 26px 20px 44px; border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+
+  @media (max-width: 420px) {
+    main { padding: 0 14px 44px; }
+    section { padding: 40px 0; }
+    .hero { gap: 26px; padding-top: 32px; }
+    .steps li, .prices > div { padding: 18px; }
+    .close { padding: 30px 20px; }
+    .bar .inner { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main" data-t="skip"></a>
+
+<header class="bar">
+  <div class="inner">
+    <a class="brand" href="/">CallBridge</a>
+    <nav class="langs" id="langs" aria-label="Language"></nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div>
+      <span class="kicker" data-t="kicker"></span>
+      <h1 data-t="h1"></h1>
+      <p class="lead" data-t="lead"></p>
+      <div class="cta">
+        <a class="btn" href="intake.html" data-t="ctaMain"></a>
+        <small data-t="ctaSub"></small>
+      </div>
+    </div>
+
+    <aside class="sample" aria-labelledby="sampleTitle">
+      <span class="tag" id="sampleTitle" data-t="sampleTag"></span>
+      <strong data-t="sampleWhen"></strong>
+      <span class="sub" data-t="sampleWho"></span>
+      <hr>
+      <span class="tag" data-t="sampleRuleTag"></span>
+      <p class="rule" style="margin:8px 0 0" data-t="sampleRule"></p>
+    </aside>
+  </section>
+
+  <section id="how" aria-labelledby="howTitle">
+    <h2 id="howTitle" data-t="howTitle"></h2>
+    <ol class="steps">
+      <li><h3 data-t="s1t"></h3><p data-t="s1d"></p></li>
+      <li><h3 data-t="s2t"></h3><p data-t="s2d"></p></li>
+      <li><h3 data-t="s3t"></h3><p data-t="s3d"></p></li>
+    </ol>
+  </section>
+
+  <section id="why" aria-labelledby="whyTitle">
+    <h2 id="whyTitle" data-t="whyTitle"></h2>
+    <div class="steps" style="counter-reset:none">
+      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
+        <h3 data-t="w1t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w1d"></p>
+      </div>
+      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
+        <h3 data-t="w2t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w2d"></p>
+      </div>
+      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
+        <h3 data-t="w3t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w3d"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="price" aria-labelledby="priceTitle">
+    <h2 id="priceTitle" data-t="priceTitle"></h2>
+    <div class="prices">
+      <div class="main">
+        <span data-t="p1n"></span><span class="amt">₩9,900</span>
+        <span class="desc" data-t="p1d"></span>
+      </div>
+      <div>
+        <span data-t="p2n"></span><span class="amt">₩15,900</span>
+        <span class="desc" data-t="p2d"></span>
+      </div>
+      <div>
+        <span class="soon" data-t="soon"></span>
+        <span data-t="p3n"></span>
+        <span class="desc" data-t="p3d"></span>
+      </div>
+      <div>
+        <span class="soon" data-t="soon"></span>
+        <span data-t="p4n"></span>
+        <span class="desc" data-t="p4d"></span>
+      </div>
+    </div>
+    <p style="margin-top:18px;color:var(--muted)" data-t="priceNote"></p>
+  </section>
+
+  <section id="faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle" data-t="faqTitle"></h2>
+    <details class="faq"><summary data-t="q1"></summary><p data-t="a1"></p></details>
+    <details class="faq"><summary data-t="q2"></summary><p data-t="a2"></p></details>
+    <details class="faq"><summary data-t="q3"></summary><p data-t="a3"></p></details>
+    <details class="faq"><summary data-t="q4"></summary><p data-t="a4"></p></details>
+  </section>
+
+  <section>
+    <div class="close">
+      <div style="flex:1 1 320px;min-width:0">
+        <h2 data-t="closeTitle"></h2>
+        <p data-t="closeDesc"></p>
+      </div>
+      <a class="btn gold" href="intake.html" data-t="closeBtn"></a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>CallBridge</span>
+  <span data-t="footerHours"></span>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var T = {
+    ja: { label:"日本語",
+      skip:"本文へスキップ",
+      kicker:"韓国を旅する方へ",
+      h1:"本当に行きたいお店ほど、電話でしか予約を受け付けません",
+      lead:"行きたいお店を教えてください。私たちが韓国語で電話して席を確保し、予約内容と一緒に、そのお店の利用方法までお伝えします。",
+      ctaMain:"レストランを予約する ₩9,900", ctaSub:"予約が取れなければ料金はいただきません",
+      sampleTag:"お届けする内容", sampleWhen:"10月24日(金) 19:00・2名", sampleWho:"予約者名 Emma L.",
+      sampleRuleTag:"確認したお店のルール",
+      sampleRule:"スタッフがお肉を焼いてくれます・お肉は2人前から・おかずはおかわり無料・会計はレジで、チップなし",
+      howTitle:"ご利用の流れ",
+      s1t:"リクエストを送る", s1d:"お店、日時、人数と、第1希望が満席だった場合に受け入れられる条件をお知らせください。",
+      s2t:"韓国語で電話します", s2d:"お店が落ち着いている時間に電話し、席やルールを確認したうえで、お知らせいただいた範囲内で予約を確定します。",
+      s3t:"結果を受け取る", s3d:"確定内容をご自身の言語でお送りします。お店からの折り返しの電話も私たちが受けます。",
+      whyTitle:"CallBridgeが選ばれる理由",
+      w1t:"アプリに載っていないお店", w1d:"オンライン予約のないお店こそ、地元の人が通う名店です。そこを私たちが担当します。",
+      w2t:"その場で代わりの時間を確定", w2d:"満席でも、お知らせいただいた範囲内であれば通話中に確定します。確認のために待たせません。",
+      w3t:"お店の折り返しも対応", w3d:"韓国の電話番号がなくても大丈夫です。予約連絡先は私たちの番号をお伝えします。",
+      priceTitle:"料金",
+      p1n:"レストラン予約", p1d:"1件・変更1回込み",
+      p2n:"団体（8名以上）", p2d:"席やコースの調整が必要な場合",
+      p3n:"落とし物のお問い合わせ", p3d:"地下鉄・タクシー・店舗",
+      p4n:"宿泊先・配送への連絡", p4d:"遅いチェックイン、荷物、再配達",
+      soon:"準備中",
+      priceNote:"変更・キャンセルは1件につき1回無料です。結果が得られなかった場合、料金はいただきません。",
+      faqTitle:"よくあるご質問",
+      q1:"予約が取れなかった場合はどうなりますか？",
+      a1:"料金は全額返金いたします。あわせて、そのお店が空いている時間をお知らせしますので、別の日時で再度ご依頼いただけます。",
+      q2:"韓国の電話番号がなくても利用できますか？",
+      a2:"はい。お店には私たちの番号を予約連絡先としてお伝えします。お店からの確認の電話も私たちが受けて、内容をお伝えします。",
+      q3:"希望の時間が満席だった場合は？",
+      a3:"ご依頼時に第2・第3希望をお伺いします。その範囲内であれば通話中にその場で確定しますので、改めてご確認をお願いすることはありません。",
+      q4:"誰が電話をかけるのですか？",
+      a4:"AIアシスタントが身元を明かした上で韓国語で電話します。お店が人との通話を希望された場合や、やりとりが複雑な場合は担当者が引き継ぎます。",
+      closeTitle:"行きたいお店はお決まりですか？", closeDesc:"教えていただければ、本日中にお電話します。",
+      closeBtn:"リクエストを始める",
+      footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
+    },
+    "zh-TW": { label:"繁體中文",
+      skip:"跳至內容",
+      kicker:"給在韓國旅行的您",
+      h1:"越想去的餐廳，越是只接受電話訂位",
+      lead:"告訴我們您想去的餐廳，我們用韓語打電話替您訂位，並連同這家店的用餐方式一起告訴您。",
+      ctaMain:"預訂餐廳 ₩9,900", ctaSub:"訂不到就不收費",
+      sampleTag:"您會收到的內容", sampleWhen:"10月24日(五) 19:00・2位", sampleWho:"訂位人 Emma L.",
+      sampleRuleTag:"我們確認過的店內規則",
+      sampleRule:"店員會替您烤肉・肉類2人份起訂・小菜免費續加・在櫃台結帳，無需小費",
+      howTitle:"使用流程",
+      s1t:"送出委託", s1d:"請填寫餐廳、時間、人數，以及第1順位客滿時您可以接受的條件。",
+      s2t:"我們用韓語致電", s2d:"在餐廳較空閒的時段致電，確認座位與規則後，在您允許的範圍內當場訂位。",
+      s3t:"收到結果", s3d:"用您的語言傳送確認內容。餐廳回電也由我們接聽。",
+      whyTitle:"為什麼選擇 CallBridge",
+      w1t:"訂位 App 上沒有的餐廳", w1d:"沒有線上訂位的店，往往才是在地人常去的名店。那些店由我們負責。",
+      w2t:"當場敲定替代時間", w2d:"即使客滿，只要在您允許的範圍內，我們會在通話中直接確定，不讓您等待。",
+      w3t:"也處理餐廳回電", w3d:"沒有韓國門號也沒關係。訂位聯絡電話會留我們的號碼。",
+      priceTitle:"費用",
+      p1n:"餐廳訂位", p1d:"1件・含1次變更",
+      p2n:"團體（8人以上）", p2d:"需要協調座位或套餐時",
+      p3n:"遺失物詢問", p3d:"地鐵、計程車、店家",
+      p4n:"聯絡住宿・宅配", p4d:"晚到入住、行李、重新配送",
+      soon:"準備中",
+      priceNote:"變更與取消每件免費1次。若無法取得結果，不收取費用。",
+      faqTitle:"常見問題",
+      q1:"訂不到位子的話會怎麼樣？",
+      a1:"費用將全額退還，並告知該餐廳可訂的時段，您可以改用其他時間再次委託。",
+      q2:"沒有韓國電話號碼也能使用嗎？",
+      a2:"可以。我們會把自己的號碼留給餐廳作為訂位聯絡電話，餐廳的確認來電也由我們接聽並轉達給您。",
+      q3:"希望的時間客滿怎麼辦？",
+      a3:"委託時會請您填寫第2、第3順位。只要在該範圍內，我們會在通話中直接確定，不需要再向您確認。",
+      q4:"是誰打電話？",
+      a4:"由AI助理表明身分後用韓語致電。若餐廳希望與真人通話，或溝通較複雜，將由負責人員接手。",
+      closeTitle:"已經想好要去哪間了嗎？", closeDesc:"告訴我們，今天就為您致電。",
+      closeBtn:"開始委託",
+      footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
+    },
+    "zh-CN": { label:"简体中文",
+      skip:"跳到内容",
+      kicker:"给在韩国旅行的您",
+      h1:"越想去的餐厅，越是只接受电话预订",
+      lead:"告诉我们您想去的餐厅，我们用韩语打电话替您订位，并连同这家店的用餐方式一起告诉您。",
+      ctaMain:"预订餐厅 ₩9,900", ctaSub:"订不到就不收费",
+      sampleTag:"您会收到的内容", sampleWhen:"10月24日(五) 19:00・2位", sampleWho:"预订人 Emma L.",
+      sampleRuleTag:"我们确认过的店内规则",
+      sampleRule:"店员会替您烤肉・肉类2人份起订・小菜免费续加・在柜台结账，无需小费",
+      howTitle:"使用流程",
+      s1t:"提交委托", s1d:"请填写餐厅、时间、人数，以及第1顺位客满时您可以接受的条件。",
+      s2t:"我们用韩语致电", s2d:"在餐厅较空闲的时段致电，确认座位与规则后，在您允许的范围内当场预订。",
+      s3t:"收到结果", s3d:"用您的语言发送确认内容。餐厅回电也由我们接听。",
+      whyTitle:"为什么选择 CallBridge",
+      w1t:"预订App上没有的餐厅", w1d:"没有在线预订的店，往往才是本地人常去的名店。那些店由我们负责。",
+      w2t:"当场敲定替代时间", w2d:"即使客满，只要在您允许的范围内，我们会在通话中直接确定，不让您等待。",
+      w3t:"也处理餐厅回电", w3d:"没有韩国号码也没关系。预订联系电话会留我们的号码。",
+      priceTitle:"费用",
+      p1n:"餐厅预订", p1d:"1件・含1次变更",
+      p2n:"团体（8人以上）", p2d:"需要协调座位或套餐时",
+      p3n:"失物查询", p3d:"地铁、出租车、商家",
+      p4n:"联系住宿・快递", p4d:"晚到入住、行李、重新配送",
+      soon:"准备中",
+      priceNote:"变更与取消每件免费1次。若无法取得结果，不收取费用。",
+      faqTitle:"常见问题",
+      q1:"订不到位子的话会怎么样？",
+      a1:"费用将全额退还，并告知该餐厅可订的时段，您可以改用其他时间再次委托。",
+      q2:"没有韩国电话号码也能使用吗？",
+      a2:"可以。我们会把自己的号码留给餐厅作为预订联系电话，餐厅的确认来电也由我们接听并转达给您。",
+      q3:"希望的时间客满怎么办？",
+      a3:"委托时会请您填写第2、第3顺位。只要在该范围内，我们会在通话中直接确定，不需要再向您确认。",
+      q4:"是谁打电话？",
+      a4:"由AI助理表明身份后用韩语致电。若餐厅希望与真人通话，或沟通较复杂，将由负责人员接手。",
+      closeTitle:"已经想好要去哪家了吗？", closeDesc:"告诉我们，今天就为您致电。",
+      closeBtn:"开始委托",
+      footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
+    },
+    en: { label:"English",
+      skip:"Skip to content",
+      kicker:"For travellers in Korea",
+      h1:"The restaurants you most want to visit take bookings by phone only",
+      lead:"Tell us where you want to eat. We call the restaurant in Korean, secure your table, and send you the booking with everything you need to know before you walk in.",
+      ctaMain:"Book a restaurant — ₩9,900", ctaSub:"No table, no charge",
+      sampleTag:"What you get back", sampleWhen:"Fri 24 Oct, 7:00 PM · 2 people", sampleWho:"Under the name Emma L.",
+      sampleRuleTag:"House rules we checked",
+      sampleRule:"Staff grill the meat for you · Minimum two portions · Side dishes refill free · Pay at the counter, no tipping",
+      howTitle:"How it works",
+      s1t:"Tell us the details", s1d:"The restaurant, your date and party size, and which alternatives you would accept if your first choice is full.",
+      s2t:"We call in Korean", s2d:"We reach the restaurant during its quiet hours, ask about seating and house rules, and book within the range you allowed.",
+      s3t:"You get the booking", s3d:"Written confirmation in your language. We take the restaurant's callback for you too.",
+      whyTitle:"Why CallBridge",
+      w1t:"Places no app lists", w1d:"Restaurants without online booking are often the ones locals actually go to. Those are the ones we handle.",
+      w2t:"Alternatives settled on the call", w2d:"If your time is full, we confirm another within the range you allowed — without making you wait.",
+      w3t:"We take the callback", w3d:"No Korean phone number needed. We leave our number as the booking contact.",
+      priceTitle:"Pricing",
+      p1n:"Restaurant booking", p1d:"One booking, one change included",
+      p2n:"Groups of 8 or more", p2d:"When seating or a set menu needs arranging",
+      p3n:"Lost item enquiry", p3d:"Subway, taxi, or a venue",
+      p4n:"Message a hotel or courier", p4d:"Late arrival, luggage, redelivery",
+      soon:"Coming soon",
+      priceNote:"One change or cancellation is free per booking. If we cannot get you a result, you pay nothing.",
+      faqTitle:"Questions",
+      q1:"What happens if you cannot get a table?",
+      a1:"You are refunded in full. We still tell you the times the restaurant does have, so you can send a new request for one of those.",
+      q2:"Can I use this without a Korean phone number?",
+      a2:"Yes. We leave our number as the booking contact. If the restaurant calls back, we take the call and pass on what they said.",
+      q3:"What if my preferred time is full?",
+      a3:"You give us a second and third choice when you book. Within that range we confirm on the call, so we never have to come back and ask.",
+      q4:"Who makes the call?",
+      a4:"An AI assistant calls in Korean and identifies itself. If the restaurant asks for a person, or the conversation gets complicated, one of our team takes over.",
+      closeTitle:"Have a place in mind?", closeDesc:"Send it to us and we will call today.",
+      closeBtn:"Start a request",
+      footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
+    },
+    ko: { label:"한국어",
+      skip:"본문 바로가기",
+      kicker:"한국을 여행하는 분들께",
+      h1:"정말 가고 싶은 식당일수록 전화로만 예약을 받습니다",
+      lead:"가고 싶은 곳을 알려주시면 저희가 한국어로 전화해 자리를 잡아드립니다. 예약 내용과 함께 그 식당을 이용할 때 알아야 할 것까지 정리해 보내드립니다.",
+      ctaMain:"식당 예약하기 ₩9,900", ctaSub:"예약이 안 되면 요금을 받지 않습니다",
+      sampleTag:"받아보시는 결과", sampleWhen:"10월 24일(금) 오후 7시 · 2명", sampleWho:"예약자명 Emma L.",
+      sampleRuleTag:"저희가 확인한 이용 규칙",
+      sampleRule:"직원이 고기를 구워줍니다 · 2인분부터 주문 · 반찬 리필 무료 · 계산은 카운터에서, 팁 없음",
+      howTitle:"이용 방법",
+      s1t:"요청을 남깁니다", s1d:"식당, 날짜, 인원과 원하는 시간이 안 될 때 받아들일 수 있는 조건을 알려주세요.",
+      s2t:"한국어로 전화합니다", s2d:"식당이 한가한 시간에 전화해 좌석과 이용 규칙을 확인하고, 알려주신 범위 안에서 예약을 잡습니다.",
+      s3t:"결과를 받습니다", s3d:"확정 내용을 모국어로 보내드립니다. 식당이 다시 거는 전화도 저희가 받습니다.",
+      whyTitle:"콜브릿지를 쓰는 이유",
+      w1t:"앱에 없는 식당", w1d:"온라인 예약이 없는 곳이 오히려 현지인이 가는 맛집입니다. 그런 곳을 저희가 맡습니다.",
+      w2t:"통화 중에 대안 확정", w2d:"만석이어도 알려주신 범위 안이면 통화 중에 바로 잡습니다. 확인하느라 기다리실 일이 없습니다.",
+      w3t:"식당 회신도 대응", w3d:"한국 번호가 없어도 괜찮습니다. 예약 연락처로 저희 번호를 남깁니다.",
+      priceTitle:"요금",
+      p1n:"식당 예약", p1d:"1건 · 변경 1회 포함",
+      p2n:"단체(8인 이상)", p2d:"좌석이나 코스 협의가 필요할 때",
+      p3n:"분실물 문의", p3d:"지하철, 택시, 가게",
+      p4n:"숙소·택배 연락", p4d:"늦은 체크인, 짐 보관, 재배송",
+      soon:"준비 중",
+      priceNote:"변경과 취소는 건당 1회 무료입니다. 결과를 얻지 못하면 요금을 받지 않습니다.",
+      faqTitle:"자주 묻는 질문",
+      q1:"예약이 안 되면 어떻게 되나요?",
+      a1:"요금은 전액 환불해 드립니다. 그 식당에 가능한 시간은 그대로 알려드리니, 다른 일시로 다시 요청하실 수 있습니다.",
+      q2:"한국 전화번호가 없어도 쓸 수 있나요?",
+      a2:"네. 예약 연락처로 저희 번호를 남깁니다. 식당이 확인 전화를 걸어도 저희가 받아 내용을 전해드립니다.",
+      q3:"원하는 시간이 만석이면요?",
+      a3:"요청하실 때 2·3순위를 함께 받습니다. 그 범위 안이면 통화 중에 바로 확정하므로 다시 여쭤볼 일이 없습니다.",
+      q4:"누가 전화하나요?",
+      a4:"AI 상담원이 신분을 밝히고 한국어로 전화합니다. 식당이 사람과 통화하기를 원하거나 협의가 복잡하면 담당자가 이어받습니다.",
+      closeTitle:"가고 싶은 곳이 있으신가요?", closeDesc:"알려주시면 오늘 바로 전화해 드립니다.",
+      closeBtn:"요청 시작하기",
+      footerHours:"운영 09:00–24:00 (한국 시간) · 24시간 내 결과 안내"
+    }
+  };
+
+  var ORDER = ["ja", "zh-TW", "zh-CN", "en", "ko"];
+  var HTML_LANG = { ja: "ja", "zh-TW": "zh-Hant", "zh-CN": "zh-Hans", en: "en", ko: "ko" };
+  var lang = "ja";
+
+  // 저장값 → URL 파라미터 → 브라우저 설정 순으로 결정
+  try { var sv = localStorage.getItem("cb-lang"); if (sv && T[sv]) lang = sv; } catch (e) {}
+  var p = (location.search.match(/[?&]lang=([^&]+)/) || [])[1];
+  if (p && T[decodeURIComponent(p)]) lang = decodeURIComponent(p);
+  else if (!(function () { try { return localStorage.getItem("cb-lang"); } catch (e) { return null; } })()) {
+    var nav = (navigator.language || "ja").toLowerCase();
+    if (nav.indexOf("ko") === 0) lang = "ko";
+    else if (nav.indexOf("zh-tw") === 0 || nav.indexOf("zh-hant") === 0 || nav.indexOf("zh-hk") === 0) lang = "zh-TW";
+    else if (nav.indexOf("zh") === 0) lang = "zh-CN";
+    else if (nav.indexOf("ja") === 0) lang = "ja";
+    else lang = "en";
+  }
+
+  function t(k) { return (T[lang] && T[lang][k]) || T.ja[k] || ""; }
+
+  var box = document.getElementById("langs");
+  box.innerHTML = ORDER.map(function (l) {
+    return "<button type='button' data-l='" + l + "' lang='" + HTML_LANG[l] + "'>" + T[l].label + "</button>";
+  }).join("");
+
+  function apply() {
+    document.documentElement.lang = HTML_LANG[lang];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-t]"), function (el) {
+      el.textContent = t(el.getAttribute("data-t"));
+    });
+    Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-l") === lang ? "true" : "false");
+    });
+    try { localStorage.setItem("cb-lang", lang); } catch (e) {}
+  }
+
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () { lang = b.getAttribute("data-l"); apply(); });
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>
