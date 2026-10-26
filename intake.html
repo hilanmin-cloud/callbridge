@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CallBridge</title>
+<style>
+  :root {
+    color-scheme: light;
+    --teal: #0F5E5C; --gold: #C08A2E; --ink: #15211F; --muted: #5A6A67;
+    --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF; --warm: #FBF4E6; --warmink: #4A3A10;
+    --ok: #0F5E5C; --err: #8A3B3B;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --teal: #4E8F8C; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+      --line: #2A3836; --soft: #16211F; --bg: #0E1716; --warm: #26210F; --warmink: #E2CF9E;
+      --ok: #4E8F8C; --err: #D98A8A;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --teal: #4E8F8C; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+    --line: #2A3836; --soft: #16211F; --bg: #0E1716; --warm: #26210F; --warmink: #E2CF9E;
+    --ok: #4E8F8C; --err: #D98A8A;
+  }
+  * { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans JP", "Noto Sans SC", "Noto Sans TC", "Noto Sans KR", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.65; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .brand { font-size: 18px; font-weight: 700; color: var(--teal); }
+  .langs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .langs button { font: inherit; font-size: 13px; min-height: 36px; padding: 0 12px; border-radius: 18px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+  .langs button.on { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 18px; padding: 18px 20px 48px; max-width: 1020px; }
+  .col { flex: 1 1 330px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .card h2 { margin: 0 0 4px; font-size: 16px; color: var(--teal); }
+  .card .hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  input, select, textarea { width: 100%; min-height: 44px; padding: 8px 11px; font: inherit; font-size: 15px;
+    border: 1px solid var(--line); border-radius: 9px; background: var(--bg); color: var(--ink); }
+  textarea { min-height: 64px; resize: vertical; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row > * { flex: 1 1 120px; min-width: 0; }
+  .rank { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .rank .no { flex: 0 0 56px; font-size: 13px; font-weight: 600; color: var(--teal);
+    background: var(--soft); border-radius: 7px; padding: 10px 0; text-align: center; }
+  .rank .f { flex: 1 1 auto; display: flex; gap: 6px; min-width: 0; }
+  .chk { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin: 10px 0;
+    cursor: pointer; }
+  .chk input { width: 19px; min-height: 19px; height: 19px; flex: 0 0 auto; margin-top: 3px; cursor: pointer; }
+  .chk label { margin: 0; color: var(--ink); font-size: 14px; cursor: pointer;
+    -webkit-user-select: none; user-select: none; }
+  button.go { font: inherit; font-size: 16px; font-weight: 600; min-height: 52px; width: 100%;
+    border-radius: 10px; border: 1px solid var(--teal); background: var(--teal); color: #fff; cursor: pointer; }
+  button.go:disabled { opacity: .5; cursor: default; }
+  button.ghost { font: inherit; font-size: 14px; min-height: 40px; padding: 0 14px; border-radius: 8px;
+    border: 1px solid var(--teal); background: transparent; color: var(--teal); cursor: pointer; }
+  .note { background: var(--warm); color: var(--warmink); border-radius: 10px; padding: 12px 14px;
+    font-size: 13.5px; line-height: 1.6; margin-top: 10px; }
+  .status { border-radius: 10px; padding: 13px 15px; font-size: 14px; }
+  .status.ok { background: var(--ok); color: #fff; }
+  .status.err { background: var(--err); color: #fff; }
+  .status.info { background: var(--soft); color: var(--muted); }
+  pre { background: var(--soft); border-radius: 9px; padding: 11px; font-size: 12.5px; white-space: pre-wrap;
+    margin: 0; font-family: Consolas, monospace; color: var(--ink); max-height: 280px; overflow: auto; }
+  details { border: 1px solid var(--line); border-radius: 10px; padding: 10px 13px; }
+  summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--teal); }
+  .conn { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 4px; background: var(--muted); margin-right: 6px; }
+  .dot.on { background: var(--ok); }
+  .price { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; padding: 5px 0; }
+  .price.total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; font-weight: 600; font-size: 16px; }
+  footer { padding: 0 20px 34px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">CallBridge</span>
+  <div class="langs" id="langs"></div>
+</header>
+
+<div class="wrap">
+  <div class="col">
+    <div class="card">
+      <h2 data-t="formTitle"></h2>
+      <p class="hint" data-t="formLead"></p>
+
+      <label for="vlink" data-t="linkLabel"></label>
+      <input id="vlink" type="url">
+      <p class="hint" style="margin:6px 0 0" data-t="linkHint"></p>
+      <p class="hint" style="margin:4px 0 0" data-t="linkHow"></p>
+
+      <label for="venue" data-t="venueLabel" style="margin-top:12px"></label>
+      <input id="venue">
+      <p class="hint" style="margin:6px 0 0" data-t="venueHint"></p>
+
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label for="party" data-t="partyLabel"></label>
+          <input id="party" type="number" value="2" min="1">
+        </div>
+        <div style="flex:2 1 170px">
+          <label for="bname" data-t="nameLabel"></label>
+          <input id="bname" placeholder="Emma L.">
+        </div>
+      </div>
+
+      <label data-t="slotsLabel" style="margin-top:14px"></label>
+      <p class="hint" style="margin:0 0 4px" data-t="slotsHint"></p>
+      <div class="rank"><span class="no" data-t="r1"></span><span class="f"><input type="date" id="d1"><input type="time" id="t1" value="19:00"></span></div>
+      <div class="rank"><span class="no" data-t="r2"></span><span class="f"><input type="date" id="d2"><input type="time" id="t2" value="13:00"></span></div>
+      <div class="rank"><span class="no" data-t="r3"></span><span class="f"><input type="date" id="d3"><input type="time" id="t3" value="19:30"></span></div>
+
+      <div class="chk"><input type="checkbox" id="tol" checked><label for="tol" data-t="cTol"></label></div>
+      <div class="chk"><input type="checkbox" id="split" checked><label for="split" data-t="cSplit"></label></div>
+      <div class="chk"><input type="checkbox" id="seat"><label for="seat" data-t="cSeat"></label></div>
+      <div class="chk"><input type="checkbox" id="course"><label for="course" data-t="cCourse"></label></div>
+      <div class="chk"><input type="checkbox" id="late" checked><label for="late" data-t="cLate"></label></div>
+
+      <label for="note" data-t="noteLabel" style="margin-top:12px"></label>
+      <textarea id="note"></textarea>
+      <p class="hint" style="margin:6px 0 0" data-t="noteHint"></p>
+
+      <label for="email" data-t="emailLabel" style="margin-top:12px"></label>
+      <input id="email" type="email" placeholder="you@example.com">
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <h2 data-t="priceTitle"></h2>
+      <div class="price"><span data-t="priceItem"></span><strong>₩9,900</strong></div>
+      <div class="price"><span data-t="priceChange"></span><span data-t="included"></span></div>
+      <div class="price"><span data-t="priceCallback"></span><span data-t="included"></span></div>
+      <div class="price total"><span data-t="priceTotal"></span><strong>₩9,900</strong></div>
+      <div class="note" data-t="refundNote"></div>
+      <div class="chk" style="margin-top:12px"><input type="checkbox" id="agree"><label for="agree" data-t="aiConsent"></label></div>
+      <button class="go" id="submit" style="margin-top:10px" data-t="submitBtn"></button>
+      <p class="conn" id="conn"></p>
+    </div>
+
+    <div id="status" class="status info" data-t="statusIdle"></div>
+
+    <div class="card">
+      <h2 data-t="previewTitle"></h2>
+      <p class="hint" data-t="previewHint"></p>
+      <pre id="preview"></pre>
+    </div>
+
+    <details>
+      <summary data-t="setupTitle"></summary>
+      <p class="hint" style="margin-top:8px" data-t="setupHint"></p>
+      <label for="url">Project URL</label>
+      <input id="url" placeholder="https://xxxxx.supabase.co">
+      <label for="key">Publishable key</label>
+      <input id="key" placeholder="sb_publishable_...">
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="save" data-t="saveBtn"></button>
+        <button class="ghost" id="forget" data-t="forgetBtn"></button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<footer data-t="footer"></footer>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var T = {
+    ja: {
+      label: "日本語",
+      formTitle: "レストラン予約の代行",
+      formLead: "電話でしか予約を受け付けないお店に、私たちが韓国語で電話します。",
+      linkLabel: "地図のリンク（推奨）",
+      linkPh: "https://naver.me/... / https://maps.app.goo.gl/...",
+      linkHint: "リンクをいただくと、同じ名前の別の店舗にかけてしまうことを防げます。",
+      linkHow: "Naverマップ／Googleマップでお店を開き、「共有」からリンクをコピーして貼り付けてください。",
+      venueLabel: "店名（リンクがない場合）",
+      venuePh: "例：延南洞カルビ / naver.me/xxxxx",
+      venueHint: "NaverマップやGoogleマップのリンクを貼っていただくと、最も正確です。",
+      partyLabel: "人数", nameLabel: "予約者名",
+      slotsLabel: "希望日時（第1〜第3希望）",
+      slotsHint: "第1希望が満席の場合、第2・第3希望の範囲内でその場で確定します。",
+      r1: "第1", r2: "第2", r3: "第3",
+      cTol: "記入した時刻の前後30分以内なら、早めても遅めても構いません",
+      cSplit: "席が離れても構いません",
+      cSeat: "席の種類（カウンター・座敷・個室など）は問いません",
+      cCourse: "コース・セットメニューでも構いません",
+      cLate: "10分ほど遅れる可能性があると伝えてください",
+      noteLabel: "お店に伝えたいこと",
+      notePh: "アレルギー、お子様連れ、席のご希望など",
+      noteHint: "日本語で入力してください。韓国語に翻訳してお店に伝えます。",
+      emailLabel: "結果をお送りするメールアドレス",
+      priceTitle: "料金", priceItem: "レストラン予約", priceChange: "変更・キャンセル 1回",
+      priceCallback: "お店からの折り返し対応", included: "込み", priceTotal: "合計",
+      refundNote: "料金は「結果」に対するものです。ご記入いただいた日時がすべて取れなかった場合は全額返金し、お店が空いている時間だけお知らせします。",
+      aiConsent: "お店へはAIアシスタントが身元を明かして電話することに同意します。",
+      submitBtn: "リクエストを送る",
+      statusIdle: "リクエストを送ると、ここに結果が表示されます。",
+      previewTitle: "送信される内容", previewHint: "入力内容がどのように保存されるかを表示します。",
+      setupTitle: "接続設定（運営用）", setupHint: "このブラウザにのみ保存されます。",
+      saveBtn: "保存して接続", forgetBtn: "接続解除",
+      connOff: "未接続 — プレビューのみ動作します", connOn: "接続済み — リクエストが保存されます",
+      errVenue: "店名を入力してください。", errSlot: "希望日時を1つ以上入力してください。",
+      errAgree: "AI通話への同意が必要です。",
+      saving: "送信中…", saved: "送信しました。受付番号 ",
+      failed: "送信に失敗しました: ", offline: "未接続のため保存されていません。入力内容のみ作成しました。",
+      footer: "パスポート番号やクレジットカード情報はお預かりしません。"
+    },
+    "zh-TW": {
+      label: "繁體中文",
+      formTitle: "餐廳訂位代訂",
+      formLead: "只接受電話訂位的餐廳，由我們用韓語替您打電話。",
+      linkLabel: "地圖連結（建議）",
+      linkPh: "https://naver.me/... / https://maps.app.goo.gl/...",
+      linkHint: "提供連結可避免我們打給同名的其他分店。",
+      linkHow: "請在 Naver 地圖或 Google 地圖開啟店家，點「分享」複製連結後貼上。",
+      venueLabel: "店名（沒有連結時）",
+      venuePh: "例：延南洞烤排骨 / naver.me/xxxxx",
+      venueHint: "提供 Naver 地圖或 Google 地圖連結最為準確。",
+      partyLabel: "人數", nameLabel: "訂位人姓名",
+      slotsLabel: "希望時間（第1～第3順位）",
+      slotsHint: "若第1順位已滿，我們會在第2、第3順位範圍內當場確定。",
+      r1: "第1", r2: "第2", r3: "第3",
+      cTol: "所填時間前後30分鐘內，提早或延後都可以",
+      cSplit: "可以分開坐",
+      cSeat: "座位型式（吧台、和式、包廂等）不拘",
+      cCourse: "套餐也可以",
+      cLate: "請告知可能會晚到10分鐘左右",
+      noteLabel: "想轉告餐廳的事項",
+      notePh: "過敏、攜帶兒童、座位需求等",
+      noteHint: "請用中文填寫，我們會翻譯成韓語轉達。",
+      emailLabel: "接收結果的電子郵件",
+      priceTitle: "費用", priceItem: "餐廳訂位", priceChange: "變更・取消 1次",
+      priceCallback: "餐廳回電處理", included: "包含", priceTotal: "合計",
+      refundNote: "費用是針對「結果」收取的。若您填寫的時段全部訂不到，將全額退費，並告知餐廳可訂的時段。",
+      aiConsent: "我同意由AI助理表明身分後致電餐廳。",
+      submitBtn: "送出委託",
+      statusIdle: "送出後，結果會顯示在這裡。",
+      previewTitle: "將送出的內容", previewHint: "顯示填寫內容的儲存方式。",
+      setupTitle: "連線設定（營運用）", setupHint: "僅儲存在此瀏覽器中。",
+      saveBtn: "儲存並連線", forgetBtn: "解除連線",
+      connOff: "未連線 — 僅能預覽", connOn: "已連線 — 委託將會儲存",
+      errVenue: "請輸入店名。", errSlot: "請至少填寫一個希望時間。",
+      errAgree: "需要同意AI致電。",
+      saving: "傳送中…", saved: "已送出。受理編號 ",
+      failed: "送出失敗: ", offline: "未連線，尚未儲存，僅建立了資料。",
+      footer: "我們不會收集護照號碼或信用卡資訊。"
+    },
+    "zh-CN": {
+      label: "简体中文",
+      formTitle: "餐厅预订代办",
+      formLead: "只接受电话预订的餐厅，由我们用韩语替您打电话。",
+      linkLabel: "地图链接（推荐）",
+      linkPh: "https://naver.me/... / https://maps.app.goo.gl/...",
+      linkHint: "提供链接可避免我们打给同名的其他分店。",
+      linkHow: "请在地图应用中打开店家，点「分享」复制链接后粘贴。",
+      venueLabel: "店名（没有链接时）",
+      venuePh: "例：延南洞烤排骨 / naver.me/xxxxx",
+      venueHint: "提供地图链接最为准确。",
+      partyLabel: "人数", nameLabel: "预订人姓名",
+      slotsLabel: "希望时间（第1～第3顺位）",
+      slotsHint: "若第1顺位已满，我们会在第2、第3顺位范围内当场确定。",
+      r1: "第1", r2: "第2", r3: "第3",
+      cTol: "所填时间前后30分钟内，提前或延后都可以",
+      cSplit: "可以分开坐",
+      cSeat: "座位类型（吧台、和式、包间等）不限",
+      cCourse: "套餐也可以",
+      cLate: "请告知可能会晚到10分钟左右",
+      noteLabel: "想转告餐厅的事项",
+      notePh: "过敏、携带儿童、座位需求等",
+      noteHint: "请用中文填写，我们会翻译成韩语转达。",
+      emailLabel: "接收结果的电子邮箱",
+      priceTitle: "费用", priceItem: "餐厅预订", priceChange: "变更・取消 1次",
+      priceCallback: "餐厅回电处理", included: "包含", priceTotal: "合计",
+      refundNote: "费用是针对「结果」收取的。若您填写的时段全部订不到，将全额退款，并告知餐厅可订的时段。",
+      aiConsent: "我同意由AI助理表明身份后致电餐厅。",
+      submitBtn: "提交委托",
+      statusIdle: "提交后，结果会显示在这里。",
+      previewTitle: "将提交的内容", previewHint: "显示填写内容的保存方式。",
+      setupTitle: "连接设置（运营用）", setupHint: "仅保存在此浏览器中。",
+      saveBtn: "保存并连接", forgetBtn: "断开连接",
+      connOff: "未连接 — 仅能预览", connOn: "已连接 — 委托将被保存",
+      errVenue: "请输入店名。", errSlot: "请至少填写一个希望时间。",
+      errAgree: "需要同意AI致电。",
+      saving: "提交中…", saved: "已提交。受理编号 ",
+      failed: "提交失败: ", offline: "未连接，尚未保存，仅创建了数据。",
+      footer: "我们不会收集护照号码或信用卡信息。"
+    },
+    en: {
+      label: "English",
+      formTitle: "Restaurant booking, handled",
+      formLead: "For restaurants that only take bookings by phone, we call them in Korean for you.",
+      linkLabel: "Map link (recommended)",
+      linkPh: "https://naver.me/... / https://maps.app.goo.gl/...",
+      linkHint: "A link stops us calling a different branch with the same name.",
+      linkHow: "Open the restaurant in Naver Maps or Google Maps, tap Share, and paste the link here.",
+      venueLabel: "Restaurant name (if you have no link)",
+      venuePh: "e.g. Yeonnam-dong Galbi / naver.me/xxxxx",
+      venueHint: "A Naver or Google Maps link is the most accurate way for us to find the right place.",
+      partyLabel: "People", nameLabel: "Name for the booking",
+      slotsLabel: "Preferred times (1st to 3rd choice)",
+      slotsHint: "If your 1st choice is full, we confirm on the spot within your 2nd and 3rd choices.",
+      r1: "1st", r2: "2nd", r3: "3rd",
+      cTol: "Within 30 minutes either side of the times above is fine",
+      cSplit: "Separate tables are fine",
+      cSeat: "Any seating type is fine (counter, floor seating, private room)",
+      cCourse: "A set course menu is fine",
+      cLate: "Please tell them we may be about 10 minutes late",
+      noteLabel: "Anything to tell the restaurant",
+      notePh: "Allergies, children joining, seating requests",
+      noteHint: "Write in English. We translate it into Korean when we call.",
+      emailLabel: "Where we send the result",
+      priceTitle: "Price", priceItem: "Restaurant booking", priceChange: "One change or cancellation",
+      priceCallback: "Restaurant callback handled", included: "Included", priceTotal: "Total",
+      refundNote: "You pay for a result, not for a call. If none of your times work out, we refund in full and still tell you the times the restaurant does have.",
+      aiConsent: "I understand an AI assistant will call the restaurant and identify itself.",
+      submitBtn: "Send request",
+      statusIdle: "Send a request and the result appears here.",
+      previewTitle: "What gets sent", previewHint: "Shows how your entries are stored.",
+      setupTitle: "Connection settings (staff)", setupHint: "Stored in this browser only.",
+      saveBtn: "Save and connect", forgetBtn: "Disconnect",
+      connOff: "Not connected — preview only", connOn: "Connected — requests are saved",
+      errVenue: "Please enter the restaurant name.", errSlot: "Please enter at least one preferred time.",
+      errAgree: "Please agree to the AI call.",
+      saving: "Sending…", saved: "Sent. Request number ",
+      failed: "Could not send: ", offline: "Not connected, so nothing was saved. Data structure only.",
+      footer: "We never collect passport numbers or card details."
+    },
+    ko: {
+      label: "한국어",
+      formTitle: "식당 예약 대행",
+      formLead: "전화로만 예약을 받는 식당에 저희가 한국어로 전화합니다.",
+      linkLabel: "지도 링크 (권장)",
+      linkPh: "https://naver.me/... / https://maps.app.goo.gl/...",
+      linkHint: "링크를 주시면 같은 이름의 다른 지점에 전화하는 일을 막을 수 있습니다.",
+      linkHow: "네이버 지도나 구글 지도에서 식당을 열고 공유를 눌러 링크를 복사해 붙여넣으세요.",
+      venueLabel: "식당 이름 (링크가 없을 때)",
+      venuePh: "예: 연남동 갈비 / naver.me/xxxxx",
+      venueHint: "네이버나 구글 지도 링크를 주시면 가장 정확합니다.",
+      partyLabel: "인원", nameLabel: "예약자명",
+      slotsLabel: "희망 일시 (1~3순위)",
+      slotsHint: "1순위가 만석이면 2·3순위 범위 안에서 통화 중에 바로 확정합니다.",
+      r1: "1순위", r2: "2순위", r3: "3순위",
+      cTol: "적어둔 시각에서 ±30분이면 당겨도 미뤄도 괜찮습니다",
+      cSplit: "자리를 나눠 앉아도 괜찮습니다",
+      cSeat: "좌석 형태(바·좌식·룸 등)는 상관없습니다",
+      cCourse: "코스·세트 메뉴여도 괜찮습니다",
+      cLate: "10분 정도 늦을 수 있다고 전해주세요",
+      noteLabel: "식당에 전할 내용",
+      notePh: "알레르기, 아이 동반, 좌석 요청 등",
+      noteHint: "모국어로 적으시면 한국어로 옮겨 전달합니다.",
+      emailLabel: "결과 받을 이메일",
+      priceTitle: "요금", priceItem: "식당 예약", priceChange: "변경·취소 1회",
+      priceCallback: "식당 회신 전화 대응", included: "포함", priceTotal: "합계",
+      refundNote: "요금은 통화 시도가 아니라 결과에 대한 것입니다. 적어주신 일시가 모두 안 되면 전액 환불하고, 식당에 가능한 시간은 그대로 알려드립니다.",
+      aiConsent: "식당에 AI 상담원이 신분을 밝히고 전화하는 것에 동의합니다.",
+      submitBtn: "요청 보내기",
+      statusIdle: "요청을 보내면 결과가 여기에 표시됩니다.",
+      previewTitle: "저장될 데이터", previewHint: "입력이 어떻게 저장되는지 보여줍니다.",
+      setupTitle: "연결 설정 (운영용)", setupHint: "이 브라우저에만 저장됩니다.",
+      saveBtn: "저장하고 연결", forgetBtn: "연결 해제",
+      connOff: "연결 전 — 미리보기만 동작", connOn: "연결됨 — 요청이 저장됩니다",
+      errVenue: "식당 이름을 입력해 주세요.", errSlot: "희망 일시를 최소 1개 입력해 주세요.",
+      errAgree: "AI 통화 동의가 필요합니다.",
+      saving: "저장 중…", saved: "저장 완료. 요청 번호 ",
+      failed: "저장 실패: ", offline: "연결 전입니다. 저장되지 않았고 데이터 구조만 만들었습니다.",
+      footer: "여권번호나 카드 정보는 수집하지 않습니다."
+    }
+  };
+
+  var ORDER = ["ja", "zh-TW", "zh-CN", "en", "ko"];
+  var lang = "ja";
+  try { var sv = localStorage.getItem("cb-lang"); if (sv && T[sv]) lang = sv; } catch (e) {}
+  function t(k) { return (T[lang] && T[lang][k]) || T.ja[k] || k; }
+
+  $("langs").innerHTML = ORDER.map(function (l) {
+    return "<button data-l='" + l + "'>" + T[l].label + "</button>";
+  }).join("");
+
+  function applyLang() {
+    document.documentElement.lang = lang === "zh-TW" ? "zh-Hant" : lang === "zh-CN" ? "zh-Hans" : lang;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-t]"), function (el) {
+      el.textContent = t(el.getAttribute("data-t"));
+    });
+    $("venue").placeholder = t("venuePh");
+    $("vlink").placeholder = t("linkPh");
+    $("note").placeholder = t("notePh");
+    Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.getAttribute("data-l") === lang);
+    });
+    drawConn(); preview();
+    try { localStorage.setItem("cb-lang", lang); } catch (e) {}
+  }
+
+  Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () { lang = b.getAttribute("data-l"); applyLang(); });
+  });
+
+  function iso(d) { return d.toISOString().slice(0, 10); }
+  var now = new Date();
+  $("d1").value = iso(new Date(now.getTime() + 86400000));
+  $("d2").value = iso(new Date(now.getTime() + 86400000));
+  $("d3").value = iso(new Date(now.getTime() + 2 * 86400000));
+
+  var CFG = "sb-cfg-v1";
+  var cfg = { url: "", key: "" };
+  try { var s = localStorage.getItem(CFG); if (s) cfg = JSON.parse(s); } catch (e) {}
+  function connected() { return !!(cfg.url && cfg.key); }
+  function drawConn() {
+    $("conn").innerHTML = connected()
+      ? "<span class='dot on'></span>" + t("connOn")
+      : "<span class='dot'></span>" + t("connOff");
+    if (connected()) { $("url").value = cfg.url; $("key").value = cfg.key; }
+  }
+
+  function api(path, options) {
+    options = options || {};
+    return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/" + path, {
+      method: options.method || "GET",
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+                 "Content-Type": "application/json", "Prefer": options.prefer || "return=representation" },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    }).then(function (res) {
+      return res.text().then(function (txt) {
+        var d = null; try { d = txt ? JSON.parse(txt) : null; } catch (e) { d = txt; }
+        if (!res.ok) throw new Error((d && d.message) ? d.message : "HTTP " + res.status);
+        return d;
+      });
+    });
+  }
+
+  function collect() {
+    var slots = [];
+    [["d1","t1"],["d2","t2"],["d3","t3"]].forEach(function (p, i) {
+      var d = $(p[0]).value, tm = $(p[1]).value;
+      if (d && tm) slots.push({ rank: i + 1, slot_at: d + "T" + tm + ":00+09:00",
+                                tolerance_min: $("tol").checked ? 30 : 0 });
+    });
+    var link = $("vlink").value.trim();
+    var nm = $("venue").value.trim();
+    return {
+      customer: { display_name: $("bname").value.trim(), email: $("email").value.trim(), locale: lang },
+      venue: { name: nm, link: link },
+      request: {
+        venue_name_raw: (nm || "") + (link ? " | " + link : ""), service_type: "booking",
+        party_size: parseInt($("party").value, 10) || 1,
+        booking_name: $("bname").value.trim(),
+        note_to_venue: $("note").value.trim() || null, status: "received"
+      },
+      slots: slots,
+      conditions: { split_seating: $("split").checked, course_only: $("course").checked,
+                    seat_type_any: $("seat").checked, late_arrival: $("late").checked }
+    };
+  }
+  function preview() { $("preview").textContent = JSON.stringify(collect(), null, 2); }
+  function setStatus(k, m) { var el = $("status"); el.className = "status " + k; el.removeAttribute("data-t"); el.textContent = m; }
+
+  function submit() {
+    var d = collect();
+    if (!d.venue.name && !d.venue.link) { setStatus("err", t("errVenue")); return; }
+    if (!d.slots.length) { setStatus("err", t("errSlot")); return; }
+    if (!$("agree").checked) { setStatus("err", t("errAgree")); return; }
+    if (!connected()) { setStatus("info", t("offline")); preview(); return; }
+
+    $("submit").disabled = true;
+    setStatus("info", t("saving"));
+    var ids = {};
+    api("customers", { method: "POST", body: d.customer })
+      .then(function (r) {
+        ids.customer = r[0].id;
+        if (!d.venue.name) return [];
+        var q = d.venue.name.replace(/\(.*?\)/g, "").trim().slice(0, 12);
+        return api("venues?select=id&name=ilike.*" + encodeURIComponent(q) + "*&limit=1").catch(function () { return []; });
+      })
+      .then(function (found) {
+        d.request.customer_id = ids.customer;
+        if (found && found.length) d.request.venue_id = found[0].id;
+        return api("requests", { method: "POST", body: d.request });
+      })
+      .then(function (r) {
+        ids.request = r[0].id;
+        return api("request_slots", { method: "POST", body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
+      })
+      .then(function () {
+        d.conditions.request_id = ids.request;
+        return api("request_conditions", { method: "POST", body: d.conditions });
+      })
+      .then(function () { setStatus("ok", t("saved") + ids.request.slice(0, 8)); })
+      .catch(function (e) { setStatus("err", t("failed") + e.message); })
+      .then(function () { $("submit").disabled = false; });
+  }
+
+  $("submit").addEventListener("click", submit);
+  $("save").addEventListener("click", function () {
+    cfg = { url: $("url").value.trim(), key: $("key").value.trim() };
+    try { localStorage.setItem(CFG, JSON.stringify(cfg)); } catch (e) {}
+    drawConn();
+  });
+  $("forget").addEventListener("click", function () {
+    cfg = { url: "", key: "" };
+    try { localStorage.removeItem(CFG); } catch (e) {}
+    $("url").value = ""; $("key").value = ""; drawConn();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("input, textarea"), function (el) {
+    if (el.id === "url" || el.id === "key") return;
+    el.addEventListener("input", preview); el.addEventListener("change", preview);
+  });
+
+  applyLang();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>예약 결과</title>
+<style>
+  :root {
+    color-scheme: light;
+    --teal: #0F5E5C; --gold: #C08A2E; --ink: #15211F; --muted: #5A6A67;
+    --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF; --warm: #FBF4E6; --warmink: #4A3A10;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --teal: #2E6E6B; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+      --line: #2A3836; --soft: #16211F; --bg: #0E1716; --warm: #26210F; --warmink: #E2CF9E;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --teal: #2E6E6B; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+    --line: #2A3836; --soft: #16211F; --bg: #0E1716; --warm: #26210F; --warmink: #E2CF9E;
+  }
+  * { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; font-size: 16px; line-height: 1.65; }
+  .page { max-width: 560px; margin: 0 auto; padding: 0 18px 60px; }
+  header { padding: 22px 0 16px; }
+  .brand { font-size: 17px; font-weight: 700; color: var(--teal); }
+  .hero { border-radius: 16px; padding: 22px; color: #fff; background: var(--teal); margin-bottom: 16px; }
+  .hero.unavailable { background: #7A4A4A; }
+  .hero.hold { background: var(--gold); color: #2E2305; }
+  .hero .tag { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600;
+    letter-spacing: .5px; opacity: .9; margin-bottom: 8px; }
+  .hero h1 { margin: 0 0 6px; font-size: 26px; line-height: 1.35; }
+  .hero p { margin: 4px 0 0; font-size: 15px; opacity: .92; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 10px; font-size: 16px; }
+  .kv { display: flex; gap: 10px; padding: 7px 0; font-size: 15px; border-bottom: 1px dashed var(--line); }
+  .kv:last-child { border-bottom: 0; }
+  .kv b { flex: 0 0 92px; color: var(--muted); font-weight: 500; font-size: 14px; }
+  .note { background: var(--warm); color: var(--warmink); border-radius: 10px; padding: 12px 14px;
+    font-size: 14px; line-height: 1.6; margin-top: 10px; }
+  .guide { background: var(--soft); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .guide h2 { margin: 0 0 12px; font-size: 16px; }
+  .guide .line { display: flex; gap: 11px; font-size: 15px; padding: 6px 0; }
+  .guide .line b { flex: 0 0 auto; color: var(--teal); font-weight: 700; }
+  .ko { font-size: 18px; line-height: 1.7; padding: 14px; background: var(--soft); border-radius: 10px; margin-top: 6px; }
+  .sub { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  a.btn, button.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px;
+    padding: 0 18px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600;
+    font-family: inherit; cursor: pointer; border: 1px solid var(--teal); background: var(--teal); color: #fff; }
+  a.btn.ghost, button.btn.ghost { background: transparent; color: var(--teal); }
+  .state { padding: 40px 0; text-align: center; color: var(--muted); font-size: 15px; }
+  .langs { display: flex; gap: 5px; flex-wrap: wrap; }
+  .langs button { font: inherit; font-size: 12px; min-height: 34px; padding: 0 10px; border-radius: 17px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+  .langs button.on { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+  .lookup { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .lookup input { flex: 1 1 200px; min-width: 0; min-height: 48px; padding: 8px 12px; font: inherit;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+  .lookup button { flex: 0 1 110px; min-height: 48px; }
+  footer { text-align: center; font-size: 13px; color: var(--muted); padding: 24px 0 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between"><span class="brand">CallBridge</span><div class="langs" id="langs"></div></header>
+
+  <div id="root"></div>
+
+  <footer>CallBridge</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var CFG = "sb-cfg-v1";
+  var cfg = { url: "", key: "" };
+  try { var s = localStorage.getItem(CFG); if (s) cfg = JSON.parse(s); } catch (e) {}
+
+  function api(path) {
+    return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/" + path, {
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key }
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) { d = t; }
+        if (!res.ok) throw new Error((d && d.message) ? d.message : "HTTP " + res.status);
+        return d;
+      });
+    });
+  }
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[<>&]/g, function (c) {
+    return { "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]; }); }
+
+  var LOCALE_MAP = { ja: "ja-JP", "zh-TW": "zh-TW", "zh-CN": "zh-CN", en: "en-US", ko: "ko-KR" };
+
+  /* 고객 언어로 날짜·시간을 표시한다 */
+  function fmtDT(iso) {
+    if (!iso) return "-";
+    var d = new Date(iso);
+    var loc = LOCALE_MAP[lang] || "ja-JP";
+    try {
+      return new Intl.DateTimeFormat(loc, {
+        month: "long", day: "numeric", weekday: "short",
+        hour: "numeric", minute: "2-digit", timeZone: "Asia/Seoul"
+      }).format(d);
+    } catch (e) {
+      return d.toLocaleString(loc);
+    }
+  }
+
+  /* 식당에 보여줄 한국어 시각 */
+  function fmtKoTime(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    var h = d.getHours(), m = d.getMinutes();
+    return (h < 12 ? "오전 " : "오후 ") + (h > 12 ? h - 12 : h === 0 ? 12 : h) + "시" + (m ? " " + m + "분" : "");
+  }
+
+
+  /* ================= 다국어 ================= */
+  var T = {
+    ja: { label:"日本語",
+      lookupTitle:"予約結果の照会", lookupHint:"受付番号8桁を入力してください。", lookupPh:"例: 3f9a2b7c",
+      go:"照会", idle:"受付番号を入力すると結果が表示されます。", loading:"読み込み中…",
+      notFound:"該当するリクエストが見つかりません。",
+      tagOk:"予約確定", tagHold:"確認が必要です", tagNo:"予約できませんでした", tagRun:"進行中",
+      titleHold:"まだ確定していません", titleNo:"お席を確保できませんでした", titleRun:"お店に連絡しています",
+      descHold:"追加の確認が必要です", descNo:"料金は全額返金いたします。", descRun:"通常24時間以内に結果をお知らせします。",
+      detailTitle:"予約内容", venue:"店舗", address:"住所", phone:"店舗電話", when:"日時", party:"人数", bname:"予約者名",
+      altNote:"ご希望の時間は満席だったため、お知らせいただいた範囲内の別の時間でお取りしました。",
+      condTitle:"お店から伝えられた条件", pendTitle:"まだ確認できていないこと",
+      pendNote:"お店から折り返しがあり次第、すぐにお知らせします。",
+      availTitle:"お店が空いている時間", availNote:"この時間帯で再度ご依頼いただければお取りできます。",
+      guideTitle:"このお店の利用方法", showTitle:"入口でこの画面をお見せください",
+      showSub:"お店のスタッフにそのままお見せください。",
+      mapBtn:"地図で開く", againBtn:"別のリクエストを照会" },
+    "zh-TW": { label:"繁體中文",
+      lookupTitle:"訂位結果查詢", lookupHint:"請輸入受理編號8碼。", lookupPh:"例: 3f9a2b7c",
+      go:"查詢", idle:"輸入受理編號後會顯示結果。", loading:"載入中…",
+      notFound:"找不到對應的委託。",
+      tagOk:"訂位完成", tagHold:"需要確認", tagNo:"無法訂位", tagRun:"進行中",
+      titleHold:"尚未確定", titleNo:"沒有訂到位子", titleRun:"正在與餐廳聯絡",
+      descHold:"需要進一步確認", descNo:"費用將全額退還。", descRun:"通常24小時內告知結果。",
+      detailTitle:"訂位內容", venue:"餐廳", address:"地址", phone:"餐廳電話", when:"時間", party:"人數", bname:"訂位人",
+      altNote:"您希望的時間已客滿，我們在您允許的範圍內改訂了其他時間。",
+      condTitle:"餐廳告知的條件", pendTitle:"尚未確認的事項",
+      pendNote:"餐廳回覆後會立即通知您。",
+      availTitle:"餐廳可訂的時段", availNote:"以這些時段再次委託，我們可以替您訂位。",
+      guideTitle:"這家餐廳的用餐方式", showTitle:"請在門口出示此畫面",
+      showSub:"直接出示給店員即可。",
+      mapBtn:"在地圖開啟", againBtn:"查詢其他委託" },
+    "zh-CN": { label:"简体中文",
+      lookupTitle:"预订结果查询", lookupHint:"请输入受理编号8位。", lookupPh:"例: 3f9a2b7c",
+      go:"查询", idle:"输入受理编号后会显示结果。", loading:"加载中…",
+      notFound:"找不到对应的委托。",
+      tagOk:"预订成功", tagHold:"需要确认", tagNo:"无法预订", tagRun:"进行中",
+      titleHold:"尚未确定", titleNo:"没有订到位子", titleRun:"正在与餐厅联系",
+      descHold:"需要进一步确认", descNo:"费用将全额退还。", descRun:"通常24小时内告知结果。",
+      detailTitle:"预订内容", venue:"餐厅", address:"地址", phone:"餐厅电话", when:"时间", party:"人数", bname:"预订人",
+      altNote:"您希望的时间已满，我们在您允许的范围内改订了其他时间。",
+      condTitle:"餐厅告知的条件", pendTitle:"尚未确认的事项",
+      pendNote:"餐厅回复后会立即通知您。",
+      availTitle:"餐厅可订的时段", availNote:"以这些时段再次委托，我们可以替您预订。",
+      guideTitle:"这家餐厅的用餐方式", showTitle:"请在门口出示此画面",
+      showSub:"直接出示给店员即可。",
+      mapBtn:"在地图打开", againBtn:"查询其他委托" },
+    en: { label:"English",
+      lookupTitle:"Check your booking", lookupHint:"Enter the eight-character request number you received.", lookupPh:"e.g. 3f9a2b7c",
+      go:"Check", idle:"Enter your request number to see the result.", loading:"Loading…",
+      notFound:"We could not find that request.",
+      tagOk:"Confirmed", tagHold:"Needs your confirmation", tagNo:"Could not book", tagRun:"In progress",
+      titleHold:"Not confirmed yet", titleNo:"We could not get you a table", titleRun:"We are calling the restaurant",
+      descHold:"Something needs checking with you", descNo:"You will be refunded in full.", descRun:"Usually within 24 hours.",
+      detailTitle:"Your booking", venue:"Restaurant", address:"Address", phone:"Restaurant phone", when:"When", party:"People", bname:"Booked under",
+      altNote:"Your first choice was full, so we booked within the range you allowed.",
+      condTitle:"Conditions from the restaurant", pendTitle:"Not yet confirmed",
+      pendNote:"We will tell you as soon as the restaurant gets back to us.",
+      availTitle:"Times the restaurant does have", availNote:"Send a new request for one of these and we can book it.",
+      guideTitle:"How this restaurant works", showTitle:"Show this at the door",
+      showSub:"Show this to the staff as it is.",
+      mapBtn:"Open in maps", againBtn:"Check another request" },
+    ko: { label:"한국어",
+      lookupTitle:"예약 결과 조회", lookupHint:"접수 시 받으신 요청 번호 여덟 자리를 입력하세요.", lookupPh:"예: 3f9a2b7c",
+      go:"조회", idle:"요청 번호를 입력하면 결과를 보여드립니다.", loading:"불러오는 중…",
+      notFound:"해당 요청을 찾을 수 없습니다.",
+      tagOk:"예약 확정", tagHold:"확인 필요", tagNo:"예약 불가", tagRun:"진행 중",
+      titleHold:"아직 확정하지 않았습니다", titleNo:"자리를 잡지 못했습니다", titleRun:"식당에 연락하고 있습니다",
+      descHold:"추가 확인이 필요합니다", descNo:"요금은 전액 환불됩니다.", descRun:"보통 24시간 안에 결과를 알려드립니다.",
+      detailTitle:"예약 내용", venue:"식당", address:"주소", phone:"식당 번호", when:"일시", party:"인원", bname:"예약자명",
+      altNote:"처음 요청하신 시간은 자리가 없어, 미리 알려주신 범위 안의 다른 시간으로 잡았습니다.",
+      condTitle:"식당이 알려준 조건", pendTitle:"아직 확인되지 않은 것",
+      pendNote:"식당에서 회신이 오면 바로 알려드립니다.",
+      availTitle:"식당이 알려준 가능 시간", availNote:"이 시간대로 다시 요청하시면 잡아드릴 수 있습니다.",
+      guideTitle:"이 식당 이용 방법", showTitle:"입구에서 이 화면을 보여주세요",
+      showSub:"식당 직원에게 그대로 보여주시면 됩니다.",
+      mapBtn:"지도에서 열기", againBtn:"다른 요청 조회" }
+  };
+  var ORDER = ["ja","zh-TW","zh-CN","en","ko"];
+  var lang = "ja";
+  try { var sv = localStorage.getItem("cb-lang"); if (sv && T[sv]) lang = sv; } catch (e) {}
+  function L(k) { return (T[lang] && T[lang][k]) || T.ja[k] || k; }
+
+  var GUIDE_T = {
+    ja: { galbi:["スタッフが席でお肉を焼いてくれます。","お肉は2人前からの注文になります。","おかずは無料で、頼めばおかわりできます。お水はセルフです。","スタッフを呼ぶときはテーブルの呼び出しボタンを押します。","会計は帰りにレジで。チップの習慣はありません。"],
+          hansik:["おかずは無料でおかわりできます。","お水とカトラリーは基本セルフです。","スタッフを呼ぶときは呼び出しボタンを押します。","会計は帰りにレジで。チップの習慣はありません。"],
+          base:["お水とカトラリーは基本セルフです。","おかずが一緒に出てきて、ほとんど無料です。","スタッフを呼ぶときは呼び出しボタンを押します。","会計は帰りにレジで。チップの習慣はありません。"] },
+    "zh-TW": { galbi:["店員會在桌邊替您烤肉。","肉類從2人份起訂。","小菜免費，可以要求續加。水是自助的。","呼叫店員請按桌上的服務鈴。","結帳在離開時到櫃台。韓國沒有小費文化。"],
+          hansik:["小菜免費且可以續加。","水和餐具通常是自助的。","呼叫店員請按服務鈴。","結帳在離開時到櫃台。韓國沒有小費文化。"],
+          base:["水和餐具通常是自助的。","會附上小菜，大多免費。","呼叫店員請按服務鈴。","結帳在離開時到櫃台。韓國沒有小費文化。"] },
+    "zh-CN": { galbi:["店员会在桌边替您烤肉。","肉类从2人份起订。","小菜免费，可以要求续加。水是自助的。","呼叫店员请按桌上的服务铃。","结账在离开时到柜台。韩国没有小费文化。"],
+          hansik:["小菜免费且可以续加。","水和餐具通常是自助的。","呼叫店员请按服务铃。","结账在离开时到柜台。韩国没有小费文化。"],
+          base:["水和餐具通常是自助的。","会附上小菜，大多免费。","呼叫店员请按服务铃。","结账在离开时到柜台。韩国没有小费文化。"] },
+    en: { galbi:["Staff grill the meat at your table for you.","Meat is ordered for two people minimum, not per person.","Side dishes are free and refilled on request. Water is self-serve.","Press the call button on the table instead of waving at staff.","Pay at the counter on the way out. There is no tipping in Korea."],
+          hansik:["Side dishes are free and you can ask for refills.","Water and cutlery are usually self-serve.","Press the call button to get staff attention.","Pay at the counter on the way out. There is no tipping in Korea."],
+          base:["Water and cutlery are usually self-serve.","Side dishes come with the meal and are mostly free.","Press the call button to get staff attention.","Pay at the counter on the way out. There is no tipping in Korea."] },
+    ko: { galbi:["직원이 자리에서 고기를 구워줍니다.","고기는 2인분부터 주문합니다.","반찬은 무료이고 말하면 더 줍니다. 물은 셀프입니다.","직원을 부를 때는 테이블의 호출 버튼을 누릅니다.","계산은 나갈 때 카운터에서 합니다. 팁 문화가 없습니다."],
+          hansik:["반찬은 무료이고 리필을 요청할 수 있습니다.","물과 수저는 보통 셀프입니다.","직원을 부를 때는 호출 버튼을 누릅니다.","계산은 나갈 때 카운터에서 합니다. 팁 문화가 없습니다."],
+          base:["물과 수저는 보통 셀프입니다.","반찬이 함께 나오며 대부분 무료입니다.","직원을 부를 때는 호출 버튼을 누릅니다.","계산은 나갈 때 카운터에서 합니다. 팁 문화가 없습니다."] }
+  };
+
+  function guideFor(cat) {
+    var g = GUIDE_T[lang] || GUIDE_T.ja;
+    if (!cat) return g.base;
+    if (/갈비|구이|등심|삼겹|고기/.test(cat)) return g.galbi;
+    if (/한식|국밥|백반|찌개|탕/.test(cat)) return g.hansik;
+    return g.base;
+  }
+
+  function render(req, res, venue) {
+    var kind = res ? res.outcome : null;
+    var hero, title, desc, tag;
+
+    if (kind === "confirmed" || kind === "alt_confirmed") {
+      hero = ""; tag = L("tagOk");
+      title = fmtDT(res.confirmed_at);
+      desc = (venue ? venue.name : req.venue_name_raw) + " · " + req.party_size + "명 · 예약자 " + (req.booking_name || "");
+    } else if (kind === "hold") {
+      hero = " hold"; tag = L("tagHold");
+      title = L("titleHold");
+      desc = (res.pending_items && res.pending_items.length) ? res.pending_items.join(" · ") : L("descHold");
+    } else if (kind === "unavailable") {
+      hero = " unavailable"; tag = L("tagNo");
+      title = L("titleNo");
+      desc = L("descNo");
+    } else {
+      hero = " hold"; tag = L("tagRun");
+      title = L("titleRun");
+      desc = L("descRun");
+    }
+
+    var html = "<div class='hero" + hero + "'><span class='tag'>" + tag + "</span>" +
+      "<h1>" + esc(title) + "</h1><p>" + esc(desc) + "</p></div>";
+
+    // 예약 상세
+    if (kind === "confirmed" || kind === "alt_confirmed") {
+      html += "<div class='card'><h2>" + L("detailTitle") + "</h2>" +
+        "<div class='kv'><b>" + L("venue") + "</b><span>" + esc(venue ? venue.name : req.venue_name_raw) + "</span></div>" +
+        (venue && venue.address ? "<div class='kv'><b>" + L("address") + "</b><span>" + esc(venue.address) + "</span></div>" : "") +
+        (venue && venue.phone ? "<div class='kv'><b>" + L("phone") + "</b><span>" + esc(venue.phone) + "</span></div>" : "") +
+        "<div class='kv'><b>" + L("when") + "</b><span>" + fmtDT(res.confirmed_at) + "</span></div>" +
+        "<div class='kv'><b>" + L("party") + "</b><span>" + req.party_size + "</span></div>" +
+        "<div class='kv'><b>" + L("bname") + "</b><span>" + esc(req.booking_name) + "</span></div>";
+      if (kind === "alt_confirmed")
+        html += "<div class='note'>" + L("altNote") + "</div>";
+      html += "</div>";
+    }
+
+    // 식당 조건
+    var conds = res && res.venue_conditions;
+    if (conds && conds.length) {
+      html += "<div class='card'><h2>" + L("condTitle") + "</h2><p style='margin:0;font-size:15px'>" +
+        esc(conds.join(" · ")) + "</p></div>";
+    }
+
+    // 미확정 항목
+    if (res && res.pending_items && res.pending_items.length && kind !== "hold") {
+      html += "<div class='card'><h2>" + L("pendTitle") + "</h2><p style='margin:0;font-size:15px'>" +
+        esc(res.pending_items.join(" · ")) + "</p>" +
+        "<div class='note'>" + L("pendNote") + "</div></div>";
+    }
+
+    // 가능 시간 (불가·보류일 때)
+    if (res && res.alternatives && res.alternatives.length && kind !== "confirmed" && kind !== "alt_confirmed") {
+      html += "<div class='card'><h2>" + L("availTitle") + "</h2><p style='margin:0;font-size:15px'>" +
+        esc(res.alternatives.join(", ")) + "</p>" +
+        "<div class='note'>" + L("availNote") + "</div></div>";
+    }
+
+    // 이용 가이드 + 한국어 카드 (확정일 때만)
+    if (kind === "confirmed" || kind === "alt_confirmed") {
+      var lines = guideFor(venue ? venue.category : "");
+      html += "<div class='guide'><h2>" + L("guideTitle") + "</h2>" +
+        lines.map(function (t, i) {
+          return "<div class='line'><b>" + (i + 1 < 10 ? "0" : "") + (i + 1) + "</b><span>" + esc(t) + "</span></div>";
+        }).join("") + "</div>";
+
+      var koLine = fmtKoTime(res.confirmed_at) + "에 예약한 " +
+        (req.booking_name || "") + "입니다. " + req.party_size + "명입니다." +
+        (req.note_to_venue ? " " + req.note_to_venue : "");
+      html += "<div class='card'><h2>" + L("showTitle") + "</h2>" +
+        "<div class='ko'>" + esc(koLine) + "</div>" +
+        "<p class='sub'>" + L("showSub") + "</p></div>";
+    }
+
+    html += "<div class='btns'>" +
+      (venue && venue.address ? "<a class='btn ghost' target='_blank' rel='noopener' href='https://map.naver.com/p/search/" +
+        encodeURIComponent(venue.name + " " + venue.address) + "'>" + L("mapBtn") + "</a>" : "") +
+      "<a class='btn ghost' href='#' id='again'>" + L("againBtn") + "</a></div>";
+
+    $("root").innerHTML = html;
+    var ag = $("again");
+    if (ag) ag.addEventListener("click", function (e) { e.preventDefault(); location.hash = ""; location.reload(); });
+  }
+
+  function load(rid) {
+    if (!cfg.url) { $("state").textContent = "연결 설정이 없습니다. 운영자에게 문의해 주세요."; return; }
+    $("root").innerHTML = "<div class='state'>" + L("loading") + "</div>";
+    var key = rid.replace(/[^0-9a-fA-F-]/g, "").toLowerCase();
+    var q = key.length >= 32
+      ? "requests?select=*&id=eq." + encodeURIComponent(key) + "&limit=1"
+      : "requests?select=*&order=created_at.desc&limit=200";
+    api(q)
+      .then(function (rs) {
+        // 전체 UUID가 아니면 앞 여덟 자리로 맞춰 찾는다
+        if (key.length >= 32) return rs;
+        return (rs || []).filter(function (r) { return r.id.toLowerCase().indexOf(key) === 0; }).slice(0, 1);
+      })
+      .then(function (rs) {
+        if (!rs || !rs.length) throw new Error(L("notFound"));
+        var req = rs[0];
+        return Promise.all([
+          req,
+          api("results?select=*&request_id=eq." + req.id).catch(function () { return []; }),
+          req.venue_id ? api("venues?select=*&id=eq." + req.venue_id).catch(function () { return []; }) : []
+        ]);
+      })
+      .then(function (a) {
+        render(a[0], (a[1] && a[1][0]) || null, (a[2] && a[2][0]) || null);
+      })
+      .catch(function (e) {
+        $("root").innerHTML = "<div class='state'>" + esc(e.message) + "</div>" +
+          "<div class='card'><h2>" + L("lookupTitle") + "</h2><div class='lookup'>" +
+          "<input id='rid2' placeholder='" + L("lookupPh") + "'><button class='btn' id='go2'>" + L("go") + "</button></div></div>";
+        var g2 = $("go2");
+        if (g2) g2.addEventListener("click", function () {
+          var v = ($("rid2").value || "").trim(); if (v) { location.hash = v; load(v); }
+        });
+      });
+  }
+
+  /* 언어 버튼 */
+  $("langs").innerHTML = ORDER.map(function (l) {
+    return "<button data-l='" + l + "'>" + T[l].label + "</button>";
+  }).join("");
+  function applyLang() {
+    document.documentElement.lang = lang === "zh-TW" ? "zh-Hant" : lang === "zh-CN" ? "zh-Hans" : lang;
+    Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.getAttribute("data-l") === lang);
+    });
+    try { localStorage.setItem("cb-lang", lang); } catch (e) {}
+    var cur = (location.hash || "").replace("#", "").trim();
+    if (cur) { load(cur); } else { drawLookup(); }
+  }
+  function drawLookup() {
+    $("root").innerHTML = "<div class='state'>" + L("idle") + "</div>" +
+      "<div class='card'><h2>" + L("lookupTitle") + "</h2>" +
+      "<p class='sub' style='margin-top:0'>" + L("lookupHint") + "</p>" +
+      "<div class='lookup'><input id='rid' placeholder='" + L("lookupPh") + "'>" +
+      "<button class='btn' id='go'>" + L("go") + "</button></div></div>";
+    $("go").addEventListener("click", function () {
+      var v = ($("rid").value || "").trim(); if (v) { location.hash = v; load(v); }
+    });
+    $("rid").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { var v = ($("rid").value || "").trim(); if (v) { location.hash = v; load(v); } }
+    });
+  }
+  Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () { lang = b.getAttribute("data-l"); applyLang(); });
+  });
+
+  var h = (location.hash || "").replace("#", "").trim();
+  applyLang();
+  if (h) load(h);
+})();
+</script>
+</body>
+</html>
