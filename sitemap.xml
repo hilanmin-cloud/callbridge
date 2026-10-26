@@ -2,18 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://callbridge.vercel.app/</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://callbridge.vercel.app/?lang=ja"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://callbridge.vercel.app/?lang=zh-TW"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://callbridge.vercel.app/?lang=zh-CN"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://callbridge.vercel.app/?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://callbridge.vercel.app/?lang=ko"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://callbridge.vercel.app/"/>
+    <loc>https://callbridge-kr.vercel.app/</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://callbridge-kr.vercel.app/?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://callbridge-kr.vercel.app/?lang=zh-TW"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://callbridge-kr.vercel.app/?lang=zh-CN"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://callbridge-kr.vercel.app/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://callbridge-kr.vercel.app/?lang=ko"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://callbridge-kr.vercel.app/"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://callbridge.vercel.app/intake.html</loc>
+    <loc>https://callbridge-kr.vercel.app/intake.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
