@@ -465,6 +465,14 @@
     });
   }
 
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
   function collect() {
     var slots = [];
     [["d1","t1"],["d2","t2"],["d3","t3"]].forEach(function (p, i) {
@@ -500,10 +508,11 @@
 
     $("submit").disabled = true;
     setStatus("info", t("saving"));
-    var ids = {};
-    api("customers", { method: "POST", body: d.customer })
-      .then(function (r) {
-        ids.customer = r[0].id;
+    var ids = { customer: uuid() };
+    d.customer.id = ids.customer;
+
+    api("customers", { method: "POST", body: d.customer, prefer: "return=minimal" })
+      .then(function () {
         if (!d.venue.name) return [];
         var q = d.venue.name.replace(/\(.*?\)/g, "").trim().slice(0, 12);
         return api("venues?select=id&name=ilike.*" + encodeURIComponent(q) + "*&limit=1").catch(function () { return []; });
@@ -516,11 +525,14 @@
       .then(function (r) {
         ids.request = r[0].id;
         ids.code = r[0].lookup_code || "";
-        return api("request_slots", { method: "POST", body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
+        return api("request_slots", {
+          method: "POST", prefer: "return=minimal",
+          body: d.slots.map(function (s) { s.request_id = ids.request; return s; })
+        });
       })
       .then(function () {
         d.conditions.request_id = ids.request;
-        return api("request_conditions", { method: "POST", body: d.conditions });
+        return api("request_conditions", { method: "POST", body: d.conditions, prefer: "return=minimal" });
       })
       .then(function () { setStatus("ok", t("saved") + (ids.code || ids.request.slice(0, 8))); })
       .catch(function (e) { setStatus("err", t("failed") + e.message); })
