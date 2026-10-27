@@ -238,7 +238,7 @@
       connOff: "未接続 — プレビューのみ動作します", connOn: "接続済み — リクエストが保存されます",
       errVenue: "店名を入力してください。", errSlot: "希望日時を1つ以上入力してください。",
       errAgree: "AI通話への同意が必要です。",
-      saving: "送信中…", saved: "送信しました。受付番号 ",
+      saving: "送信中…", saved: "送信しました。照会コード ",
       failed: "送信に失敗しました: ", offline: "未接続のため保存されていません。入力内容のみ作成しました。",
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
@@ -278,7 +278,7 @@
       connOff: "未連線 — 僅能預覽", connOn: "已連線 — 委託將會儲存",
       errVenue: "請輸入店名。", errSlot: "請至少填寫一個希望時間。",
       errAgree: "需要同意AI致電。",
-      saving: "傳送中…", saved: "已送出。受理編號 ",
+      saving: "傳送中…", saved: "已送出。查詢碼 ",
       failed: "送出失敗: ", offline: "未連線，尚未儲存，僅建立了資料。",
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
@@ -318,7 +318,7 @@
       connOff: "未连接 — 仅能预览", connOn: "已连接 — 委托将被保存",
       errVenue: "请输入店名。", errSlot: "请至少填写一个希望时间。",
       errAgree: "需要同意AI致电。",
-      saving: "提交中…", saved: "已提交。受理编号 ",
+      saving: "提交中…", saved: "已提交。查询码 ",
       failed: "提交失败: ", offline: "未连接，尚未保存，仅创建了数据。",
       footer: "我们不会收集护照号码或信用卡信息。"
     },
@@ -358,7 +358,7 @@
       connOff: "Not connected — preview only", connOn: "Connected — requests are saved",
       errVenue: "Please enter the restaurant name.", errSlot: "Please enter at least one preferred time.",
       errAgree: "Please agree to the AI call.",
-      saving: "Sending…", saved: "Sent. Request number ",
+      saving: "Sending…", saved: "Sent. Your lookup code is ",
       failed: "Could not send: ", offline: "Not connected, so nothing was saved. Data structure only.",
       footer: "We never collect passport numbers or card details."
     },
@@ -398,7 +398,7 @@
       connOff: "연결 전 — 미리보기만 동작", connOn: "연결됨 — 요청이 저장됩니다",
       errVenue: "식당 이름을 입력해 주세요.", errSlot: "희망 일시를 최소 1개 입력해 주세요.",
       errAgree: "AI 통화 동의가 필요합니다.",
-      saving: "저장 중…", saved: "저장 완료. 요청 번호 ",
+      saving: "저장 중…", saved: "접수 완료. 조회 코드 ",
       failed: "저장 실패: ", offline: "연결 전입니다. 저장되지 않았고 데이터 구조만 만들었습니다.",
       footer: "여권번호나 카드 정보는 수집하지 않습니다."
     }
@@ -515,13 +515,14 @@
       })
       .then(function (r) {
         ids.request = r[0].id;
+        ids.code = r[0].lookup_code || "";
         return api("request_slots", { method: "POST", body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
       })
       .then(function () {
         d.conditions.request_id = ids.request;
         return api("request_conditions", { method: "POST", body: d.conditions });
       })
-      .then(function () { setStatus("ok", t("saved") + ids.request.slice(0, 8)); })
+      .then(function () { setStatus("ok", t("saved") + (ids.code || ids.request.slice(0, 8))); })
       .catch(function (e) { setStatus("err", t("failed") + e.message); })
       .then(function () { $("submit").disabled = false; });
   }

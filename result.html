@@ -134,7 +134,7 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
-      lookupTitle:"予約結果の照会", lookupHint:"受付番号8桁を入力してください。", lookupPh:"例: 3f9a2b7c",
+      lookupTitle:"予約結果の照会", lookupHint:"お申し込み時にお送りした照会コードを入力してください。", noConn:"現在ご利用いただけません。しばらくしてからお試しください。", lookupPh:"例: 60D99BC53C43",
       go:"照会", idle:"受付番号を入力すると結果が表示されます。", loading:"読み込み中…",
       notFound:"該当するリクエストが見つかりません。",
       tagOk:"予約確定", tagHold:"確認が必要です", tagNo:"予約できませんでした", tagRun:"進行中",
@@ -149,7 +149,7 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
-      lookupTitle:"訂位結果查詢", lookupHint:"請輸入受理編號8碼。", lookupPh:"例: 3f9a2b7c",
+      lookupTitle:"訂位結果查詢", lookupHint:"請輸入委託時收到的查詢碼。", noConn:"目前無法使用，請稍後再試。", lookupPh:"例: 60D99BC53C43",
       go:"查詢", idle:"輸入受理編號後會顯示結果。", loading:"載入中…",
       notFound:"找不到對應的委託。",
       tagOk:"訂位完成", tagHold:"需要確認", tagNo:"無法訂位", tagRun:"進行中",
@@ -164,7 +164,7 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
-      lookupTitle:"预订结果查询", lookupHint:"请输入受理编号8位。", lookupPh:"例: 3f9a2b7c",
+      lookupTitle:"预订结果查询", lookupHint:"请输入委托时收到的查询码。", noConn:"目前无法使用，请稍后再试。", lookupPh:"例: 60D99BC53C43",
       go:"查询", idle:"输入受理编号后会显示结果。", loading:"加载中…",
       notFound:"找不到对应的委托。",
       tagOk:"预订成功", tagHold:"需要确认", tagNo:"无法预订", tagRun:"进行中",
@@ -179,7 +179,7 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", againBtn:"查询其他委托" },
     en: { label:"English",
-      lookupTitle:"Check your booking", lookupHint:"Enter the eight-character request number you received.", lookupPh:"e.g. 3f9a2b7c",
+      lookupTitle:"Check your booking", lookupHint:"Enter the lookup code you received when you sent your request.", noConn:"This page is unavailable right now. Please try again later.", lookupPh:"e.g. 60D99BC53C43",
       go:"Check", idle:"Enter your request number to see the result.", loading:"Loading…",
       notFound:"We could not find that request.",
       tagOk:"Confirmed", tagHold:"Needs your confirmation", tagNo:"Could not book", tagRun:"In progress",
@@ -194,7 +194,7 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", againBtn:"Check another request" },
     ko: { label:"한국어",
-      lookupTitle:"예약 결과 조회", lookupHint:"접수 시 받으신 요청 번호 여덟 자리를 입력하세요.", lookupPh:"예: 3f9a2b7c",
+      lookupTitle:"예약 결과 조회", lookupHint:"접수하실 때 받으신 조회 코드를 입력하세요.", noConn:"지금은 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.", lookupPh:"예: 60D99BC53C43",
       go:"조회", idle:"요청 번호를 입력하면 결과를 보여드립니다.", loading:"불러오는 중…",
       notFound:"해당 요청을 찾을 수 없습니다.",
       tagOk:"예약 확정", tagHold:"확인 필요", tagNo:"예약 불가", tagRun:"진행 중",
@@ -327,18 +327,12 @@
   }
 
   function load(rid) {
-    if (!cfg.url) { $("state").textContent = "연결 설정이 없습니다. 운영자에게 문의해 주세요."; return; }
+    if (!cfg.url) { $("root").innerHTML = "<div class='state'>" + L("noConn") + "</div>"; return; }
     $("root").innerHTML = "<div class='state'>" + L("loading") + "</div>";
-    var key = rid.replace(/[^0-9a-fA-F-]/g, "").toLowerCase();
-    var q = key.length >= 32
-      ? "requests?select=*&id=eq." + encodeURIComponent(key) + "&limit=1"
-      : "requests?select=*&order=created_at.desc&limit=200";
-    api(q)
-      .then(function (rs) {
-        // 전체 UUID가 아니면 앞 여덟 자리로 맞춰 찾는다
-        if (key.length >= 32) return rs;
-        return (rs || []).filter(function (r) { return r.id.toLowerCase().indexOf(key) === 0; }).slice(0, 1);
-      })
+
+    // 조회 코드로 정확히 한 건만 조회한다
+    var code = rid.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
+    api("requests?select=*&lookup_code=eq." + encodeURIComponent(code) + "&limit=1")
       .then(function (rs) {
         if (!rs || !rs.length) throw new Error(L("notFound"));
         var req = rs[0];
@@ -352,13 +346,8 @@
         render(a[0], (a[1] && a[1][0]) || null, (a[2] && a[2][0]) || null);
       })
       .catch(function (e) {
-        $("root").innerHTML = "<div class='state'>" + esc(e.message) + "</div>" +
-          "<div class='card'><h2>" + L("lookupTitle") + "</h2><div class='lookup'>" +
-          "<input id='rid2' placeholder='" + L("lookupPh") + "'><button class='btn' id='go2'>" + L("go") + "</button></div></div>";
-        var g2 = $("go2");
-        if (g2) g2.addEventListener("click", function () {
-          var v = ($("rid2").value || "").trim(); if (v) { location.hash = v; load(v); }
-        });
+        $("root").innerHTML = "<div class='state'>" + esc(e.message) + "</div>";
+        drawLookup(true);
       });
   }
 
@@ -375,8 +364,9 @@
     var cur = (location.hash || "").replace("#", "").trim();
     if (cur) { load(cur); } else { drawLookup(); }
   }
-  function drawLookup() {
-    $("root").innerHTML = "<div class='state'>" + L("idle") + "</div>" +
+  function drawLookup(append) {
+    var head = append ? $("root").innerHTML : "<div class='state'>" + L("idle") + "</div>";
+    $("root").innerHTML = head +
       "<div class='card'><h2>" + L("lookupTitle") + "</h2>" +
       "<p class='sub' style='margin-top:0'>" + L("lookupHint") + "</p>" +
       "<div class='lookup'><input id='rid' placeholder='" + L("lookupPh") + "'>" +
