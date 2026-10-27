@@ -168,7 +168,6 @@
       <div class="note" data-t="refundNote"></div>
       <div class="chk" style="margin-top:12px"><input type="checkbox" id="agree"><label for="agree" data-t="aiConsent"></label></div>
       <button class="go" id="submit" style="margin-top:10px" data-t="submitBtn"></button>
-      <p class="conn" id="conn"></p>
     </div>
 
     <div id="status" class="status info" data-t="statusIdle"></div>
@@ -179,18 +178,7 @@
       <pre id="preview"></pre>
     </div>
 
-    <details>
-      <summary data-t="setupTitle"></summary>
-      <p class="hint" style="margin-top:8px" data-t="setupHint"></p>
-      <label for="url">Project URL</label>
-      <input id="url" placeholder="https://xxxxx.supabase.co">
-      <label for="key">Publishable key</label>
-      <input id="key" placeholder="sb_publishable_...">
-      <div class="row" style="margin-top:10px">
-        <button class="ghost" id="save" data-t="saveBtn"></button>
-        <button class="ghost" id="forget" data-t="forgetBtn"></button>
-      </div>
-    </details>
+
   </div>
 </div>
 
@@ -438,16 +426,14 @@
   $("d2").value = iso(new Date(now.getTime() + 86400000));
   $("d3").value = iso(new Date(now.getTime() + 2 * 86400000));
 
-  var CFG = "sb-cfg-v1";
-  var cfg = { url: "", key: "" };
-  try { var s = localStorage.getItem(CFG); if (s) cfg = JSON.parse(s); } catch (e) {}
+  // 공개 키는 브라우저에 노출되도록 설계된 값이라 코드에 포함한다.
+  // 접근 범위는 데이터베이스 정책(RLS)으로 제한된다.
+  var cfg = {
+    url: "https://knxggqpdsosmequgdawb.supabase.co",
+    key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW"
+  };
   function connected() { return !!(cfg.url && cfg.key); }
-  function drawConn() {
-    $("conn").innerHTML = connected()
-      ? "<span class='dot on'></span>" + t("connOn")
-      : "<span class='dot'></span>" + t("connOff");
-    if (connected()) { $("url").value = cfg.url; $("key").value = cfg.key; }
-  }
+  function drawConn() { /* 연결 표시 없음 — 항상 연결된 상태 */ }
 
   function api(path, options) {
     options = options || {};
@@ -540,16 +526,6 @@
   }
 
   $("submit").addEventListener("click", submit);
-  $("save").addEventListener("click", function () {
-    cfg = { url: $("url").value.trim(), key: $("key").value.trim() };
-    try { localStorage.setItem(CFG, JSON.stringify(cfg)); } catch (e) {}
-    drawConn();
-  });
-  $("forget").addEventListener("click", function () {
-    cfg = { url: "", key: "" };
-    try { localStorage.removeItem(CFG); } catch (e) {}
-    $("url").value = ""; $("key").value = ""; drawConn();
-  });
   Array.prototype.forEach.call(document.querySelectorAll("input, textarea"), function (el) {
     if (el.id === "url" || el.id === "key") return;
     el.addEventListener("input", preview); el.addEventListener("change", preview);
