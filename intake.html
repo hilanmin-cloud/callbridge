@@ -432,7 +432,7 @@
 
 
   /* ================= 로그인 ================= */
-  var sb = window.supabase ? window.supabase.createClient(cfg.url, cfg.key) : null;
+  var sb = null;   // initAuth()에서 생성한다 (cfg 정의 이후)
   var user = null;
 
   function drawAuth() {
@@ -465,7 +465,9 @@
   function drawMine() {
     var box = $("mineBox");
     if (!box) return;
-    if (!user) { box.innerHTML = "<p class='hint' style='margin:0'>" + t("loginHint") + "</p>"; return; }
+    if (!user || typeof api !== "function") {
+      box.innerHTML = "<p class='hint' style='margin:0'>" + t("loginHint") + "</p>"; return;
+    }
     box.innerHTML = "<p class='hint' style='margin:0'>…</p>";
     api("requests?select=lookup_code,venue_name_raw,party_size,status,created_at&order=created_at.desc&limit=10")
       .then(function (rs) {
@@ -480,6 +482,9 @@
   }
 
   function initAuth() {
+    if (!sb && window.supabase && cfg && cfg.url) {
+      try { sb = window.supabase.createClient(cfg.url, cfg.key); } catch (e) { sb = null; }
+    }
     if (!sb) { drawAuth(); return; }
     sb.auth.getSession().then(function (res) {
       var s = res.data && res.data.session;
