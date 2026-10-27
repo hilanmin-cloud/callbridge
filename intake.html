@@ -102,13 +102,27 @@
   .price { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; padding: 5px 0; }
   .price.total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; font-weight: 600; font-size: 16px; }
   footer { padding: 0 20px 34px; color: var(--muted); font-size: 12px; }
+  .gbtn { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 13px;
+    min-height: 38px; padding: 0 14px; border-radius: 19px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); cursor: pointer; font-weight: 500; }
+  .gbtn:hover { border-color: var(--teal); }
+  .who { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .who button { font: inherit; font-size: 12px; min-height: 32px; padding: 0 10px; border-radius: 16px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+  .mine { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 14px; }
+  .mine b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .mine span { color: var(--muted); font-size: 13px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
 <header>
   <span class="brand">CallBridge</span>
-  <div class="langs" id="langs"></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="langs" id="langs"></div>
+    <div id="authBox"></div>
+  </div>
 </header>
 
 <div class="wrap">
@@ -173,6 +187,11 @@
     <div id="status" class="status info" data-t="statusIdle"></div>
 
     <div class="card">
+      <h2 data-t="myReq"></h2>
+      <div id="mineBox" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
       <h2 data-t="previewTitle"></h2>
       <p class="hint" data-t="previewHint"></p>
       <pre id="preview"></pre>
@@ -192,6 +211,8 @@
   var T = {
     ja: {
       label: "日本語",
+      signIn: "Googleでログイン", signOut: "ログアウト", myReq: "マイリクエスト",
+      noReq: "まだリクエストがありません。", loginHint: "ログインすると、リクエストの結果をいつでも確認できます。",
       formTitle: "レストラン予約の代行",
       formLead: "電話でしか予約を受け付けないお店に、私たちが韓国語で電話します。",
       linkLabel: "地図のリンク（推奨）",
@@ -232,6 +253,8 @@
     },
     "zh-TW": {
       label: "繁體中文",
+      signIn: "使用 Google 登入", signOut: "登出", myReq: "我的委託",
+      noReq: "尚無委託紀錄。", loginHint: "登入後可隨時查看委託結果。",
       formTitle: "餐廳訂位代訂",
       formLead: "只接受電話訂位的餐廳，由我們用韓語替您打電話。",
       linkLabel: "地圖連結（建議）",
@@ -272,6 +295,8 @@
     },
     "zh-CN": {
       label: "简体中文",
+      signIn: "使用 Google 登录", signOut: "退出", myReq: "我的委托",
+      noReq: "暂无委托记录。", loginHint: "登录后可随时查看委托结果。",
       formTitle: "餐厅预订代办",
       formLead: "只接受电话预订的餐厅，由我们用韩语替您打电话。",
       linkLabel: "地图链接（推荐）",
@@ -312,6 +337,8 @@
     },
     en: {
       label: "English",
+      signIn: "Sign in with Google", signOut: "Sign out", myReq: "My requests",
+      noReq: "No requests yet.", loginHint: "Sign in to check your results any time.",
       formTitle: "Restaurant booking, handled",
       formLead: "For restaurants that only take bookings by phone, we call them in Korean for you.",
       linkLabel: "Map link (recommended)",
@@ -352,6 +379,8 @@
     },
     ko: {
       label: "한국어",
+      signIn: "Google로 로그인", signOut: "로그아웃", myReq: "내 요청",
+      noReq: "아직 요청이 없습니다.", loginHint: "로그인하시면 요청 결과를 언제든 확인할 수 있습니다.",
       formTitle: "식당 예약 대행",
       formLead: "전화로만 예약을 받는 식당에 저희가 한국어로 전화합니다.",
       linkLabel: "지도 링크 (권장)",
@@ -401,6 +430,70 @@
     return "<button data-l='" + l + "'>" + T[l].label + "</button>";
   }).join("");
 
+
+  /* ================= 로그인 ================= */
+  var sb = window.supabase ? window.supabase.createClient(cfg.url, cfg.key) : null;
+  var user = null;
+
+  function drawAuth() {
+    var box = $("authBox");
+    if (!box) return;
+    if (user) {
+      box.innerHTML = "<span class='who'>" + (user.email || "") +
+        " <button id='signOut'>" + t("signOut") + "</button></span>";
+      $("signOut").addEventListener("click", function () {
+        if (sb) sb.auth.signOut().then(function () { user = null; drawAuth(); drawMine(); });
+      });
+    } else {
+      box.innerHTML = "<button class='gbtn' id='signIn'>" +
+        "<svg width='15' height='15' viewBox='0 0 24 24' aria-hidden='true'>" +
+        "<path fill='#4285F4' d='M22 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.6a4.8 4.8 0 0 1-2.1 3.1v2.6h3.4c2-1.8 3.1-4.5 3.1-7.6z'/>" +
+        "<path fill='#34A853' d='M12 23c2.8 0 5.2-.9 6.9-2.5l-3.4-2.6c-.9.6-2.1 1-3.5 1-2.7 0-5-1.8-5.8-4.3H2.7v2.7A10.4 10.4 0 0 0 12 23z'/>" +
+        "<path fill='#FBBC05' d='M6.2 14.6a6.2 6.2 0 0 1 0-4V7.9H2.7a10.4 10.4 0 0 0 0 9.4l3.5-2.7z'/>" +
+        "<path fill='#EA4335' d='M12 5.4c1.5 0 2.9.5 4 1.6l3-3A10.4 10.4 0 0 0 2.7 7.9l3.5 2.7c.8-2.5 3.1-4.3 5.8-4.3z'/></svg>" +
+        t("signIn") + "</button>";
+      $("signIn").addEventListener("click", function () {
+        if (!sb) return;
+        sb.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: location.origin + location.pathname }
+        });
+      });
+    }
+  }
+
+  function drawMine() {
+    var box = $("mineBox");
+    if (!box) return;
+    if (!user) { box.innerHTML = "<p class='hint' style='margin:0'>" + t("loginHint") + "</p>"; return; }
+    box.innerHTML = "<p class='hint' style='margin:0'>…</p>";
+    api("requests?select=lookup_code,venue_name_raw,party_size,status,created_at&order=created_at.desc&limit=10")
+      .then(function (rs) {
+        if (!rs || !rs.length) { box.innerHTML = "<p class='hint' style='margin:0'>" + t("noReq") + "</p>"; return; }
+        box.innerHTML = rs.map(function (r) {
+          var nm = (r.venue_name_raw || "").split(" | ")[0] || "-";
+          return "<div class='mine'><b>" + nm + "</b><span>" + r.party_size + " · " +
+            r.status + " · " + r.lookup_code + "</span></div>";
+        }).join("");
+      })
+      .catch(function () { box.innerHTML = "<p class='hint' style='margin:0'>" + t("noReq") + "</p>"; });
+  }
+
+  function initAuth() {
+    if (!sb) { drawAuth(); return; }
+    sb.auth.getSession().then(function (res) {
+      var s = res.data && res.data.session;
+      user = s ? s.user : null;
+      authToken = s ? s.access_token : null;
+      drawAuth(); drawMine();
+    });
+    sb.auth.onAuthStateChange(function (_e, session) {
+      user = session ? session.user : null;
+      authToken = session ? session.access_token : null;
+      drawAuth(); drawMine();
+    });
+  }
+
   function applyLang() {
     document.documentElement.lang = lang === "zh-TW" ? "zh-Hant" : lang === "zh-CN" ? "zh-Hans" : lang;
     Array.prototype.forEach.call(document.querySelectorAll("[data-t]"), function (el) {
@@ -412,7 +505,7 @@
     Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
       b.classList.toggle("on", b.getAttribute("data-l") === lang);
     });
-    drawConn(); preview();
+    drawConn(); preview(); drawAuth(); drawMine();
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
   }
 
@@ -435,11 +528,14 @@
   function connected() { return !!(cfg.url && cfg.key); }
   function drawConn() { /* 연결 표시 없음 — 항상 연결된 상태 */ }
 
+  var authToken = null;
+
   function api(path, options) {
     options = options || {};
     return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/" + path, {
       method: options.method || "GET",
-      headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+      headers: { "apikey": cfg.key,
+                 "Authorization": "Bearer " + (authToken || cfg.key),
                  "Content-Type": "application/json", "Prefer": options.prefer || "return=representation" },
       body: options.body ? JSON.stringify(options.body) : undefined
     }).then(function (res) {
@@ -505,6 +601,7 @@
       })
       .then(function (found) {
         d.request.customer_id = ids.customer;
+        if (user) d.request.user_id = user.id;
         if (found && found.length) d.request.venue_id = found[0].id;
         return api("requests", { method: "POST", body: d.request });
       })
@@ -544,6 +641,7 @@
   });
 
   applyLang();
+  initAuth();
 })();
 </script>
 </body>
