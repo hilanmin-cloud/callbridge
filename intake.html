@@ -520,7 +520,19 @@
         d.conditions.request_id = ids.request;
         return api("request_conditions", { method: "POST", body: d.conditions, prefer: "return=minimal" });
       })
-      .then(function () { setStatus("ok", t("saved") + (ids.code || ids.request.slice(0, 8))); })
+      .then(function () {
+        setStatus("ok", t("saved") + (ids.code || ids.request.slice(0, 8)));
+        try {
+          fetch(cfg.url + "/rest/v1/visits", {
+            method: "POST",
+            headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+                       "Content-Type": "application/json", "Prefer": "return=minimal" },
+            body: JSON.stringify({ event: "submit", page: "/intake.html", lang: lang,
+                                   referrer: document.referrer ? document.referrer.slice(0, 200) : null }),
+            keepalive: true
+          }).catch(function () {});
+        } catch (e) {}
+      })
       .catch(function (e) { setStatus("err", t("failed") + e.message); })
       .then(function () { $("submit").disabled = false; });
   }

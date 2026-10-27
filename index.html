@@ -551,5 +551,57 @@
   apply();
 })();
 </script>
+
+<script>
+/* 유입 측정 — 외부 분석 도구 없이 자체 기록 */
+(function () {
+  "use strict";
+  var SB = { url: "https://knxggqpdsosmequgdawb.supabase.co",
+             key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW" };
+
+  function track(evt, extra) {
+    try {
+      var p = new URLSearchParams(location.search);
+      var body = {
+        event: evt,
+        page: location.pathname,
+        lang: (function () { try { return localStorage.getItem("cb-lang") || navigator.language; }
+                             catch (e) { return navigator.language; } })(),
+        referrer: document.referrer ? document.referrer.slice(0, 200) : null,
+        utm_source: p.get("utm_source"),
+        utm_medium: p.get("utm_medium"),
+        utm_campaign: p.get("utm_campaign"),
+        screen_w: window.innerWidth,
+        extra: extra || null
+      };
+      fetch(SB.url + "/rest/v1/visits", {
+        method: "POST",
+        headers: { "apikey": SB.key, "Authorization": "Bearer " + SB.key,
+                   "Content-Type": "application/json", "Prefer": "return=minimal" },
+        body: JSON.stringify(body),
+        keepalive: true
+      }).catch(function () { /* 측정 실패는 무시 */ });
+    } catch (e) { /* 무시 */ }
+  }
+
+  track("view");
+
+  // 요청하기 버튼 클릭 측정
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest("a[href*='intake']") : null;
+    if (a) track("cta_click", a.textContent.trim().slice(0, 40));
+  });
+
+  // 페이지를 얼마나 읽었는지 — 이탈 시 1회 기록
+  var deepest = 0, sent = false;
+  window.addEventListener("scroll", function () {
+    var p = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+    if (p > deepest) deepest = Math.min(p, 100);
+  }, { passive: true });
+  window.addEventListener("pagehide", function () {
+    if (!sent) { sent = true; track("depth", String(deepest)); }
+  });
+})();
+</script>
 </body>
 </html>
