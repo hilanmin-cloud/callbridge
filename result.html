@@ -148,7 +148,7 @@
       availTitle:"お店が空いている時間", availNote:"この時間帯で再度ご依頼いただければお取りできます。",
       guideTitle:"このお店の利用方法", showTitle:"入口でこの画面をお見せください",
       showSub:"お店のスタッフにそのままお見せください。",
-      mapBtn:"地図で開く", againBtn:"別のリクエストを照会" },
+      mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
       lookupTitle:"訂位結果查詢", lookupHint:"請輸入委託時收到的查詢碼。", noConn:"目前無法使用，請稍後再試。", lookupPh:"例: 60D99BC53C43",
       go:"查詢", idle:"輸入受理編號後會顯示結果。", loading:"載入中…",
@@ -163,7 +163,7 @@
       availTitle:"餐廳可訂的時段", availNote:"以這些時段再次委託，我們可以替您訂位。",
       guideTitle:"這家餐廳的用餐方式", showTitle:"請在門口出示此畫面",
       showSub:"直接出示給店員即可。",
-      mapBtn:"在地圖開啟", againBtn:"查詢其他委託" },
+      mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
       lookupTitle:"预订结果查询", lookupHint:"请输入委托时收到的查询码。", noConn:"目前无法使用，请稍后再试。", lookupPh:"例: 60D99BC53C43",
       go:"查询", idle:"输入受理编号后会显示结果。", loading:"加载中…",
@@ -178,7 +178,7 @@
       availTitle:"餐厅可订的时段", availNote:"以这些时段再次委托，我们可以替您预订。",
       guideTitle:"这家餐厅的用餐方式", showTitle:"请在门口出示此画面",
       showSub:"直接出示给店员即可。",
-      mapBtn:"在地图打开", againBtn:"查询其他委托" },
+      mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
       lookupTitle:"Check your booking", lookupHint:"Enter the lookup code you received when you sent your request.", noConn:"This page is unavailable right now. Please try again later.", lookupPh:"e.g. 60D99BC53C43",
       go:"Check", idle:"Enter your request number to see the result.", loading:"Loading…",
@@ -193,7 +193,7 @@
       availTitle:"Times the restaurant does have", availNote:"Send a new request for one of these and we can book it.",
       guideTitle:"How this restaurant works", showTitle:"Show this at the door",
       showSub:"Show this to the staff as it is.",
-      mapBtn:"Open in maps", againBtn:"Check another request" },
+      mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
       lookupTitle:"예약 결과 조회", lookupHint:"접수하실 때 받으신 조회 코드를 입력하세요.", noConn:"지금은 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.", lookupPh:"예: 60D99BC53C43",
       go:"조회", idle:"요청 번호를 입력하면 결과를 보여드립니다.", loading:"불러오는 중…",
@@ -208,7 +208,7 @@
       availTitle:"식당이 알려준 가능 시간", availNote:"이 시간대로 다시 요청하시면 잡아드릴 수 있습니다.",
       guideTitle:"이 식당 이용 방법", showTitle:"입구에서 이 화면을 보여주세요",
       showSub:"식당 직원에게 그대로 보여주시면 됩니다.",
-      mapBtn:"지도에서 열기", againBtn:"다른 요청 조회" }
+      mapBtn:"지도에서 열기", cancelBtn:"못 가게 되었습니다 (취소)", cancelAsk:"식당에 취소를 전달합니다. 진행할까요?", cancelDone:"접수했습니다. 식당에 전달하겠습니다.", cancelNote:"못 가시게 되면 꼭 알려주세요. 연락 없이 방문하지 않으시면 식당에 피해가 가고, 이후 이용이 제한될 수 있습니다.", againBtn:"다른 요청 조회" }
   };
   var ORDER = ["ja","zh-TW","zh-CN","en","ko"];
   var lang = "ja";
@@ -320,11 +320,34 @@
     html += "<div class='btns'>" +
       (venue && venue.address ? "<a class='btn ghost' target='_blank' rel='noopener' href='https://map.naver.com/p/search/" +
         encodeURIComponent(venue.name + " " + venue.address) + "'>" + L("mapBtn") + "</a>" : "") +
+      ((kind === "confirmed" || kind === "alt_confirmed")
+        ? "<button class='btn ghost' id='cancelBtn' type='button'>" + L("cancelBtn") + "</button>"
+        : "") +
       "<a class='btn ghost' href='#' id='again'>" + L("againBtn") + "</a></div>";
+
+    if (kind === "confirmed" || kind === "alt_confirmed") {
+      html += "<p class='sub' style='margin-top:12px'>" + L("cancelNote") + "</p>";
+    }
 
     $("root").innerHTML = html;
     var ag = $("again");
     if (ag) ag.addEventListener("click", function (e) { e.preventDefault(); location.hash = ""; location.reload(); });
+
+    var cb = $("cancelBtn");
+    if (cb) cb.addEventListener("click", function () {
+      if (!window.confirm(L("cancelAsk"))) return;
+      cb.disabled = true;
+      fetch(cfg.url + "/rest/v1/requests?id=eq." + req.id, {
+        method: "PATCH",
+        headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+                   "Content-Type": "application/json", "Prefer": "return=minimal" },
+        body: JSON.stringify({ status: "cancel_requested" })
+      }).then(function () {
+        cb.textContent = L("cancelDone");
+      }).catch(function () {
+        cb.disabled = false;
+      });
+    });
   }
 
   function load(rid) {
