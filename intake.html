@@ -630,6 +630,21 @@
       })
       .then(function () {
         setStatus("ok", t("saved") + (ids.code || ids.request.slice(0, 8)));
+        // 운영자 알림 (실패해도 고객 흐름에 영향 없음)
+        try {
+          fetch(cfg.url + "/functions/v1/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": cfg.key },
+            body: JSON.stringify({
+              code: ids.code,
+              venue: d.request.venue_name_raw,
+              party: d.request.party_size,
+              name: d.request.booking_name,
+              lang: lang
+            }),
+            keepalive: true
+          }).catch(function () {});
+        } catch (e) {}
         try {
           fetch(cfg.url + "/rest/v1/visits", {
             method: "POST",
