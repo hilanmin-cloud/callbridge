@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
 <title>CallBridge｜電話でしか予約できない韓国のレストランを代わりに予約します</title>
 <meta name="description" content="韓国の人気店の多くは電話でしか予約を受け付けません。CallBridgeが韓国語で電話し、席を確保して、お店の利用方法までお伝えします。予約が取れなければ料金はいただきません。">
 <meta name="keywords" content="韓国 レストラン 予約代行, 한국 식당 예약 대행, Korea restaurant booking service, 韓國餐廳訂位代訂">
@@ -96,226 +95,473 @@
 
 <style>
   :root {
-    color-scheme: light;
-    --teal: #0F5E5C; --teal-d: #0A4443; --gold: #C08A2E; --gold-l: #E8B55A;
-    --ink: #15211F; --muted: #5A6A67; --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF;
-    --warm: #FBF4E6; --warmink: #4A3A10;
+    color-scheme: light only;
+    --teal: #0F5E5C; --teal-d: #0A4443; --teal-l: #2E7D7A;
+    --coral: #F0603F; --coral-d: #D4482A;
+    --gold: #C9962F; --gold-l: #E0B356;
+    --ink: #1A2422; --muted: #6B7A77; --line: #E6E2DD;
+    --soft: #FFF1EB; --mist: #F3F7F6; --bg: #FFFBF8; --card: #FFFFFF;
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --teal: #4E8F8C; --teal-d: #6FA9A6; --gold: #D9A450; --gold-l: #E8B55A;
-      --ink: #E8EFEE; --muted: #9FB0AD; --line: #2A3836; --soft: #16211F; --bg: #0E1716;
-      --warm: #26210F; --warmink: #E2CF9E;
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --teal: #4E8F8C; --teal-d: #6FA9A6; --gold: #D9A450; --gold-l: #E8B55A;
-    --ink: #E8EFEE; --muted: #9FB0AD; --line: #2A3836; --soft: #16211F; --bg: #0E1716;
-    --warm: #26210F; --warmink: #E2CF9E;
-  }
   * { box-sizing: inherit; }
-  html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
   body { margin: 0; background: var(--bg); color: var(--ink);
-    font-family: "Pretendard", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", "Noto Sans KR", system-ui, sans-serif;
-    font-size: 16px; line-height: 1.7; }
+    font-family: "Pretendard", "Noto Sans JP", "Noto Sans TC", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.65; }
 
   .skip { position: absolute; left: -9999px; }
-  .skip:focus { left: 12px; top: 12px; z-index: 100; background: var(--teal); color: #fff;
+  .skip:focus { left: 14px; top: 14px; z-index: 100; background: var(--teal); color: #fff;
     padding: 10px 16px; border-radius: 8px; }
 
-  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
-    background: var(--bg); border-bottom: 1px solid var(--line); }
-  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
-    background: var(--bg); z-index: 21; }
-  .bar .inner { max-width: 1080px; margin: 0 auto; padding: 12px 20px;
-    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-  .brand { font-size: 19px; font-weight: 700; color: var(--teal); text-decoration: none; }
-  .langs { display: flex; gap: 5px; flex-wrap: wrap; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+  /* ===== 상단 바 ===== */
+  .bar { border-bottom: 1px solid var(--line); background: rgba(255,251,248,.92);
+    backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 20; }
+  .bar .in { height: 68px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 9px; font-size: 18px; font-weight: 800;
+    color: var(--teal); text-decoration: none; }
+  .logo .dot { width: 10px; height: 10px; border-radius: 5px; background: var(--coral); }
+  .right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .langs { display: flex; gap: 4px; flex-wrap: wrap; }
   .langs button { font: inherit; font-size: 12.5px; min-height: 36px; padding: 0 11px; border-radius: 18px;
-    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+    transition: background .18s, color .18s, border-color .18s; }
+  .langs button:hover { border-color: var(--teal); color: var(--teal); }
   .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
 
-  main { max-width: 1080px; margin: 0 auto; padding: 0 20px 60px; }
-  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
-  section:last-of-type { border-bottom: 0; }
-  h1 { margin: 0 0 18px; font-size: clamp(28px, 5.4vw, 46px); line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
-  h2 { margin: 0 0 24px; font-size: clamp(21px, 3.4vw, 30px); line-height: 1.4; }
-  h3 { margin: 0 0 8px; font-size: 18px; }
-  p { margin: 0 0 14px; }
-  .lead { font-size: clamp(16px, 2.2vw, 19px); color: var(--muted); max-width: 60ch; }
+  /* ===== 공통 버튼 ===== */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px;
+    padding: 0 30px; border-radius: 11px; font-size: 16px; font-weight: 700; text-decoration: none;
+    border: 0; cursor: pointer; font-family: inherit; background: var(--coral); color: #fff;
+    box-shadow: 0 2px 10px rgba(240,96,63,.22);
+    transition: transform .18s, box-shadow .18s, background .18s; }
+  .btn:hover { background: var(--coral-d); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(240,96,63,.3); }
+  .btn.sm { min-height: 44px; padding: 0 18px; font-size: 14px; }
+  .btn.ghost { background: transparent; color: var(--teal); box-shadow: inset 0 0 0 2px var(--line); }
+  .btn.ghost:hover { background: var(--mist); box-shadow: inset 0 0 0 2px var(--teal); }
+  .btn.light { background: #fff; color: var(--teal); box-shadow: 0 2px 12px rgba(0,0,0,.14); }
+  .btn.light:hover { background: #fff; box-shadow: 0 7px 20px rgba(0,0,0,.2); }
 
-  .hero { display: flex; flex-wrap: wrap; gap: 36px; align-items: center; padding-top: 48px; }
-  .hero > div:first-child { flex: 999 1 340px; min-width: 0; }
-  .hero > aside { flex: 1 1 290px; min-width: 0; }
-  .kicker { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: 1.2px;
-    color: var(--gold); margin-bottom: 12px; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 54px;
-    padding: 0 28px; border-radius: 10px; text-decoration: none; font-size: 17px; font-weight: 600;
-    background: var(--teal); color: #fff; border: 1px solid var(--teal); }
-  .btn:hover { background: var(--teal-d); border-color: var(--teal-d); }
-  .btn.ghost { background: transparent; color: var(--teal); }
-  .btn.gold { background: var(--gold-l); border-color: var(--gold-l); color: #2E2305; }
-  .cta small { font-size: 14px; color: var(--muted); }
+  .trust { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--muted); }
+  .trust .chk { width: 18px; height: 18px; border-radius: 9px; background: var(--teal); flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center; }
+  .trust .chk::after { content: ""; width: 5px; height: 8px; border: solid #fff;
+    border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-.5px,-1px); }
 
-  .sample { border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--bg); }
-  .sample .tag { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: var(--muted); }
-  .sample strong { display: block; font-size: 19px; margin: 6px 0 2px; }
-  .sample .sub { font-size: 15px; color: var(--muted); }
-  .sample hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
-  .sample .rule { font-size: 14.5px; line-height: 1.65; color: var(--ink); }
+  /* ===== 스크롤 등장 ===== */
+  .rise { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.22,.61,.36,1); }
+  .rise.in { opacity: 1; transform: none; }
+  .d1 { transition-delay: .08s; } .d2 { transition-delay: .16s; } .d3 { transition-delay: .24s; }
 
-  .steps { display: flex; flex-wrap: wrap; gap: 20px; list-style: none; margin: 0; padding: 0; counter-reset: s; }
-  .steps li { flex: 1 1 260px; min-width: 0; background: var(--soft); border-radius: 14px; padding: 26px; }
-  .steps li::before { counter-increment: s; content: counter(s, decimal-leading-zero);
-    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
-    border-radius: 20px; background: var(--teal); color: #fff; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
-  .steps p { margin: 0; font-size: 15.5px; color: var(--muted); }
+  /* ===== 01 히어로 ===== */
+  .hero { padding: 84px 28px 76px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center; }
+  .copy { flex: 6 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+  .kick { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;
+    letter-spacing: .5px; color: var(--coral); }
+  .kick i { width: 6px; height: 6px; border-radius: 3px; background: var(--coral); }
+  h1 { margin: 0; font-size: clamp(32px, 4.6vw, 54px); line-height: 1.26; font-weight: 800; letter-spacing: -.02em; }
+  h1 em { font-style: normal; color: var(--teal); }
+  .lead { margin: 0; font-size: clamp(15px, 1.5vw, 18px); color: var(--muted); max-width: 46ch; }
+  .cta { display: flex; flex-wrap: wrap; gap: 11px; align-items: center; margin-top: 2px; }
 
-  .prices { display: flex; flex-wrap: wrap; gap: 16px; }
-  .prices > div { flex: 1 1 210px; min-width: 0; border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
-  .prices > div.main { border: 2px solid var(--teal); background: var(--soft); }
-  .prices .amt { display: block; font-size: 27px; font-weight: 700; margin: 6px 0; }
-  .prices .desc { font-size: 14px; color: var(--muted); }
-  .prices .soon { display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 11px;
-    background: var(--soft); color: var(--muted); margin-bottom: 6px; }
+  .visual { flex: 6 1 380px; min-width: 0; display: flex; justify-content: center; position: relative; }
+  .glow { position: absolute; inset: -10% 6%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(240,96,63,.13), rgba(15,94,92,.07) 55%, transparent 72%);
+    filter: blur(6px); pointer-events: none; }
+  .phone { position: relative; width: 100%; max-width: 330px; border-radius: 30px; background: var(--card);
+    border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 10px 34px rgba(15,94,92,.1); }
+  .pstat { background: var(--mist); border-radius: 18px; padding: 24px 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 13px; }
+  .rings { position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; }
+  .ring { position: absolute; inset: 0; border: 1.5px solid var(--teal); border-radius: 50%; opacity: 0;
+    animation: pulse 2.6s cubic-bezier(.22,.61,.36,1) infinite; }
+  .ring:nth-child(2) { animation-delay: .85s; }
+  .ring:nth-child(3) { animation-delay: 1.7s; }
+  @keyframes pulse { 0% { transform: scale(.38); opacity: 0; } 18% { opacity: .5; } 100% { transform: scale(1); opacity: 0; } }
+  .core { width: 52px; height: 52px; border-radius: 26px; background: var(--teal); position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; animation: breathe 2.6s ease-in-out infinite; }
+  .core svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  .pstat h2 { margin: 0; font-size: 15.5px; font-weight: 700; }
+  .pstat p { margin: 0; font-size: 13px; color: var(--muted); }
+  .prow { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .pmark { width: 17px; height: 17px; border-radius: 9px; background: var(--teal); flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center; }
+  .pmark::after { content: ""; width: 4px; height: 7px; border: solid #fff;
+    border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-.5px,-1px); }
+  .pdone { background: var(--gold); color: #fff; border-radius: 15px; padding: 16px 15px;
+    box-shadow: 0 3px 12px rgba(201,150,47,.26); }
+  .pdone .tag { margin: 0 0 5px; font-size: 11.5px; font-weight: 600; opacity: .9;
+    display: flex; align-items: center; gap: 6px; }
+  .pdone .tag i { width: 14px; height: 14px; border-radius: 7px; background: rgba(255,255,255,.3);
+    display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .pdone .tag i::after { content: ""; width: 4px; height: 6px; border: solid #fff;
+    border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-.5px,-1px); }
+  .pdone .when { margin: 0 0 3px; font-size: 18px; font-weight: 800; }
+  .pdone .who { margin: 0; font-size: 12.5px; opacity: .88; }
 
-  details.faq { border-bottom: 1px solid var(--line); padding: 16px 0; }
-  details.faq summary { cursor: pointer; font-size: 17px; font-weight: 600; list-style: none; }
-  details.faq summary::-webkit-details-marker { display: none; }
-  details.faq summary::after { content: "+"; float: right; color: var(--teal); font-weight: 400; }
-  details.faq[open] summary::after { content: "−"; }
-  details.faq p { margin: 12px 0 0; color: var(--muted); font-size: 15.5px; }
+  /* ===== 섹션 공통 ===== */
+  section h2.t { margin: 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.35; font-weight: 800; letter-spacing: -.01em; }
+  .label { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; color: var(--coral); }
 
-  .close { background: var(--teal); border-radius: 18px; padding: 44px 32px; color: #fff;
-    display: flex; flex-wrap: wrap; gap: 22px; align-items: center; justify-content: space-between; }
-  .close h2 { margin: 0 0 6px; color: #fff; }
-  .close p { margin: 0; color: #D7E6E5; }
+  /* ===== 02-A 이용 방법 (회색 배경, 가로 띠) ===== */
+  .how { background: var(--mist); padding: 112px 0 96px; }
+  .how .head { display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-end;
+    justify-content: space-between; margin-bottom: 52px; }
+  .how .head .l { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .how .head .r { flex: 0 1 320px; min-width: 0; font-size: 14.5px; color: var(--muted); margin: 0; }
+  .steps { display: flex; flex-wrap: wrap; }
+  .step { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding-right: 32px; }
+  .step:last-child { padding-right: 0; }
+  /* 계단식 배치 — 왼쪽에서 오른쪽으로 조금씩 내려감 */
+  .step.mid { margin-top: 18px; }
+  .step.last { margin-top: 36px; }
+  .step .top { display: flex; align-items: center; gap: 14px; }
+  .step .n { width: 46px; height: 46px; border-radius: 23px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800;
+    background: var(--teal); color: #fff; }
+  .step.mid .n { background: var(--card); color: var(--teal); box-shadow: inset 0 0 0 2px var(--teal); }
+  .step.last .n { background: var(--card); color: var(--muted); box-shadow: inset 0 0 0 2px var(--line); }
+  .step .ln { flex: 1 1 auto; height: 2px; background: var(--line); }
+  .step .ln.fade { background: linear-gradient(to right, var(--line), transparent); }
+  .step h3 { margin: 0; font-size: 18px; font-weight: 700; }
+  .step p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .minicard { background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 13px;
+    display: flex; align-items: center; gap: 11px; box-shadow: 0 1px 4px rgba(15,94,92,.05); }
+  .minicard .ic { width: 30px; height: 30px; border-radius: 15px; background: var(--teal); flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; }
+  .minicard .ic svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .minicard b { display: block; font-size: 12.5px; }
+  .minicard span { font-size: 11.5px; color: var(--muted); }
 
-  footer { max-width: 1080px; margin: 0 auto; padding: 26px 20px 44px; border-top: 1px solid var(--line);
-    display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+  /* ===== 02-B 선택 이유 (흰 배경, 가운데 헤더, 지그재그) ===== */
+  .why { padding: 160px 0 120px; }
+  .why .head { display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-align: center; margin-bottom: 52px; }
+  .why .head p { margin: 0; font-size: 15px; color: var(--muted); max-width: 48ch; }
+  .rowcards { display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 22px; }
+  .rowcards:last-child { margin-bottom: 0; }
+  .c { background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    transition: transform .22s, box-shadow .22s; }
+  .c:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(15,94,92,.1); }
+  .c.big { flex: 2 1 480px; min-width: 0; padding: 36px; display: flex; flex-wrap: wrap; gap: 30px; align-items: center; }
+  .c.sm { flex: 1 1 280px; min-width: 0; padding: 30px; display: flex; flex-direction: column; gap: 14px; }
+  .ico { width: 42px; height: 42px; border-radius: 12px; background: var(--soft);
+    display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .ico svg { width: 21px; height: 21px; fill: none; stroke: var(--coral); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .c h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .c.sm h3 { font-size: 17px; }
+  .c p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .c .txt { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 13px; }
+  .c .vis { flex: 1 1 200px; min-width: 0; }
 
-  @media (max-width: 420px) {
-    main { padding: 0 14px 44px; }
-    section { padding: 40px 0; }
-    .hero { gap: 26px; padding-top: 32px; }
-    .steps li, .prices > div { padding: 18px; }
-    .close { padding: 30px 20px; }
-    .bar .inner { padding: 10px 14px; }
+  .listvis { display: flex; flex-direction: column; gap: 9px; }
+  .listvis .li { border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px;
+    display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
+  .listvis .li.off { opacity: .45; }
+  .listvis .li.on { border: 2px solid var(--teal); color: var(--ink); font-weight: 600; background: var(--mist); }
+  .listvis .li .sq { width: 22px; height: 22px; border-radius: 6px; background: var(--line); flex: 0 0 auto; }
+  .listvis .li.on .sq { background: var(--teal); }
+
+  .guidevis { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--mist);
+    display: flex; flex-direction: column; gap: 11px; }
+  .guidevis .g { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--muted); }
+  .guidevis .g i { width: 18px; height: 18px; border-radius: 9px; background: var(--teal); flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .guidevis .g i::after { content: ""; width: 4px; height: 7px; border: solid #fff;
+    border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-.5px,-1px); }
+
+  /* ===== 03 요금 (회색) ===== */
+  .price { background: var(--mist); padding: 96px 0 88px; }
+  .price .head { margin-bottom: 40px; display: flex; flex-direction: column; gap: 12px; }
+  .plans { display: flex; flex-wrap: wrap; gap: 18px; }
+  .plan { flex: 1 1 260px; min-width: 0; background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 12px;
+    transition: transform .22s, box-shadow .22s; }
+  .plan:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(15,94,92,.09); }
+  .plan.main { border: 2px solid var(--coral); box-shadow: 0 4px 18px rgba(240,96,63,.12); }
+  .plan .nm { font-size: 15px; font-weight: 700; }
+  .plan .amt { font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+  .plan .dsc { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .plan .soon { align-self: flex-start; font-size: 11.5px; font-weight: 700; padding: 3px 10px;
+    border-radius: 11px; background: var(--line); color: var(--muted); }
+  .price .note { margin: 26px 0 0; font-size: 14px; color: var(--muted); }
+
+  /* ===== 04 FAQ ===== */
+  .faq { padding: 88px 0 80px; }
+  .faq .head { margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
+  details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+  details summary { cursor: pointer; font-size: 16.5px; font-weight: 700; list-style: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary .pm { width: 24px; height: 24px; border-radius: 12px; background: var(--soft); flex: 0 0 auto;
+    position: relative; transition: background .2s, transform .25s; }
+  details summary .pm::before, details summary .pm::after { content: ""; position: absolute;
+    background: var(--coral); border-radius: 1px; top: 50%; left: 50%; transition: transform .25s; }
+  details summary .pm::before { width: 10px; height: 2px; transform: translate(-50%,-50%); }
+  details summary .pm::after { width: 2px; height: 10px; transform: translate(-50%,-50%); }
+  details[open] summary .pm::after { transform: translate(-50%,-50%) rotate(90deg); }
+  details[open] summary .pm { background: var(--coral); }
+  details[open] summary .pm::before, details[open] summary .pm::after { background: #fff; }
+  details p { margin: 14px 0 0; font-size: 15px; color: var(--muted); max-width: 72ch; }
+
+  /* ===== 05 마무리 CTA ===== */
+  .close { padding: 0 0 72px; }
+  .close .box { background: var(--teal); border-radius: 22px; padding: 46px 40px; color: #fff;
+    display: flex; flex-wrap: wrap; gap: 26px; align-items: center; justify-content: space-between;
+    position: relative; overflow: hidden; }
+  .close .box::after { content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(240,96,63,.3), transparent 70%);
+    right: -80px; top: -120px; pointer-events: none; }
+  .close h2 { margin: 0 0 7px; font-size: clamp(22px, 2.8vw, 31px); font-weight: 800; letter-spacing: -.01em; }
+  .close p { margin: 0; font-size: 15px; color: #CFE2E1; }
+  .close .l { flex: 1 1 320px; min-width: 0; position: relative; z-index: 1; }
+  .close .r { position: relative; z-index: 1; }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 44px; font-size: 13px; color: var(--muted); }
+  footer .in { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring, .core { animation: none; }
+    .rise { opacity: 1; transform: none; transition: none; }
+    .btn:hover, .c:hover, .plan:hover { transform: none; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding-left: 18px; padding-right: 18px; }
+    .hero { padding: 48px 18px 52px; gap: 34px; }
+    .how { padding: 72px 0 64px; } .why { padding: 88px 0 72px; }
+    .price { padding: 64px 0 60px; } .faq { padding: 60px 0 56px; }
+    .step { padding-right: 0; margin-bottom: 26px; }
+    .step.mid, .step.last { margin-top: 0; }
+    .c.big, .c.sm { padding: 24px; }
+    .close .box { padding: 32px 24px; }
   }
 </style>
 </head>
 <body>
 
-<a class="skip" href="#main" data-t="skip"></a>
+
+<a class="skip" href="#main" data-t="skip">本文へスキップ</a>
 
 <header class="bar">
-  <div class="inner">
-    <a class="brand" href="/">CallBridge</a>
-    <nav class="langs" id="langs" aria-label="Language"></nav>
+  <div class="wrap in">
+    <a class="logo" href="#"><span class="dot"></span>CallBridge</a>
+    <div class="right">
+      <nav class="langs" id="langs" aria-label="Language"></nav>
+      <a href="#start" class="btn sm" data-t="navCta">予約する</a>
+    </div>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="hero">
-    <div>
-      <span class="kicker" data-t="kicker"></span>
-      <h1 data-t="h1"></h1>
-      <p class="lead" data-t="lead"></p>
-      <div class="cta">
-        <a class="btn" href="intake.html" data-t="ctaMain"></a>
-        <small data-t="ctaSub"></small>
+  <!-- 01 히어로 -->
+  <section class="wrap hero">
+    <div class="copy">
+      <span class="kick rise"><i></i><span data-t="kicker">韓国を旅する方へ</span></span>
+      <h1 class="rise d1"><span data-t="h1a">言葉が通じなくても、</span><br><em data-t="h1b">あのお店を予約できます</em></h1>
+      <p class="lead rise d2" data-t="lead"></p>
+      <div class="cta rise d3">
+        <a href="intake.html" class="btn" data-t="ctaMain">レストランを予約　₩9,900</a>
+        <a href="#how" class="btn ghost" data-t="ctaSecond">使い方を見る</a>
       </div>
+      <div class="trust rise d3"><span class="chk"></span><span data-t="trust">予約が取れなければ料金はいただきません</span></div>
     </div>
 
-    <aside class="sample" aria-labelledby="sampleTitle">
-      <span class="tag" id="sampleTitle" data-t="sampleTag"></span>
-      <strong data-t="sampleWhen"></strong>
-      <span class="sub" data-t="sampleWho"></span>
-      <hr>
-      <span class="tag" data-t="sampleRuleTag"></span>
-      <p class="rule" style="margin:8px 0 0" data-t="sampleRule"></p>
-    </aside>
-  </section>
-
-  <section id="how" aria-labelledby="howTitle">
-    <h2 id="howTitle" data-t="howTitle"></h2>
-    <ol class="steps">
-      <li><h3 data-t="s1t"></h3><p data-t="s1d"></p></li>
-      <li><h3 data-t="s2t"></h3><p data-t="s2d"></p></li>
-      <li><h3 data-t="s3t"></h3><p data-t="s3d"></p></li>
-    </ol>
-  </section>
-
-  <section id="why" aria-labelledby="whyTitle">
-    <h2 id="whyTitle" data-t="whyTitle"></h2>
-    <div class="steps" style="counter-reset:none">
-      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
-        <h3 data-t="w1t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w1d"></p>
-      </div>
-      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
-        <h3 data-t="w2t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w2d"></p>
-      </div>
-      <div style="flex:1 1 260px;min-width:0;background:var(--soft);border-radius:14px;padding:26px">
-        <h3 data-t="w3t"></h3><p style="margin:0;color:var(--muted);font-size:15.5px" data-t="w3d"></p>
+    <div class="visual rise d2">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="phone">
+        <div class="pstat">
+          <div class="rings" aria-hidden="true">
+            <span class="ring"></span><span class="ring"></span><span class="ring"></span>
+            <span class="core">
+              <svg viewBox="0 0 24 24"><path d="M4.5 4.5h4l1.5 4-2.3 1.6a12 12 0 0 0 6.2 6.2l1.6-2.3 4 1.5v4a1.5 1.5 0 0 1-1.6 1.5A17 17 0 0 1 3 6.1 1.5 1.5 0 0 1 4.5 4.5z"/></svg>
+            </span>
+          </div>
+          <h2 data-t="pCalling">お席を確認中です</h2>
+          <p data-t="pVenue">延南洞カルビ</p>
+        </div>
+        <div class="prow"><span class="pmark"></span><span data-t="pLog1">ご希望の日時をお伝えしました</span></div>
+        <div class="prow"><span class="pmark"></span><span data-t="pLog2">2名で確認しました</span></div>
+        <div class="pdone">
+          <p class="tag"><i></i><span data-t="pDoneTag">予約確定</span></p>
+          <p class="when" data-t="pWhen">10月24日(金) 19:00</p>
+          <p class="who" data-t="pWho">延南洞カルビ・2名・Tanaka 様</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="price" aria-labelledby="priceTitle">
-    <h2 id="priceTitle" data-t="priceTitle"></h2>
-    <div class="prices">
-      <div class="main">
-        <span data-t="p1n"></span><span class="amt">₩9,900</span>
-        <span class="desc" data-t="p1d"></span>
+  <!-- 02-A 이용 방법 -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <div class="head">
+        <div class="l">
+          <span class="label rise" data-t="howLabel">ご利用の流れ</span>
+          <h2 class="t rise d1" data-t="howTitle2">3つだけ教えてください</h2>
+        </div>
+        <p class="r rise d2" data-t="howNote"></p>
       </div>
-      <div>
-        <span data-t="p2n"></span><span class="amt">₩15,900</span>
-        <span class="desc" data-t="p2d"></span>
-      </div>
-      <div>
-        <span class="soon" data-t="soon"></span>
-        <span data-t="p3n"></span>
-        <span class="desc" data-t="p3d"></span>
-      </div>
-      <div>
-        <span class="soon" data-t="soon"></span>
-        <span data-t="p4n"></span>
-        <span class="desc" data-t="p4d"></span>
+
+      <div class="steps">
+        <div class="step rise">
+          <div class="top"><span class="n">01</span><span class="ln"></span></div>
+          <h3 data-t="s1t">リクエストを送る</h3>
+          <p data-t="s1d"></p>
+        </div>
+
+        <div class="step mid rise d1">
+          <div class="top"><span class="n">02</span><span class="ln"></span></div>
+          <h3 data-t="s2t">韓国語で電話します</h3>
+          <p data-t="s2d"></p>
+          <div class="minicard">
+            <span class="ic"><svg viewBox="0 0 24 24"><path d="M4.5 4.5h4l1.5 4-2.3 1.6a12 12 0 0 0 6.2 6.2l1.6-2.3 4 1.5v4a1.5 1.5 0 0 1-1.6 1.5A17 17 0 0 1 3 6.1 1.5 1.5 0 0 1 4.5 4.5z"/></svg></span>
+            <span><b data-t="miniT">通話中</b><span data-t="miniS">AIが身元を明かして対応</span></span>
+          </div>
+        </div>
+
+        <div class="step last rise d2">
+          <div class="top"><span class="n">03</span><span class="ln fade"></span></div>
+          <h3 data-t="s3t">結果を受け取る</h3>
+          <p data-t="s3d"></p>
+        </div>
       </div>
     </div>
-    <p style="margin-top:18px;color:var(--muted)" data-t="priceNote"></p>
   </section>
 
-  <section id="faq" aria-labelledby="faqTitle">
-    <h2 id="faqTitle" data-t="faqTitle"></h2>
-    <details class="faq"><summary data-t="q1"></summary><p data-t="a1"></p></details>
-    <details class="faq"><summary data-t="q2"></summary><p data-t="a2"></p></details>
-    <details class="faq"><summary data-t="q3"></summary><p data-t="a3"></p></details>
-    <details class="faq"><summary data-t="q4"></summary><p data-t="a4"></p></details>
+  <!-- 02-B 선택 이유 -->
+  <section class="wrap why">
+    <div class="head">
+      <span class="label rise" data-t="whyLabel">CallBridgeが選ばれる理由</span>
+      <h2 class="t rise d1" data-t="whyTitle2"></h2>
+      <p class="rise d2" data-t="whyLead"></p>
+    </div>
+
+    <div class="rowcards">
+      <article class="c big rise">
+        <div class="txt">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-6h5v6"/></svg></span>
+          <h3 data-t="c1t"></h3>
+          <p data-t="c1d"></p>
+        </div>
+        <div class="vis listvis">
+          <div class="li off"><span class="sq"></span><span data-t="c1a"></span></div>
+          <div class="li on"><span class="sq"></span><span data-t="c1b"></span></div>
+          <div class="li off"><span class="sq"></span><span data-t="c1a"></span></div>
+        </div>
+      </article>
+
+      <article class="c sm rise d1">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M17 7H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H6"/></svg></span>
+        <h3 data-t="c2t"></h3>
+        <p data-t="c2d"></p>
+      </article>
+    </div>
+
+    <div class="rowcards">
+      <article class="c sm rise">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M4.5 4.5h4l1.5 4-2.3 1.6a12 12 0 0 0 6.2 6.2l1.6-2.3 4 1.5v4a1.5 1.5 0 0 1-1.6 1.5A17 17 0 0 1 3 6.1 1.5 1.5 0 0 1 4.5 4.5z"/></svg></span>
+        <h3 data-t="c3t"></h3>
+        <p data-t="c3d"></p>
+      </article>
+
+      <article class="c big rise d1">
+        <div class="txt">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-3.5L5 20z"/></svg></span>
+          <h3 data-t="c4t"></h3>
+          <p data-t="c4d"></p>
+        </div>
+        <div class="vis guidevis">
+          <div class="g"><i></i><span data-t="g1"></span></div>
+          <div class="g"><i></i><span data-t="g2"></span></div>
+          <div class="g"><i></i><span data-t="g3"></span></div>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <section>
-    <div class="close">
-      <div style="flex:1 1 320px;min-width:0">
-        <h2 data-t="closeTitle"></h2>
-        <p data-t="closeDesc"></p>
+  <!-- 03 요금 -->
+  <section class="price" id="start">
+    <div class="wrap">
+      <div class="head">
+        <span class="label rise" data-t="priceLabel">料金</span>
+        <h2 class="t rise d1" data-t="priceTitle2"></h2>
       </div>
-      <a class="btn gold" href="intake.html" data-t="closeBtn"></a>
+      <div class="plans">
+        <div class="plan main rise">
+          <span class="nm" data-t="p1n"></span>
+          <span class="amt">₩9,900</span>
+          <p class="dsc" data-t="p1d"></p>
+          <a href="intake.html" class="btn" style="margin-top:6px" data-t="planCta"></a>
+        </div>
+        <div class="plan rise d1">
+          <span class="nm" data-t="p2n"></span>
+          <span class="amt">₩15,900</span>
+          <p class="dsc" data-t="p2d"></p>
+        </div>
+        <div class="plan rise d2">
+          <span class="soon" data-t="soon"></span>
+          <span class="nm" data-t="p3n"></span>
+          <p class="dsc" data-t="p3d"></p>
+        </div>
+        <div class="plan rise d3">
+          <span class="soon" data-t="soon"></span>
+          <span class="nm" data-t="p4n"></span>
+          <p class="dsc" data-t="p4d"></p>
+        </div>
+      </div>
+      <p class="note rise" data-t="priceNote"></p>
+    </div>
+  </section>
+
+  <!-- 04 FAQ -->
+  <section class="wrap faq">
+    <div class="head">
+      <span class="label rise" data-t="faqLabel">よくあるご質問</span>
+      <h2 class="t rise d1" data-t="faqTitle2"></h2>
+    </div>
+
+    <details class="rise">
+      <summary><span data-t="q1"></span><span class="pm"></span></summary>
+      <p data-t="a1"></p>
+    </details>
+    <details class="rise">
+      <summary><span data-t="q2"></span><span class="pm"></span></summary>
+      <p data-t="a2"></p>
+    </details>
+    <details class="rise">
+      <summary><span data-t="q3"></span><span class="pm"></span></summary>
+      <p data-t="a3"></p>
+    </details>
+    <details class="rise">
+      <summary><span data-t="q4"></span><span class="pm"></span></summary>
+      <p data-t="a4"></p>
+    </details>
+  </section>
+
+  <!-- 05 마무리 -->
+  <section class="wrap close">
+    <div class="box rise">
+      <div class="l">
+        <h2 data-t="closeT"></h2>
+        <p data-t="closeD"></p>
+      </div>
+      <div class="r"><a href="intake.html" class="btn light" data-t="closeBtn"></a></div>
     </div>
   </section>
 
 </main>
 
 <footer>
-  <span>CallBridge</span>
-  <span data-t="footerHours"></span>
+  <div class="wrap in">
+    <span>CallBridge</span>
+    <span data-t="footerHours"></span>
+  </div>
 </footer>
 
 <script>
@@ -323,6 +569,54 @@
   "use strict";
   var T = {
     ja: { label:"日本語",
+      h1a: "言葉が通じなくても、",
+      h1b: "あのお店を予約できます",
+      lead: "韓国語での電話も、韓国の番号がないことも、もう問題になりません。私たちが代わりにお電話して、お席を確保します。",
+      navCta: "予約する",
+      ctaSecond: "使い方を見る",
+      trust: "予約が取れなければ料金はいただきません",
+      pCalling: "お席を確認中です",
+      pVenue: "延南洞カルビ",
+      pLog1: "ご希望の日時をお伝えしました",
+      pLog2: "2名で確認しました",
+      pDoneTag: "予約確定",
+      pWhen: "10月24日(金) 19:00",
+      pWho: "延南洞カルビ・2名・Tanaka 様",
+      howLabel: "ご利用の流れ",
+      howTitle2: "3つだけ教えてください",
+      howNote: "第1希望が満席でも、お知らせいただいた範囲内なら通話中にその場で確定します。",
+      s1d: "行きたいお店と希望の日時を入力するだけ。",
+      s2d: "お店が落ち着いている時間に発信します。",
+      s3d: "確定内容と利用方法を日本語でお届け。",
+      miniT: "通話中",
+      miniS: "AIが身元を明かして対応",
+      whyLabel: "CallBridgeが選ばれる理由",
+      whyTitle2: "予約できない理由を、ひとつずつ",
+      whyLead: "言葉、電話番号、お店のルール。旅先で引っかかるところを代わりに引き受けます。",
+      c1t: "アプリに載っていないお店も",
+      c1d: "予約アプリに出てこないお店にも、電話で直接お席を確保します。",
+      c1a: "予約アプリ掲載店",
+      c1b: "電話のみのお店",
+      c2t: "取れなければ無料",
+      c2d: "ご希望の日時でお席が取れなかった場合、料金はいただきません。",
+      c3t: "韓国の番号は不要",
+      c3d: "お店からの折り返しのお電話も、私たちが代わりに受けます。",
+      c4t: "お店の利用方法までお伝えします",
+      c4d: "注文の単位、席の使い方、お会計の仕方まで。現地で迷わないように。",
+      g1: "スタッフが席でお肉を焼いてくれます",
+      g2: "お肉は2人前からの注文です",
+      g3: "会計は帰りにレジで。チップはありません",
+      priceLabel: "料金",
+      priceTitle2: "結果に対してのお支払いです",
+      p1d: "1件・変更1回込み",
+      p2d: "席やコースの調整が必要な場合",
+      p3d: "地下鉄・タクシー・店舗",
+      p4d: "遅いチェックイン、荷物、再配達",
+      planCta: "このプランで予約",
+      faqLabel: "よくあるご質問",
+      faqTitle2: "気になるところ",
+      closeT: "お店の名前だけ、教えてください",
+      closeD: "あとは私たちが韓国語でお電話します。",
       skip:"本文へスキップ",
       kicker:"韓国を旅する方へ",
       h1:"本当に行きたいお店ほど、電話でしか予約を受け付けません",
@@ -360,6 +654,54 @@
       footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
     },
     "zh-TW": { label:"繁體中文",
+      h1a: "語言不通，",
+      h1b: "也能訂到那家店",
+      lead: "不會韓語、沒有韓國門號都沒關係。我們用韓語替您打電話，幫您訂到位子。",
+      navCta: "立即預訂",
+      ctaSecond: "查看使用方式",
+      trust: "訂不到就不收費",
+      pCalling: "正在確認座位",
+      pVenue: "延南洞烤排骨",
+      pLog1: "已轉達您希望的時間",
+      pLog2: "已確認2位",
+      pDoneTag: "訂位完成",
+      pWhen: "10月24日(五) 19:00",
+      pWho: "延南洞烤排骨・2位・Tanaka",
+      howLabel: "使用流程",
+      howTitle2: "只要告訴我們三件事",
+      howNote: "第1順位客滿時，只要在您允許的範圍內，我們會在通話中直接確定。",
+      s1d: "填寫想去的餐廳和希望時間。",
+      s2d: "在餐廳較空閒的時段致電。",
+      s3d: "用中文送上確認內容與用餐方式。",
+      miniT: "通話中",
+      miniS: "AI表明身分後應對",
+      whyLabel: "為什麼選擇 CallBridge",
+      whyTitle2: "一個一個解決訂不到的原因",
+      whyLead: "語言、電話號碼、店家規則。旅途中卡住的地方由我們承擔。",
+      c1t: "連App上沒有的餐廳也行",
+      c1d: "訂位App找不到的店，我們直接打電話幫您訂位。",
+      c1a: "App可訂的店",
+      c1b: "只收電話訂位的店",
+      c2t: "訂不到就免費",
+      c2d: "若您希望的時段訂不到位子，不會收取費用。",
+      c3t: "不需要韓國門號",
+      c3d: "餐廳回電也由我們代為接聽。",
+      c4t: "連用餐方式都告訴您",
+      c4d: "點餐單位、座位使用、結帳方式。讓您在當地不會不知所措。",
+      g1: "店員會在桌邊替您烤肉",
+      g2: "肉類從2人份起訂",
+      g3: "結帳在離開時到櫃台。沒有小費文化",
+      priceLabel: "費用",
+      priceTitle2: "針對「結果」付費",
+      p1d: "1件・含1次變更",
+      p2d: "需要協調座位或套餐時",
+      p3d: "地鐵、計程車、店家",
+      p4d: "晚到入住、行李、重新配送",
+      planCta: "選擇此方案",
+      faqLabel: "常見問題",
+      faqTitle2: "您可能想知道",
+      closeT: "只要告訴我們店名",
+      closeD: "剩下的交給我們用韓語致電。",
       skip:"跳至內容",
       kicker:"給在韓國旅行的您",
       h1:"越想去的餐廳，越是只接受電話訂位",
@@ -397,6 +739,54 @@
       footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
     },
     "zh-CN": { label:"简体中文",
+      h1a: "语言不通，",
+      h1b: "也能订到那家店",
+      lead: "不会韩语、没有韩国号码都没关系。我们用韩语替您打电话，帮您订到位子。",
+      navCta: "立即预订",
+      ctaSecond: "查看使用方式",
+      trust: "订不到就不收费",
+      pCalling: "正在确认座位",
+      pVenue: "延南洞烤排骨",
+      pLog1: "已转达您希望的时间",
+      pLog2: "已确认2位",
+      pDoneTag: "预订成功",
+      pWhen: "10月24日(五) 19:00",
+      pWho: "延南洞烤排骨・2位・Tanaka",
+      howLabel: "使用流程",
+      howTitle2: "只要告诉我们三件事",
+      howNote: "第1顺位客满时，只要在您允许的范围内，我们会在通话中直接确定。",
+      s1d: "填写想去的餐厅和希望时间。",
+      s2d: "在餐厅较空闲的时段致电。",
+      s3d: "用中文送上确认内容与用餐方式。",
+      miniT: "通话中",
+      miniS: "AI表明身份后应对",
+      whyLabel: "为什么选择 CallBridge",
+      whyTitle2: "一个一个解决订不到的原因",
+      whyLead: "语言、电话号码、店家规则。旅途中卡住的地方由我们承担。",
+      c1t: "连App上没有的餐厅也行",
+      c1d: "预订App找不到的店，我们直接打电话帮您预订。",
+      c1a: "App可订的店",
+      c1b: "只收电话预订的店",
+      c2t: "订不到就免费",
+      c2d: "若您希望的时段订不到位子，不会收取费用。",
+      c3t: "不需要韩国号码",
+      c3d: "餐厅回电也由我们代为接听。",
+      c4t: "连用餐方式都告诉您",
+      c4d: "点餐单位、座位使用、结账方式。让您在当地不会不知所措。",
+      g1: "店员会在桌边替您烤肉",
+      g2: "肉类从2人份起订",
+      g3: "结账在离开时到柜台。没有小费文化",
+      priceLabel: "费用",
+      priceTitle2: "针对「结果」付费",
+      p1d: "1件・含1次变更",
+      p2d: "需要协调座位或套餐时",
+      p3d: "地铁、出租车、商家",
+      p4d: "晚到入住、行李、重新配送",
+      planCta: "选择此方案",
+      faqLabel: "常见问题",
+      faqTitle2: "您可能想知道",
+      closeT: "只要告诉我们店名",
+      closeD: "剩下的交给我们用韩语致电。",
       skip:"跳到内容",
       kicker:"给在韩国旅行的您",
       h1:"越想去的餐厅，越是只接受电话预订",
@@ -434,6 +824,54 @@
       footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
     },
     en: { label:"English",
+      h1a: "No Korean, no local number —",
+      h1b: "still booked",
+      lead: "The phone call and the callback are both handled for you. Tell us the restaurant and we secure the table.",
+      navCta: "Book now",
+      ctaSecond: "How it works",
+      trust: "No table, no charge",
+      pCalling: "Checking availability",
+      pVenue: "Yeonnam-dong Galbi",
+      pLog1: "Told them your preferred time",
+      pLog2: "Confirmed for 2 people",
+      pDoneTag: "Confirmed",
+      pWhen: "Fri 24 Oct, 7:00 PM",
+      pWho: "Yeonnam-dong Galbi · 2 people · Tanaka",
+      howLabel: "How it works",
+      howTitle2: "Three things, that is all",
+      howNote: "If your first choice is full, we confirm within your second and third choices on the call.",
+      s1d: "The restaurant and when you want to go.",
+      s2d: "We reach them during their quiet hours.",
+      s3d: "Confirmation and house rules, in your language.",
+      miniT: "On the call",
+      miniS: "AI identifies itself and speaks",
+      whyLabel: "Why CallBridge",
+      whyTitle2: "Every reason you could not book, handled",
+      whyLead: "Language, phone number, house rules. We take on what trips you up abroad.",
+      c1t: "Places no app lists",
+      c1d: "Restaurants missing from booking apps — we call them directly.",
+      c1a: "Listed on booking apps",
+      c1b: "Phone-only restaurants",
+      c2t: "No table, no charge",
+      c2d: "If we cannot get your times, you pay nothing.",
+      c3t: "No Korean number needed",
+      c3d: "We take the restaurant callback for you as well.",
+      c4t: "We explain how the place works",
+      c4d: "Order sizes, seating, how to pay. So nothing surprises you.",
+      g1: "Staff grill the meat at your table",
+      g2: "Meat is ordered for two minimum",
+      g3: "Pay at the counter on the way out. No tipping",
+      priceLabel: "Pricing",
+      priceTitle2: "You pay for a result",
+      p1d: "One booking, one change included",
+      p2d: "When seating or a set menu needs arranging",
+      p3d: "Subway, taxi, or a venue",
+      p4d: "Late arrival, luggage, redelivery",
+      planCta: "Choose this plan",
+      faqLabel: "Questions",
+      faqTitle2: "Things people ask",
+      closeT: "Just give us the name",
+      closeD: "We make the call in Korean.",
       skip:"Skip to content",
       kicker:"For travellers in Korea",
       h1:"The restaurants you most want to visit take bookings by phone only",
@@ -471,6 +909,54 @@
       footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
     },
     ko: { label:"한국어",
+      h1a: "말이 안 통해도,",
+      h1b: "그 식당 예약됩니다",
+      lead: "한국어 통화도, 한국 번호가 없는 것도 더는 문제가 되지 않습니다. 저희가 대신 전화해 자리를 잡아드립니다.",
+      navCta: "예약하기",
+      ctaSecond: "이용 방법 보기",
+      trust: "예약이 안 되면 요금을 받지 않습니다",
+      pCalling: "자리를 확인하고 있습니다",
+      pVenue: "연남동 갈비",
+      pLog1: "희망 일시를 전달했습니다",
+      pLog2: "2명으로 확인했습니다",
+      pDoneTag: "예약 확정",
+      pWhen: "10월 24일(금) 오후 7시",
+      pWho: "연남동 갈비 · 2명 · Tanaka",
+      howLabel: "이용 방법",
+      howTitle2: "세 가지만 알려주세요",
+      howNote: "1순위가 만석이어도 알려주신 범위 안이면 통화 중에 바로 확정합니다.",
+      s1d: "가고 싶은 식당과 희망 일시만 적으면 됩니다.",
+      s2d: "식당이 한가한 시간에 전화합니다.",
+      s3d: "확정 내용과 이용 방법을 모국어로 보내드립니다.",
+      miniT: "통화 중",
+      miniS: "AI가 신분을 밝히고 응대",
+      whyLabel: "콜브릿지를 쓰는 이유",
+      whyTitle2: "예약이 안 되는 이유를 하나씩",
+      whyLead: "언어, 전화번호, 식당 규칙. 여행지에서 걸리는 것들을 대신 떠맡습니다.",
+      c1t: "앱에 없는 식당도",
+      c1d: "예약 앱에 안 나오는 곳에도 전화로 직접 자리를 잡습니다.",
+      c1a: "예약 앱에 있는 식당",
+      c1b: "전화로만 받는 식당",
+      c2t: "안 되면 무료",
+      c2d: "희망하신 일시로 자리를 못 잡으면 요금을 받지 않습니다.",
+      c3t: "한국 번호 필요 없음",
+      c3d: "식당에서 다시 거는 전화도 저희가 대신 받습니다.",
+      c4t: "식당 이용법까지 알려드립니다",
+      c4d: "주문 단위, 좌석 이용, 계산 방법까지. 현장에서 당황하지 않도록.",
+      g1: "직원이 자리에서 고기를 구워줍니다",
+      g2: "고기는 2인분부터 주문합니다",
+      g3: "계산은 나갈 때 카운터에서. 팁 문화가 없습니다",
+      priceLabel: "요금",
+      priceTitle2: "결과에 대한 요금입니다",
+      p1d: "1건 · 변경 1회 포함",
+      p2d: "좌석이나 코스 협의가 필요할 때",
+      p3d: "지하철, 택시, 가게",
+      p4d: "늦은 체크인, 짐 보관, 재배송",
+      planCta: "이 요금으로 예약",
+      faqLabel: "자주 묻는 질문",
+      faqTitle2: "궁금하신 점",
+      closeT: "가게 이름만 알려주세요",
+      closeD: "나머지는 저희가 한국어로 전화합니다.",
       skip:"본문 바로가기",
       kicker:"한국을 여행하는 분들께",
       h1:"정말 가고 싶은 식당일수록 전화로만 예약을 받습니다",
@@ -526,6 +1012,7 @@
     else lang = "en";
   }
 
+
   function t(k) { return (T[lang] && T[lang][k]) || T.ja[k] || ""; }
 
   var box = document.getElementById("langs");
@@ -549,11 +1036,24 @@
   });
 
   apply();
+
+  /* 스크롤 등장 */
+  var items = document.querySelectorAll(".rise");
+  if (!("IntersectionObserver" in window)) {
+    Array.prototype.forEach.call(items, function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+  }
 })();
 </script>
 
 <script>
-/* 유입 측정 — 외부 분석 도구 없이 자체 기록 */
+/* 유입 측정 */
 (function () {
   "use strict";
   var SB = { url: "https://knxggqpdsosmequgdawb.supabase.co",
@@ -562,37 +1062,31 @@
   function track(evt, extra) {
     try {
       var p = new URLSearchParams(location.search);
-      var body = {
-        event: evt,
-        page: location.pathname,
-        lang: (function () { try { return localStorage.getItem("cb-lang") || navigator.language; }
-                             catch (e) { return navigator.language; } })(),
-        referrer: document.referrer ? document.referrer.slice(0, 200) : null,
-        utm_source: p.get("utm_source"),
-        utm_medium: p.get("utm_medium"),
-        utm_campaign: p.get("utm_campaign"),
-        screen_w: window.innerWidth,
-        extra: extra || null
-      };
       fetch(SB.url + "/rest/v1/visits", {
         method: "POST",
         headers: { "apikey": SB.key, "Authorization": "Bearer " + SB.key,
                    "Content-Type": "application/json", "Prefer": "return=minimal" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          event: evt, page: location.pathname,
+          lang: (function () { try { return localStorage.getItem("cb-lang") || navigator.language; }
+                               catch (e) { return navigator.language; } })(),
+          referrer: document.referrer ? document.referrer.slice(0, 200) : null,
+          utm_source: p.get("utm_source"), utm_medium: p.get("utm_medium"),
+          utm_campaign: p.get("utm_campaign"),
+          screen_w: window.innerWidth, extra: extra || null
+        }),
         keepalive: true
-      }).catch(function () { /* 측정 실패는 무시 */ });
-    } catch (e) { /* 무시 */ }
+      }).catch(function () {});
+    } catch (e) {}
   }
 
   track("view");
 
-  // 요청하기 버튼 클릭 측정
   document.addEventListener("click", function (e) {
     var a = e.target.closest ? e.target.closest("a[href*='intake']") : null;
     if (a) track("cta_click", a.textContent.trim().slice(0, 40));
   });
 
-  // 페이지를 얼마나 읽었는지 — 이탈 시 1회 기록
   var deepest = 0, sent = false;
   window.addEventListener("scroll", function () {
     var p = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
