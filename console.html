@@ -116,10 +116,12 @@
       <p class="hint">처리할 요청을 선택하세요.</p>
       <div class="row" style="margin-bottom:10px">
         <button class="ghost small" id="refresh">새로고침</button>
+        <button class="ghost small" id="purgeTest" style="flex:0 1 110px">테스트 정리</button>
         <select id="filter" style="min-height:36px">
           <option value="received">대기 중</option>
           <option value="cancel_requested">취소 요청</option>
           <option value="confirmed">확정됨</option>
+          <option value="test">테스트 건</option>
           <option value="all">전체</option>
         </select>
       </div>
@@ -328,8 +330,9 @@
     if (!connected()) { $("list").innerHTML = "<p class='msg'>연결 후 불러옵니다.</p>"; return; }
     $("list").innerHTML = "<p class='msg'>불러오는 중…</p>";
     var f = $("filter").value;
-    var q = "requests?select=*,request_slots(*),request_conditions(*)&order=created_at.desc&limit=30";  // service_role 키로 전체 조회
-    if (f !== "all") q += "&status=eq." + f;
+    var q = "requests?select=*,request_slots(*),request_conditions(*)&order=created_at.desc&limit=30";
+    if (f === "test") q += "&service_type=eq.test";
+    else if (f !== "all") q += "&status=eq." + f + "&service_type=neq.test";
     api(q).then(function (rows) {
       reqs = rows || [];
       if (!reqs.length) { $("list").innerHTML = "<p class='msg'>해당하는 요청이 없습니다.</p>"; return; }
@@ -337,6 +340,7 @@
         return "<div class='item' data-id='" + r.id + "'>" +
           "<b>" + ((r.venue_name_raw || "(식당명 없음)").split(" | ")[0] || "지도 링크만 제출") + "</b>" +
           "<span>" + r.party_size + "명 · " + (r.booking_name || "") + "</span><br>" +
+          (r.service_type === "test" ? "<span class='badge' style='background:var(--gold);color:#2E2305'>TEST</span> " : "") +
           "<span class='badge " + r.status + "'>" + r.status + "</span> " +
           "<span>" + new Date(r.created_at).toLocaleString("ko-KR") + "</span></div>";
       }).join("");
@@ -952,6 +956,27 @@
   });
   $("vsearch").addEventListener("click", searchVenue);
   $("vq").addEventListener("keydown", function (e) { if (e.key === "Enter") searchVenue(); });
+  /* 테스트 건 일괄 삭제 */
+  $("purgeTest").addEventListener("click", function () {
+    if (!connected()) return;
+    if (!window.confirm("테스트로 표시된 요청을 모두 삭제합니다. 실제 고객 요청은 지워지지 않습니다.")) return;
+    $("purgeTest").disabled = true;
+    api("requests?select=id&service_type=eq.test")
+      .then(function (rows) {
+        if (!rows || !rows.length) { alert("삭제할 테스트 건이 없습니다."); return null; }
+        var ids = rows.map(function (r) { return r.id; });
+        var inList = "(" + ids.join(",") + ")";
+        return api("results?request_id=in." + inList, { method: "DELETE", prefer: "return=minimal" })
+          .then(function () { return api("request_slots?request_id=in." + inList, { method: "DELETE", prefer: "return=minimal" }); })
+          .then(function () { return api("request_conditions?request_id=in." + inList, { method: "DELETE", prefer: "return=minimal" }); })
+          .then(function () { return api("requests?service_type=eq.test", { method: "DELETE", prefer: "return=minimal" }); })
+          .then(function () { alert(ids.length + "건을 삭제했습니다."); });
+      })
+      .then(function () { loadList(); })
+      .catch(function (e) { alert("삭제 실패: " + e.message); })
+      .then(function () { $("purgeTest").disabled = false; });
+  });
+
   $("refresh").addEventListener("click", loadList);
   $("filter").addEventListener("change", loadList);
   Array.prototype.forEach.call(document.querySelectorAll("[data-s]"), function (b) {

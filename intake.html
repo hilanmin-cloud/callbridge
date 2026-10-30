@@ -566,6 +566,9 @@
     });
   }
 
+  // 주소 끝에 ?test=1 을 붙이면 테스트 요청으로 기록된다
+  var TEST_MODE = /[?&]test=1/.test(location.search);
+
   function collect() {
     var slots = [];
     [["d1","t1"],["d2","t2"],["d3","t3"]].forEach(function (p, i) {
@@ -579,7 +582,8 @@
       customer: { display_name: $("bname").value.trim(), email: $("email").value.trim(), locale: lang },
       venue: { name: nm, link: link },
       request: {
-        venue_name_raw: (nm || "") + (link ? " | " + link : ""), service_type: "booking",
+        venue_name_raw: (TEST_MODE ? "[TEST] " : "") + (nm || "") + (link ? " | " + link : ""),
+        service_type: TEST_MODE ? "test" : "booking",
         party_size: parseInt($("party").value, 10) || 1,
         booking_name: $("bname").value.trim(),
         note_to_venue: $("note").value.trim() || null, status: "received"
@@ -665,6 +669,14 @@
     if (el.id === "url" || el.id === "key") return;
     el.addEventListener("input", preview); el.addEventListener("change", preview);
   });
+
+  if (TEST_MODE) {
+    var bar = document.createElement("div");
+    bar.style.cssText = "background:#C08A2E;color:#2E2305;text-align:center;padding:8px;" +
+      "font-size:14px;font-weight:600";
+    bar.textContent = "테스트 모드 — 이 요청은 테스트로 기록됩니다";
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
 
   applyLang();
   initAuth();
