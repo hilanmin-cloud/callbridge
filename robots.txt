@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Allow: /intake.html
 Disallow: /result.html
+Disallow: /console.html
+Disallow: /loader.html
 
 Sitemap: https://callbridge-kr.vercel.app/sitemap.xml

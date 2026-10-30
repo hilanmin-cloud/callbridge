@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>운영자 화면</title>
+<style>
+  :root {
+    color-scheme: light;
+    --teal: #0F5E5C; --gold: #C08A2E; --ink: #15211F; --muted: #5A6A67;
+    --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF;
+    --ok: #0F5E5C; --hold: #C08A2E; --no: #8A3B3B; --ai: #EAF2F1; --owner: #F3F1EC;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --teal: #4E8F8C; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+      --line: #2A3836; --soft: #16211F; --bg: #0E1716;
+      --ok: #4E8F8C; --hold: #D9A450; --no: #D98A8A; --ai: #17302E; --owner: #262320;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --teal: #4E8F8C; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
+    --line: #2A3836; --soft: #16211F; --bg: #0E1716;
+    --ok: #4E8F8C; --hold: #D9A450; --no: #D98A8A; --ai: #17302E; --owner: #262320;
+  }
+  * { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+  header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  h1 { margin: 0; font-size: 19px; }
+  .conn { font-size: 12px; color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 4px; background: var(--muted); margin-right: 6px; }
+  .dot.on { background: var(--ok); }
+  .wrap { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 20px 40px; max-width: 1300px; }
+  .col { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .col.list { flex: 1 1 290px; }
+  .col.call { flex: 1.3 1 340px; }
+  .col.side { flex: 1 1 290px; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .card h2 { margin: 0 0 4px; font-size: 15px; color: var(--teal); }
+  .card .hint { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  input, textarea, select { width: 100%; min-height: 42px; padding: 7px 10px; font: inherit; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+  textarea { min-height: 58px; resize: vertical; }
+  button { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 14px;
+    border-radius: 8px; border: 1px solid var(--teal); background: var(--teal); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--teal); }
+  button.small { min-height: 36px; padding: 0 10px; font-size: 13px; font-weight: 500; }
+  button:disabled { opacity: .45; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row > * { flex: 1 1 110px; min-width: 0; }
+  .item { border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; margin-bottom: 8px; cursor: pointer; }
+  .item:hover { border-color: var(--teal); }
+  .item.on { border-color: var(--teal); background: var(--soft); }
+  .item b { display: block; font-size: 15px; }
+  .item span { font-size: 13px; color: var(--muted); }
+  .badge { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 9px; background: var(--soft); color: var(--muted); }
+  .badge.received { background: var(--gold); color: #2E2305; }
+  .badge.confirmed { background: var(--ok); color: #fff; }
+  .badge.failed { background: var(--no); color: #fff; }
+  .badge.hold { background: var(--hold); color: #2E2305; }
+  .talk { display: flex; flex-direction: column; gap: 9px; max-height: 300px; overflow-y: auto; }
+  .bubble { padding: 9px 12px; border-radius: 12px; font-size: 14px; max-width: 88%; }
+  .bubble.ai { background: var(--ai); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .bubble.owner { background: var(--owner); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .bubble .who { display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .sys { align-self: center; font-size: 12px; color: var(--muted); }
+  .verdict { border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 14px; }
+  .verdict.ok { background: var(--ok); } .verdict.hold { background: var(--hold); color: #2E2305; }
+  .verdict.no { background: var(--no); } .verdict.run { background: var(--soft); color: var(--muted); }
+  .verdict b { display: block; font-size: 17px; margin-bottom: 2px; }
+  .trace { font-size: 13px; max-height: 200px; overflow-y: auto; }
+  .trace div { padding: 4px 0 4px 16px; position: relative; border-bottom: 1px dashed var(--line); }
+  .trace .pass::before { content: "✓"; position: absolute; left: 2px; color: var(--ok); }
+  .trace .fail::before { content: "✕"; position: absolute; left: 2px; color: var(--no); }
+  .trace .info::before { content: "·"; position: absolute; left: 5px; color: var(--muted); }
+  .kv { display: flex; gap: 8px; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+  .kv b { flex: 0 0 86px; color: var(--muted); font-weight: 500; }
+  pre { background: var(--soft); border-radius: 8px; padding: 10px; font-size: 12.5px; white-space: pre-wrap;
+    margin: 0; font-family: "Consolas", monospace; color: var(--ink); }
+  .samples { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  details { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--teal); }
+  .msg { font-size: 13px; color: var(--muted); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>운영자 화면</h1>
+  <div id="authArea"><p class="conn" id="conn"><span class="dot"></span>확인 중…</p></div>
+</header>
+
+<div id="gate" style="display:none; max-width:420px; margin:60px auto; padding:0 20px; text-align:center">
+  <h2 style="font-size:19px; margin:0 0 8px">운영자 로그인</h2>
+  <p style="color:var(--muted); font-size:14px; margin:0 0 20px">등록된 운영자 계정으로만 접근할 수 있습니다.</p>
+  <button id="gateSignIn" style="width:100%">Google로 로그인</button>
+  <p id="gateMsg" style="color:var(--no); font-size:14px; margin-top:14px"></p>
+</div>
+
+<div class="wrap" id="main" style="display:none">
+
+  <!-- 좌: 요청 목록 -->
+  <div class="col list">
+    <div class="card">
+      <h2>접수된 요청</h2>
+      <p class="hint">처리할 요청을 선택하세요.</p>
+      <div class="row" style="margin-bottom:10px">
+        <button class="ghost small" id="refresh">새로고침</button>
+        <select id="filter" style="min-height:36px">
+          <option value="received">대기 중</option>
+          <option value="cancel_requested">취소 요청</option>
+          <option value="confirmed">확정됨</option>
+          <option value="all">전체</option>
+        </select>
+      </div>
+      <div id="list"><p class="msg">연결 후 불러옵니다.</p></div>
+    </div>
+
+
+  </div>
+
+  <!-- 중: 통화 -->
+  <div class="col call">
+    <div class="card">
+      <h2>통화</h2>
+      <div id="reqinfo"><p class="msg">왼쪽에서 요청을 선택하세요.</p></div>
+
+      <div id="venueBox" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line)">
+        <label for="vq" style="margin:0">식당 찾기 (장소 DB)</label>
+        <div class="row" style="margin-top:4px">
+          <input id="vq" placeholder="상호 일부를 입력">
+          <button class="ghost small" id="vsearch" style="flex:0 1 80px">검색</button>
+        </div>
+        <div id="vresult" style="margin-top:8px"></div>
+
+        <details id="addBox" style="margin-top:10px">
+          <summary>이 식당 DB에 등록</summary>
+          <p class="hint" style="margin:8px 0 0">지도 링크를 열어 확인한 내용을 입력하세요. 저장하면 바로 이 요청에 연결됩니다.</p>
+          <label for="nv-name">상호</label>
+          <input id="nv-name" placeholder="정확한 상호명">
+          <label for="nv-phone">전화번호</label>
+          <input id="nv-phone" placeholder="02-123-4567">
+          <label for="nv-addr">주소</label>
+          <input id="nv-addr" placeholder="도로명 주소">
+          <label for="nv-cat">업종</label>
+          <input id="nv-cat" placeholder="갈비 / 한식 / 국밥 등">
+          <div class="row" style="margin-top:10px">
+            <button class="ghost small" id="nv-save">저장하고 연결</button>
+          </div>
+          <p class="msg" id="nv-msg" style="margin-top:6px"></p>
+        </details>
+      </div>
+
+      <details id="scriptBox" style="margin-top:12px">
+        <summary>통화 지시문 보기</summary>
+        <p class="hint" style="margin:8px 0 0">AI 음성 연동 시 그대로 전달할 지시문입니다. 요청 내용에 맞춰 자동 생성됩니다.</p>
+        <pre id="script" style="margin-top:8px; max-height:280px; overflow:auto">요청을 선택하면 생성됩니다.</pre>
+        <div class="row" style="margin-top:8px">
+          <button class="ghost small" id="copyScript">지시문 복사</button>
+        </div>
+      </details>
+
+      <div class="row" style="margin-top:10px">
+        <button id="start" disabled>통화 시작</button>
+        <button class="ghost" id="handoff" disabled>사람 인계</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>통화 내용</h2>
+      <div class="talk" id="talk"><p class="msg">아직 없음</p></div>
+      <label for="utter" style="margin-top:10px">사장님 응답</label>
+      <textarea id="utter" disabled placeholder="통화를 시작하면 입력할 수 있습니다"></textarea>
+      <div class="samples">
+        <button class="ghost small" data-s="네 가능합니다">가능</button>
+        <button class="ghost small" data-s="네 잠시만요 확인해볼게요">잠시만요</button>
+        <button class="ghost small" data-s="몇 시라고 하셨죠?">몇 시라고요</button>
+        <button class="ghost small" data-s="언제 몇 분이라 하셨죠?">언제 몇 분</button>
+        <button class="ghost small" data-s="성함이 어떻게 되세요?">성함</button>
+        <button class="ghost small" data-s="그 시간은 만석이에요">만석</button>
+        <button class="ghost small" data-s="7시는 안 되고 7시 반은 괜찮아요">7시 반</button>
+        <button class="ghost small" data-s="낮 12시부터 2시 사이면 가능합니다">12~2시</button>
+        <button class="ghost small" data-s="네 가능한데 바형 테이블인데 괜찮을까요?">바형 테이블</button>
+        <button class="ghost small" data-s="예약금 2만원 입금하셔야 해요">예약금</button>
+      </div>
+      <div class="row" style="margin-top:9px"><button id="send" disabled>응답 전달</button></div>
+    </div>
+  </div>
+
+  <!-- 우: 결과 -->
+  <div class="col side">
+    <div id="verdict" class="verdict run"><b>대기 중</b>요청을 선택하고 통화를 시작하세요.</div>
+
+    <div class="card">
+      <h2>판정 근거</h2>
+      <div id="trace" class="trace"><p class="msg">아직 없음</p></div>
+    </div>
+
+    <div class="card">
+      <h2>결과 보고</h2>
+      <pre id="report">통화 종료 후 생성됩니다.</pre>
+      <div class="row" style="margin-top:10px">
+        <button id="saveResult" disabled>DB에 결과 저장</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost small" id="copyLink" disabled>고객 전달용 링크 복사</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost small" id="markNoShow">노쇼로 기록</button>
+        <button class="ghost small" id="markVisited">방문 확인</button>
+      </div>
+      <p class="msg" id="saveMsg" style="margin-top:8px"></p>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="list" class="on">요청 목록</button>
+  <button data-tab="call">통화</button>
+  <button data-tab="side">결과</button>
+</nav>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  // 공개 키 + 운영자 로그인 토큰으로 접근한다 (service_role 키 불필요)
+  var cfg = {
+    url: "https://knxggqpdsosmequgdawb.supabase.co",
+    key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW"
+  };
+  var sb = null, me = null, authToken = null;
+
+  var reqs = [], cur = null, S = null;
+
+  function connected() { return !!(cfg.url && authToken); }
+  function drawConn() {
+    var box = $("authArea");
+    if (!box) return;
+    box.innerHTML = me
+      ? "<p class='conn'><span class='dot on'></span>" + (me.email || "") +
+        " <button class='ghost small' id='signOut' style='margin-left:6px'>로그아웃</button></p>"
+      : "<p class='conn'><span class='dot'></span>로그인 필요</p>";
+    var so = $("signOut");
+    if (so) so.addEventListener("click", function () {
+      if (sb) sb.auth.signOut().then(function () { location.reload(); });
+    });
+  }
+
+  /* ---------- 운영자 인증 ---------- */
+  function showGate(msg) {
+    $("gate").style.display = "block";
+    $("main").style.display = "none";
+    if (msg) $("gateMsg").textContent = msg;
+  }
+  function showMain() {
+    $("gate").style.display = "none";
+    $("main").style.display = "flex";
+  }
+
+  function initAuth() {
+    if (!sb && window.supabase) {
+      try { sb = window.supabase.createClient(cfg.url, cfg.key); } catch (e) { sb = null; }
+    }
+    if (!sb) { showGate("로그인 모듈을 불러오지 못했습니다."); return; }
+
+    $("gateSignIn").addEventListener("click", function () {
+      sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: location.origin + location.pathname }
+      });
+    });
+
+    function apply(session) {
+      me = session ? session.user : null;
+      authToken = session ? session.access_token : null;
+      drawConn();
+      if (!me) { showGate(); return; }
+      // 운영자 명단 확인
+      api("staff?select=role&user_id=eq." + me.id)
+        .then(function (rs) {
+          if (!rs || !rs.length) {
+            showGate("이 계정은 운영자로 등록되어 있지 않습니다. (" + me.email + ")");
+            return;
+          }
+          showMain();
+          loadList();
+        })
+        .catch(function (e) {
+          showGate("권한 확인에 실패했습니다: " + e.message);
+        });
+    }
+
+    sb.auth.getSession().then(function (res) { apply(res.data && res.data.session); });
+    sb.auth.onAuthStateChange(function (_e, session) { apply(session); });
+  }
+
+  function api(path, options) {
+    options = options || {};
+    return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/" + path, {
+      method: options.method || "GET",
+      headers: { "apikey": cfg.key,
+                 "Authorization": "Bearer " + (authToken || cfg.key),
+                 "Content-Type": "application/json",
+                 "Prefer": options.prefer || "return=representation" },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) { d = t; }
+        if (!res.ok) throw new Error((d && d.message) ? d.message : "HTTP " + res.status);
+        return d;
+      });
+    });
+  }
+
+  /* ---------- 요청 목록 ---------- */
+  function loadList() {
+    if (!connected()) { $("list").innerHTML = "<p class='msg'>연결 후 불러옵니다.</p>"; return; }
+    $("list").innerHTML = "<p class='msg'>불러오는 중…</p>";
+    var f = $("filter").value;
+    var q = "requests?select=*,request_slots(*),request_conditions(*)&order=created_at.desc&limit=30";  // service_role 키로 전체 조회
+    if (f !== "all") q += "&status=eq." + f;
+    api(q).then(function (rows) {
+      reqs = rows || [];
+      if (!reqs.length) { $("list").innerHTML = "<p class='msg'>해당하는 요청이 없습니다.</p>"; return; }
+      $("list").innerHTML = reqs.map(function (r) {
+        return "<div class='item' data-id='" + r.id + "'>" +
+          "<b>" + ((r.venue_name_raw || "(식당명 없음)").split(" | ")[0] || "지도 링크만 제출") + "</b>" +
+          "<span>" + r.party_size + "명 · " + (r.booking_name || "") + "</span><br>" +
+          "<span class='badge " + r.status + "'>" + r.status + "</span> " +
+          "<span>" + new Date(r.created_at).toLocaleString("ko-KR") + "</span></div>";
+      }).join("");
+      Array.prototype.forEach.call($("list").querySelectorAll(".item"), function (el) {
+        el.addEventListener("click", function () { select(el.getAttribute("data-id")); });
+      });
+    }).catch(function (e) { $("list").innerHTML = "<p class='msg'>불러오기 실패: " + e.message + "</p>"; });
+  }
+
+  function select(id) {
+    cur = reqs.filter(function (r) { return r.id === id; })[0];
+    if (!cur) return;
+    Array.prototype.forEach.call($("list").querySelectorAll(".item"), function (el) {
+      el.classList.toggle("on", el.getAttribute("data-id") === id);
+    });
+    var slots = (cur.request_slots || []).sort(function (a, b) { return a.rank - b.rank; });
+    var c = (cur.request_conditions && cur.request_conditions[0]) || cur.request_conditions || {};
+    var allow = [];
+    if (slots[0] && slots[0].tolerance_min) allow.push("±" + slots[0].tolerance_min + "분");
+    if (c.split_seating) allow.push("자리 분리");
+    if (c.seat_type_any) allow.push("좌석 형태 무관");
+    if (c.course_only) allow.push("코스 가능");
+    if (c.late_arrival) allow.push("지연 고지");
+
+    var rawv = cur.venue_name_raw || "";
+    var parts = rawv.split(" | ");
+    var vname = parts[0] || "-";
+    var vlink = parts[1] || "";
+
+    $("reqinfo").innerHTML =
+      "<div class='kv'><b>식당</b><span>" + vname + "</span></div>" +
+      (vlink ? "<div class='kv'><b>지도 링크</b><span><a href='" + vlink +
+        "' target='_blank' rel='noopener' style='color:var(--teal)'>지도에서 열기 ↗</a></span></div>" : "") +
+      "<div class='kv'><b>인원·예약자</b><span>" + cur.party_size + "명 · " + (cur.booking_name || "-") + "</span></div>" +
+      slots.map(function (s) {
+        return "<div class='kv'><b>" + s.rank + "순위</b><span>" + new Date(s.slot_at).toLocaleString("ko-KR", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) + "</span></div>";
+      }).join("") +
+      "<div class='kv'><b>위임 범위</b><span>" + (allow.length ? allow.join(" · ") : "없음") + "</span></div>" +
+      (cur.note_to_venue ? "<div class='kv'><b>전달 메모</b><span>" + cur.note_to_venue + "</span></div>" : "");
+
+    $("start").disabled = false;
+    $("venueBox").style.display = "block";
+    $("script").textContent = buildScript();
+    checkDuplicateName();
+    checkNoShowHistory();
+    if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
+    $("vq").value = vname.replace(/\(.*?\)/g, "").trim();
+    $("nv-name").value = vname === "-" ? "" : vname;
+    $("nv-phone").value = ""; $("nv-addr").value = ""; $("nv-cat").value = "";
+    $("nv-msg").textContent = "";
+    $("vresult").innerHTML = "";
+    matchedVenue = null;
+    searchVenue();
+    resetCall();
+  }
+
+
+  /* ---------- 노쇼 이력 확인 ---------- */
+  function checkNoShowHistory() {
+    if (!connected() || !cur || !cur.customer_id) return;
+    api("customers?select=no_show_count&id=eq." + cur.customer_id)
+      .then(function (rs) {
+        var n = (rs && rs[0] && rs[0].no_show_count) || 0;
+        if (n < 1) return;
+        var box = document.createElement("div");
+        box.className = "kv";
+        box.innerHTML = "<b style='color:var(--no)'>노쇼 이력</b><span>이 고객은 과거 " + n +
+          "회 노쇼 기록이 있습니다." + (n >= 2 ? " 이용 제한을 검토하세요." : "") + "</span>";
+        $("reqinfo").appendChild(box);
+      })
+      .catch(function () {});
+  }
+
+  /* ---------- 동명 예약 확인 ---------- */
+  function checkDuplicateName() {
+    if (!connected() || !cur || !cur.booking_name) return;
+    var slots = slotList();
+    if (!slots.length) return;
+    var day = slots[0].date;
+    var from = new Date(day.getFullYear(), day.getMonth(), day.getDate()).toISOString();
+    var to = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1).toISOString();
+
+    api("requests?select=id,booking_name,venue_id,venue_name_raw,request_slots(slot_at)" +
+        "&booking_name=eq." + encodeURIComponent(cur.booking_name) +
+        "&id=neq." + cur.id + "&limit=20")
+      .then(function (rows) {
+        if (!rows || !rows.length) return;
+        var same = rows.filter(function (r) {
+          var sameVenue = (cur.venue_id && r.venue_id === cur.venue_id) ||
+                          ((r.venue_name_raw || "").split(" | ")[0] === (cur.venue_name_raw || "").split(" | ")[0]);
+          if (!sameVenue) return false;
+          return (r.request_slots || []).some(function (s) {
+            return s.slot_at >= from && s.slot_at < to;
+          });
+        });
+        if (same.length) {
+          var box = document.createElement("div");
+          box.className = "kv";
+          box.innerHTML = "<b style='color:var(--no)'>동명 주의</b><span>같은 식당 같은 날에 '" +
+            cur.booking_name + "' 예약이 " + same.length + "건 더 있습니다. 통화 시 구분자를 붙이세요 (예: " +
+            cur.booking_name + " A).</span>";
+          $("reqinfo").appendChild(box);
+        }
+      })
+      .catch(function () { /* 조용히 무시 */ });
+  }
+
+  /* ---------- 장소 DB 검색 ---------- */
+  var matchedVenue = null;
+
+  function searchVenue() {
+    var q = ($("vq").value || "").trim();
+    if (!connected() || q.length < 2) { $("vresult").innerHTML = "<p class='msg'>두 글자 이상 입력하세요.</p>"; return; }
+    $("vresult").innerHTML = "<p class='msg'>검색 중…</p>";
+    api("venues?select=id,name,phone,address,category,phone_verified_at,ai_call_blocked&name=ilike.*" +
+        encodeURIComponent(q) + "*&limit=5")
+      .then(function (rows) {
+        if (!rows || !rows.length) {
+          $("vresult").innerHTML = "<p class='msg'>DB에 없는 식당입니다. 번호를 직접 확인해야 합니다.</p>";
+          return;
+        }
+        $("vresult").innerHTML = rows.map(function (v) {
+          var marks = [];
+          if (v.phone_verified_at) marks.push("<span class='badge confirmed'>번호 검증됨</span>");
+          if (v.ai_call_blocked) marks.push("<span class='badge failed'>AI 통화 거부</span>");
+          return "<div class='item' data-vid='" + v.id + "'><b>" + v.name + "</b>" +
+            "<span>" + (v.phone || "번호 없음") + " · " + (v.category || "-") + "</span><br>" +
+            "<span>" + (v.address || "") + "</span>" +
+            (marks.length ? "<br>" + marks.join(" ") : "") + "</div>";
+        }).join("");
+        Array.prototype.forEach.call($("vresult").querySelectorAll(".item"), function (el) {
+          el.addEventListener("click", function () {
+            var vid = el.getAttribute("data-vid");
+            matchedVenue = rows.filter(function (v) { return v.id === vid; })[0];
+            $("script").textContent = buildScript();
+    checkDuplicateName();
+    checkNoShowHistory();
+    if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
+            Array.prototype.forEach.call($("vresult").querySelectorAll(".item"), function (x) {
+              x.classList.toggle("on", x === el);
+            });
+          });
+        });
+        // 결과가 하나뿐이면 자동 선택
+        if (rows.length === 1) {
+          matchedVenue = rows[0];
+          $("vresult").querySelector(".item").classList.add("on");
+          $("script").textContent = buildScript();
+    checkDuplicateName();
+    checkNoShowHistory();
+    if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
+        }
+      })
+      .catch(function (e) { $("vresult").innerHTML = "<p class='msg'>검색 실패: " + e.message + "</p>"; });
+  }
+
+
+  /* ---------- 통화 지시문 생성 ---------- */
+  function buildScript() {
+    if (!cur) return "요청을 선택하면 생성됩니다.";
+    var slots = slotList();
+    var c = conds();
+    var vname = (cur.venue_name_raw || "").split(" | ")[0];
+    var vlink = (cur.venue_name_raw || "").split(" | ")[1] || "";
+    var L = [];
+
+    L.push("# 통화 지시문");
+    L.push("");
+    L.push("## 역할");
+    L.push("당신은 외국인 손님을 대신해 한국 식당에 전화로 예약을 요청하는 AI 비서입니다.");
+    L.push("통화 상대는 식당 직원 또는 사장님입니다. 한국어로 정중하고 간결하게 말하세요.");
+    L.push("");
+    L.push("## 첫 인사 (반드시 이 내용을 포함)");
+    L.push("- 손님을 대신해 예약 문의드리는 AI 비서임을 밝힙니다.");
+    L.push("- 바로 1순위 일시와 인원을 제시합니다.");
+    L.push("");
+    L.push("## 예약 정보");
+    L.push("- 식당: " + (matchedVenue ? matchedVenue.name : vname));
+    if (matchedVenue && matchedVenue.phone) L.push("- 전화번호: " + matchedVenue.phone);
+    if (vlink) L.push("- 지도 링크: " + vlink);
+    L.push("- 인원: " + cur.party_size + "명");
+    L.push("- 예약자명: " + (cur.booking_name || "(미입력)"));
+    if (cur.note_to_venue) L.push("- 손님 요청사항: " + cur.note_to_venue);
+    L.push("");
+
+    L.push("## 희망 일시 (순서대로 제시)");
+    slots.forEach(function (s) {
+      L.push("- " + s.rank + "순위: " + dateKo(s.date) + " " + speak(s.min) +
+             (s.tol ? " (전후 " + s.tol + "분 이내 조정 가능)" : ""));
+    });
+    L.push("");
+
+    L.push("## 통화 중 결정 권한");
+    L.push("아래 범위 안에서는 손님에게 다시 묻지 말고 **통화 중에 바로 확정**하세요.");
+    L.push("- 좌석 분리: " + (c.split ? "수용 가능" : "불가 — 한 테이블이어야 함"));
+    L.push("- 좌석 형태(바·좌식·룸 등): " + (c.seat ? "상관없음" : "확인 필요 — 확정하지 말 것"));
+    L.push("- 코스·세트 메뉴만 가능한 경우: " + (c.course ? "수용 가능" : "수용 불가"));
+    L.push("- 도착 지연: " + (c.late ? "10분 정도 늦을 수 있다고 전달" : "정시 도착 예정"));
+    L.push("");
+
+    L.push("## 확정하면 안 되는 경우 (보류 후 종료)");
+    L.push("- 예약금을 요구하는 경우 → 금액과 입금 방법만 받아 적고 확정하지 않습니다.");
+    L.push("- 위 결정 권한에서 '불가' 또는 '확인 필요'로 표시된 조건을 요구하는 경우");
+    L.push("- 상대가 사람과의 통화를 원하는 경우 → 담당자가 다시 연락드린다고 안내하고 종료");
+    L.push("- 제시된 일시가 위 순위 범위를 모두 벗어나는 경우");
+    L.push("- 들은 내용이 불확실한 경우 → 추측하지 말고 보류합니다.");
+    L.push("");
+
+    L.push("## 대화 진행 방법");
+    L.push("1. 1순위만 먼저 제시합니다. 2·3순위를 한꺼번에 말하지 않습니다.");
+    L.push("2. 상대가 \"잠시만요\", \"확인해볼게요\"라고 하면 수락으로 보지 말고 기다립니다.");
+    L.push("3. 상대가 일시·인원·성함을 다시 물으면 천천히 복창합니다.");
+    L.push("4. 1순위가 불가하면 상대가 제시한 대안을 먼저 확인하고, 범위 안이면 확정합니다.");
+    L.push("5. 대안이 없거나 범위 밖이면 2순위, 그다음 3순위를 제시합니다.");
+    L.push("6. 모든 순위가 불가하면 가능한 시간을 물어 기록하고 정중히 마무리합니다.");
+    L.push("");
+
+    L.push("## 반드시 확인해 기록할 항목");
+    L.push("- 확정된 날짜와 시각");
+    L.push("- 예약 보류 시간 (몇 분까지 자리를 잡아두는지)");
+    L.push("- 이용 시간 제한 여부");
+    L.push("- 좌석 형태나 위치에 대한 안내");
+    L.push("- 예약금 요구 여부와 금액");
+    L.push("- 그 밖에 손님이 알아야 할 이용 규칙");
+    L.push("");
+
+    L.push("## 종료 멘트");
+    L.push("확정된 경우: 예약자명과 인원을 다시 한 번 말하고 감사 인사 후 종료합니다.");
+    L.push("보류·불가한 경우: 확인 후 다시 연락드리겠다고 안내하고 종료합니다.");
+
+    return L.join("\n");
+  }
+
+  /* ---------- 통화 로직 ---------- */
+  function slotList() {
+    return (cur.request_slots || []).slice().sort(function (a, b) { return a.rank - b.rank; })
+      .map(function (s) {
+        var d = new Date(s.slot_at);
+        return { rank: s.rank, date: d, min: d.getHours() * 60 + d.getMinutes(),
+                 tol: s.tolerance_min || 0, raw: s };
+      });
+  }
+  function conds() {
+    var c = (cur.request_conditions && cur.request_conditions[0]) || cur.request_conditions || {};
+    return { split: !!c.split_seating, course: !!c.course_only, seat: !!c.seat_type_any, late: !!c.late_arrival };
+  }
+  function fmt(mins) { var h = Math.floor(mins / 60), m = mins % 60;
+    return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m; }
+  function speak(mins) { var h = Math.floor(mins / 60), m = mins % 60;
+    return (h < 12 ? "오전 " : "오후 ") + (h > 12 ? h - 12 : h) + "시" + (m ? " " + m + "분" : ""); }
+  function dateKo(d) { return (d.getMonth() + 1) + "월 " + d.getDate() + "일"; }
+
+  function extract(text) {
+    var r = { times: [], ranges: [], unavailable: false, split: false, course: false, deposit: false,
+              human: false, yes: false, wait: false, repeat: false, seatType: null, question: false,
+              limitMin: null, day: null, raw: text };
+    if (/사람|직원|담당자|실장님/.test(text)) r.human = true;
+    r.wait = /잠(시|깐)\s*만|기다려|확인(해|하고|좀)|장부|찾아볼|보고\s*말씀|알아보/.test(text);
+    r.repeat = /다시\s*(한\s*번\s*)?(말씀|말해|얘기)|뭐라(고|구)|못\s*(들었|알아)/.test(text)
+      || (/(몇\s*시|몇\s*분|몇\s*명|몇\s*분|며칠|몇\s*일|언제|성함|이름|예약자|무슨\s*요일)/.test(text)
+          && /(하셨|했(죠|지)|이라(고|구|)|라(고|구)|시죠|죠|까요|나요|세요|인가요|예요|이에요|\?)/.test(text));
+    if (/^\s*(네|예|응|그래|가능|됩니다|돼요)/.test(text) || /가능합니다|가능해요|됩니다|돼요/.test(text)) r.yes = true;
+    if (r.wait) r.yes = false;
+    if (/만석|꽉\s*찼|다\s*찼|자리\s*(가\s*)?없|예약\s*(이\s*)?안|어렵|불가|힘들/.test(text)) r.unavailable = true;
+    if (/나뉘|나눠|분리|따로\s*앉|떨어져/.test(text)) r.split = true;
+    if (/코스|세트|오마카세/.test(text)) r.course = true;
+    if (/예약금|입금|선결제|보증금/.test(text)) r.deposit = true;
+    r.question = /괜찮|상관\s*없|어떠|되시겠/.test(text) && /\?|까요|나요|세요/.test(text);
+    var sw = text.match(/(바\s*형?|바\s*자리|카운터|좌식|룸|방|테라스|야외|2\s*층|창가)/);
+    r.seatType = sw ? sw[1].replace(/\s+/g, "") : null;
+    var lim = text.match(/(\d{1,3})\s*분\s*(만|이내|제한)/); if (lim) r.limitMin = parseInt(lim[1], 10);
+    var dm = text.match(/(\d{1,2})\s*일(?!\s*전|\s*후)/); r.day = dm ? parseInt(dm[1], 10) : null;
+
+    var rest = text, g;
+    var rr = /(오전|오후|저녁|점심|낮|밤)?\s*(\d{1,2})\s*시\s*(반|\d{1,2}\s*분)?\s*(?:부터|에서|~|-)\s*(\d{1,2})\s*시\s*(반|\d{1,2}\s*분)?\s*(?:사이|까지)?/g;
+    while ((g = rr.exec(text)) !== null) {
+      var per = g[1] || "", sh = parseInt(g[2], 10), eh = parseInt(g[4], 10);
+      var sm = g[3] === "반" ? 30 : (g[3] ? parseInt(g[3], 10) : 0);
+      var em = g[5] === "반" ? 30 : (g[5] ? parseInt(g[5], 10) : 0);
+      if (/오후|저녁|밤/.test(per) && sh < 12) sh += 12;
+      if (sh > 23 || eh > 23) continue;
+      if (eh < sh) eh += 12;
+      if (eh <= sh) continue;
+      r.ranges.push({ s: sh * 60 + sm, e: eh * 60 + em, txt: g[0].trim() });
+      rest = rest.replace(g[0], " ");
+    }
+    var re = /(오전|오후|저녁|점심|낮|밤)?\s*(\d{1,2})\s*(?:시|:)\s*(반|\d{1,2})?\s*(분)?\s*(이후|이전|부터|까지)?/g, m;
+    while ((m = re.exec(rest)) !== null) {
+      var p = m[1] || "", h = parseInt(m[2], 10);
+      if (h > 23) continue;
+      var mi = m[3] === "반" ? 30 : (m[3] ? parseInt(m[3], 10) : 0);
+      if (isNaN(mi) || mi > 59) mi = 0;
+      if (/오후|저녁|밤/.test(p) && h < 12) h += 12;
+      if (/점심|낮/.test(p) && h < 10) h += 12;
+      if (!p && h >= 1 && h <= 10) h += 12;
+      if (m[5] === "이후" || m[5] === "부터") r.ranges.push({ s: h * 60 + mi, e: 1439, txt: m[0].trim() + " 이후" });
+      else if (m[5] === "이전" || m[5] === "까지") r.ranges.push({ s: 0, e: h * 60 + mi, txt: m[0].trim() + " 까지" });
+      else r.times.push({ h: h, m: mi, txt: m[0].trim() });
+    }
+    return r;
+  }
+
+  function matchSlot(ex, slot) {
+    if (ex.day && slot.date.getDate() !== ex.day) return null;
+    for (var i = 0; i < ex.ranges.length; i++) {
+      var rg = ex.ranges[i];
+      var near = Math.min(Math.max(slot.min, rg.s), rg.e), dist = Math.abs(near - slot.min);
+      if (dist === 0) return { at: near, gap: 0, how: "제시 범위 " + rg.txt + " 안에 " + fmt(slot.min) + " 포함" };
+      if (slot.tol > 0 && dist <= slot.tol)
+        return { at: near, gap: dist, how: "범위 " + rg.txt + " 중 " + fmt(near) + "은 " + slot.rank + "순위 기준 " + dist + "분 차이 (허용 오차 내)" };
+    }
+    for (var j = 0; j < ex.times.length; j++) {
+      var cm = ex.times[j].h * 60 + ex.times[j].m, gap = Math.abs(cm - slot.min);
+      if (gap === 0) return { at: cm, gap: 0, how: ex.times[j].txt + " = " + slot.rank + "순위 일치" };
+      if (slot.tol > 0 && gap <= slot.tol)
+        return { at: cm, gap: gap, how: ex.times[j].txt + "은 " + slot.rank + "순위 기준 " + gap + "분 차이 (허용 오차 내)" };
+    }
+    return null;
+  }
+
+  function condCheck(ex, md, trace) {
+    if (ex.deposit) { trace.push({ k: "fail", t: "예약금 요구 → 위임 범위 밖" }); return "예약금 요구"; }
+    if (ex.seatType && !md.seat) { trace.push({ k: "fail", t: "좌석 형태(" + ex.seatType + ") → 위임 범위에 없음" }); return "좌석 형태 확인 필요"; }
+    if (ex.split && !md.split) { trace.push({ k: "fail", t: "자리 분리 → 수용 설정 안 됨" }); return "자리 분리 불수용"; }
+    if (ex.course && !md.course) { trace.push({ k: "fail", t: "코스 메뉴 → 수용 설정 안 됨" }); return "코스 불수용"; }
+    if (ex.seatType && md.seat) trace.push({ k: "pass", t: "좌석 형태(" + ex.seatType + ") → 무관 설정됨" });
+    if (ex.split && md.split) trace.push({ k: "pass", t: "자리 분리 → 수용 설정됨" });
+    if (ex.course && md.course) trace.push({ k: "pass", t: "코스 메뉴 → 수용 설정됨" });
+    return null;
+  }
+
+  function onOwner(text) {
+    var trace = [], md = conds(), ex = extract(text), slots = S.slots, c = slots[S.idx];
+    bubble("owner", "사장님", text);
+    S.turns++;
+
+    if (ex.human) { trace.push({ k: "fail", t: "사람 통화 요청 → 담당자 인계" });
+      say("담당자가 다시 연락드리겠습니다. 감사합니다."); return done("hold", "사람 인계 요청", trace, null, ex); }
+
+    if (ex.repeat && !ex.unavailable) {
+      trace.push({ k: "info", t: "재확인 요청 → " + c.rank + "순위 정보 복창" });
+      say(dateKo(c.date) + " " + speak(c.min) + ", " + cur.party_size + "명이고요. 예약자는 " + (cur.booking_name || "") + "입니다.");
+      return render(trace, "run", c.rank + "순위 제안 중");
+    }
+    if (ex.wait && !ex.unavailable && !ex.times.length && !ex.ranges.length && !ex.seatType) {
+      S.wait = (S.wait || 0) + 1;
+      if (S.wait >= 3) { trace.push({ k: "fail", t: "확인 대기 3회 → 통화 종료" });
+        say("조금 뒤에 다시 연락드리겠습니다."); return done("hold", "확인 지연", trace, null, ex); }
+      trace.push({ k: "info", t: "확인 대기 (" + S.wait + "회)" });
+      say("네, 기다리겠습니다."); return render(trace, "run", "사장님 확인 대기 중");
+    }
+    if (ex.limitMin) S.conds.push("이용 시간 " + ex.limitMin + "분 제한");
+
+    // 조건 되묻기
+    if (ex.seatType || (ex.question && !ex.unavailable && !ex.times.length && !ex.ranges.length)) {
+      if (ex.seatType) S.conds.push("좌석 형태: " + ex.seatType);
+      var bad0 = condCheck(ex, md, trace);
+      if (!bad0) { trace.push({ k: "pass", t: "위임 범위 내 → 확정 진행" });
+        say("네, 괜찮습니다. " + (cur.booking_name || "") + " 이름으로 " + cur.party_size + "명 부탁드립니다.");
+        return done("ok", "조건 확인 후 확정", trace, { slot: c, at: c.min, gap: 0 }, ex); }
+      say("그 부분은 손님께 확인하고 다시 연락드리겠습니다. 자리를 잠시 잡아둘 수 있을까요?");
+      return done("hold", bad0, trace, null, ex);
+    }
+
+    // 그대로 수락
+    if (ex.yes && !ex.unavailable && !ex.times.length && !ex.ranges.length) {
+      S.wait = 0;
+      trace.push({ k: "pass", t: c.rank + "순위 " + fmt(c.min) + " 수락 확인" });
+      var bad = condCheck(ex, md, trace);
+      if (bad) { say("확인 후 다시 연락드리겠습니다."); return done("hold", bad, trace, null, ex); }
+      trace.push({ k: "pass", t: "위임 범위 내 → 통화 중 확정 실행" });
+      say("감사합니다. " + (cur.booking_name || "") + " 이름으로 " + cur.party_size + "명 부탁드립니다.");
+      return done("ok", "요청 조건대로 확정", trace, { slot: c, at: c.min, gap: 0 }, ex);
+    }
+
+    // 대안 제시
+    if (ex.times.length || ex.ranges.length) {
+      for (var i = 0; i < slots.length; i++) {
+        var hit = matchSlot(ex, slots[i]);
+        if (hit) {
+          trace.push({ k: "pass", t: hit.how });
+          var bad2 = condCheck(ex, md, trace);
+          if (bad2) { say("확인 후 다시 연락드리겠습니다."); return done("hold", bad2, trace, null, ex); }
+          trace.push({ k: "pass", t: "위임 범위 내 → 통화 중 확정 실행" });
+          say("그럼 " + speak(hit.at) + "로 부탁드립니다. " + (cur.booking_name || "") + " 이름으로 " + cur.party_size + "명입니다.");
+          return done("ok", hit.gap === 0 ? "요청 조건대로 확정" : "허용 범위 내 대안 확정", trace, { slot: slots[i], at: hit.at, gap: hit.gap }, ex);
+        }
+      }
+      var off = [];
+      ex.ranges.forEach(function (g) { off.push(fmt(g.s) + "~" + fmt(g.e)); });
+      ex.times.forEach(function (t) { off.push(fmt(t.h * 60 + t.m)); });
+      S.offered = S.offered.concat(off);
+      trace.push({ k: "fail", t: "제시된 " + off.join(", ") + " 은 위임 범위 밖 → 수집만" });
+      return nextSlot(trace, ex);
+    }
+
+    if (ex.unavailable) { trace.push({ k: "fail", t: c.rank + "순위 불가 확인" }); return nextSlot(trace, ex); }
+
+    trace.push({ k: "fail", t: "판단 가능한 값 없음 → 재질의" });
+    say("죄송합니다, 다시 한 번 말씀해 주시겠어요?");
+    render(trace, "run", "재질의 중");
+  }
+
+  function nextSlot(trace, ex) {
+    S.idx++;
+    if (S.idx < S.slots.length) {
+      var n = S.slots[S.idx];
+      trace.push({ k: "info", t: n.rank + "순위 제안으로 전환" });
+      say("그럼 " + dateKo(n.date) + " " + speak(n.min) + "은 어떠실까요?");
+      return render(trace, "run", n.rank + "순위 제안 중");
+    }
+    trace.push({ k: "fail", t: "모든 순위 소진 → 확정 불가" });
+    say("알겠습니다. 혹시 가능한 시간이 언제일까요?");
+    done("no", "모든 순위가 위임 범위 밖", trace, null, ex);
+  }
+
+  /* ---------- 출력 ---------- */
+  function say(t) { bubble("ai", "AI", t); }
+  function bubble(cls, who, text) {
+    var box = $("talk"); if (box.querySelector(".msg")) box.innerHTML = "";
+    var d = document.createElement("div"); d.className = "bubble " + cls;
+    d.innerHTML = "<span class='who'>" + who + "</span>" + text;
+    box.appendChild(d); box.scrollTop = box.scrollHeight;
+  }
+  function render(trace, kind, label) {
+    S.trace = S.trace.concat(trace);
+    $("trace").innerHTML = S.trace.map(function (t) { return "<div class='" + t.k + "'>" + t.t + "</div>"; }).join("");
+    var v = $("verdict"); v.className = "verdict " + kind;
+    v.innerHTML = "<b>" + (kind === "run" ? "진행 중" : kind === "ok" ? "확정" : kind === "hold" ? "보류" : "불가") + "</b>" + label;
+  }
+
+  function done(kind, reason, trace, matched, ex) {
+    S.done = true; S.kind = kind; S.reason = reason; S.matched = matched;
+    render(trace, kind, reason);
+    var box = $("talk"); var d = document.createElement("div"); d.className = "sys"; d.textContent = "— 통화 종료 —"; box.appendChild(d);
+    $("send").disabled = true; $("utter").disabled = true; $("handoff").disabled = true;
+
+    var L = [];
+    L.push("[ " + (cur.venue_name_raw || "").split(" | ")[0] + " / " + cur.party_size + "명 / " + (cur.booking_name || "") + " ]");
+    if (kind === "ok") {
+      L.push("결과: " + (matched.gap === 0 ? "확정" : "대안 확정"));
+      L.push("확정 일시: " + dateKo(matched.slot.date) + " " + fmt(matched.at) + " (" + matched.slot.rank + "순위 기준)");
+    } else if (kind === "hold") { L.push("결과: 보류 — " + reason); }
+    else { L.push("결과: 예약 불가 — " + reason); }
+    L.push("식당 조건: " + (S.conds.length ? S.conds.join(" · ") : "없음"));
+    if (kind !== "ok" && S.offered.length) L.push("가능 시간: " + S.offered.join(", "));
+    L.push("통화 턴 수: " + S.turns + "회");
+    $("report").textContent = L.join("\n");
+    $("saveResult").disabled = false;
+    $("copyLink").disabled = false;
+  }
+
+  function resetCall() {
+    S = null;
+    $("talk").innerHTML = "<p class='msg'>아직 없음</p>";
+    $("trace").innerHTML = "<p class='msg'>아직 없음</p>";
+    $("report").textContent = "통화 종료 후 생성됩니다.";
+    $("verdict").className = "verdict run";
+    $("verdict").innerHTML = "<b>대기 중</b>통화를 시작하세요.";
+    $("utter").disabled = true; $("send").disabled = true;
+    $("saveResult").disabled = true; $("handoff").disabled = true; $("saveMsg").textContent = "";
+    $("copyLink").disabled = true;
+  }
+
+  /* ---------- 결과 저장 ---------- */
+  function saveResult() {
+    if (!S || !S.done) return;
+    $("saveResult").disabled = true; $("saveMsg").textContent = "저장 중…";
+    var outcome = S.kind === "ok" ? (S.matched.gap === 0 ? "confirmed" : "alt_confirmed")
+                : S.kind === "hold" ? "hold" : "unavailable";
+    var body = {
+      request_id: cur.id,
+      outcome: outcome,
+      matched_rank: S.matched ? S.matched.slot.rank : null,
+      confirmed_at: S.matched ? new Date(S.matched.slot.date.getFullYear(), S.matched.slot.date.getMonth(),
+                      S.matched.slot.date.getDate(), Math.floor(S.matched.at / 60), S.matched.at % 60).toISOString() : null,
+      venue_conditions: S.conds,
+      pending_items: S.kind === "hold" ? [S.reason] : [],
+      alternatives: S.offered
+    };
+    var newStatus = S.kind === "ok" ? "confirmed" : S.kind === "hold" ? "hold" : "failed";
+
+    api("results", { method: "POST", body: body, prefer: "resolution=merge-duplicates,return=representation" })
+      .then(function () {
+        var patch = { status: newStatus };
+        if (matchedVenue) patch.venue_id = matchedVenue.id;
+        return api("requests?id=eq." + cur.id, { method: "PATCH", body: patch });
+      })
+      .then(function () {
+        // 통화가 연결된 건이면 해당 식당의 번호를 검증됨으로 기록
+        if (matchedVenue && S.turns > 0) {
+          var vp = { phone_verified_at: new Date().toISOString() };
+          if (S.reason === "사람 인계 요청") vp.ai_call_blocked = true;
+          return api("venues?id=eq." + matchedVenue.id, { method: "PATCH", body: vp });
+        }
+      })
+      .then(function () {
+        $("saveMsg").textContent = "저장 완료 — 요청 상태: " + newStatus +
+          (matchedVenue && S.turns > 0 ? " · 식당 번호 검증 기록됨" : "");
+        loadList();
+      })
+      .catch(function (e) { $("saveMsg").textContent = "저장 실패: " + e.message; $("saveResult").disabled = false; });
+  }
+
+  /* ---------- 이벤트 ---------- */
+  $("start").addEventListener("click", function () {
+    if (!cur) return;
+    var slots = slotList();
+    if (!slots.length) { alert("희망 일시가 없습니다."); return; }
+    S = { slots: slots, idx: 0, trace: [], conds: [], offered: [], turns: 0, done: false, wait: 0 };
+    $("talk").innerHTML = ""; $("utter").disabled = false; $("send").disabled = false;
+    $("handoff").disabled = false; $("saveResult").disabled = true; $("saveMsg").textContent = "";
+    var d = document.createElement("div"); d.className = "sys";
+    d.textContent = "— 발신: " + (matchedVenue ? matchedVenue.name + " " + (matchedVenue.phone || "") : (cur.venue_name_raw || "").split(" | ")[0] + " (번호 미확인)") + " —";
+    $("talk").appendChild(d);
+    var s0 = slots[0];
+    say("안녕하세요, 손님을 대신해 예약 문의드리는 AI 비서입니다. " + dateKo(s0.date) + " " + speak(s0.min) +
+        "에 " + cur.party_size + "명 예약 가능할까요?" + (cur.note_to_venue ? " 참고로 " + cur.note_to_venue : ""));
+    render([{ k: "info", t: "1순위 제안으로 통화 시작" }], "run", "1순위 제안 중");
+  });
+
+  $("send").addEventListener("click", function () {
+    var t = ($("utter").value || "").trim();
+    if (!t || !S || S.done) return;
+    $("utter").value = ""; onOwner(t);
+  });
+
+  $("handoff").addEventListener("click", function () {
+    if (!S || S.done) return;
+    done("hold", "운영자 수동 인계", [{ k: "info", t: "운영자가 수동으로 인계 처리" }], null, null);
+  });
+
+  /* 식당 DB 등록 */
+  $("nv-save").addEventListener("click", function () {
+    if (!connected() || !cur) return;
+    var name = ($("nv-name").value || "").trim();
+    var phone = ($("nv-phone").value || "").trim();
+    if (!name) { $("nv-msg").textContent = "상호를 입력하세요."; return; }
+    if (!phone) { $("nv-msg").textContent = "전화번호를 입력하세요."; return; }
+
+    var body = {
+      name: name,
+      phone: phone.replace(/[^0-9]/g, "").replace(/^(02)(\d{3,4})(\d{4})$/, "$1-$2-$3")
+                  .replace(/^(0\d{2})(\d{3,4})(\d{4})$/, "$1-$2-$3"),
+      address: ($("nv-addr").value || "").trim() || null,
+      category: ($("nv-cat").value || "").trim() || null,
+      source: "manual",
+      reservation_type: "phone_only",
+      status: "active"
+    };
+    $("nv-save").disabled = true;
+    $("nv-msg").textContent = "저장 중…";
+    api("venues", { method: "POST", body: body })
+      .then(function (r) {
+        matchedVenue = r[0];
+        return api("requests?id=eq." + cur.id, { method: "PATCH", body: { venue_id: r[0].id } });
+      })
+      .then(function () {
+        $("nv-msg").textContent = "등록 완료 — 이 요청에 연결했습니다.";
+        $("addBox").open = false;
+        searchVenue();
+      })
+      .catch(function (e) { $("nv-msg").textContent = "저장 실패: " + e.message; })
+      .then(function () { $("nv-save").disabled = false; });
+  });
+
+  $("copyScript").addEventListener("click", function () {
+    var t = $("script").textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    $("copyScript").textContent = "복사됨";
+    setTimeout(function () { $("copyScript").textContent = "지시문 복사"; }, 1500);
+  });
+
+  /* 방문 결과 기록 */
+  function markVisit(isNoShow) {
+    if (!connected() || !cur) return;
+    $("saveMsg").textContent = "기록 중…";
+    api("results?request_id=eq." + cur.id, {
+      method: "PATCH",
+      body: isNoShow ? { no_show: true, visited_confirmed: false }
+                     : { no_show: false, visited_confirmed: true },
+      prefer: "return=minimal"
+    })
+      .then(function () {
+        if (!isNoShow || !cur.customer_id) return;
+        // 노쇼 누적 횟수 증가
+        return api("customers?select=no_show_count&id=eq." + cur.customer_id)
+          .then(function (rs) {
+            var n = (rs && rs[0] && rs[0].no_show_count) || 0;
+            return api("customers?id=eq." + cur.customer_id, {
+              method: "PATCH", body: { no_show_count: n + 1 }, prefer: "return=minimal"
+            });
+          });
+      })
+      .then(function () {
+        $("saveMsg").textContent = isNoShow ? "노쇼로 기록했습니다." : "방문 확인으로 기록했습니다.";
+      })
+      .catch(function (e) { $("saveMsg").textContent = "기록 실패: " + e.message; });
+  }
+
+  $("markNoShow").addEventListener("click", function () {
+    if (window.confirm("이 건을 노쇼로 기록합니다. 고객의 노쇼 횟수도 함께 올라갑니다.")) markVisit(true);
+  });
+  $("markVisited").addEventListener("click", function () { markVisit(false); });
+
+  $("saveResult").addEventListener("click", saveResult);
+  $("copyLink").addEventListener("click", function () {
+    if (!cur) return;
+    var base = "https://callbridge-kr.vercel.app/result.html";
+    var link = base + "#" + (cur.lookup_code || cur.id.slice(0, 8));
+    if (navigator.clipboard) navigator.clipboard.writeText(link);
+    $("saveMsg").textContent = "링크 복사됨 — " + link;
+  });
+  $("vsearch").addEventListener("click", searchVenue);
+  $("vq").addEventListener("keydown", function (e) { if (e.key === "Enter") searchVenue(); });
+  $("refresh").addEventListener("click", loadList);
+  $("filter").addEventListener("change", loadList);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-s]"), function (b) {
+    b.addEventListener("click", function () { $("utter").value = b.getAttribute("data-s"); });
+  });
+
+  /* ---------- 모바일 탭 전환 ---------- */
+  (function initTabs() {
+    var cols = { list: document.querySelector(".col.list"),
+                 call: document.querySelector(".col.call"),
+                 side: document.querySelector(".col.side") };
+    cols.list.classList.add("active");
+    Array.prototype.forEach.call($("tabs").querySelectorAll("button"), function (b) {
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-tab");
+        Object.keys(cols).forEach(function (n) { cols[n].classList.toggle("active", n === k); });
+        Array.prototype.forEach.call($("tabs").querySelectorAll("button"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        window.scrollTo(0, 0);
+      });
+    });
+    window.switchTab = function (k) {
+      var btn = $("tabs").querySelector("[data-tab='" + k + "']");
+      if (btn) btn.click();
+    };
+  })();
+
+  initAuth();
+})();
+</script>
+</body>
+</html>
