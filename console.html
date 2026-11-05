@@ -215,8 +215,19 @@
       <div class="row" style="margin-top:10px">
         <button id="saveResult" disabled>DB에 결과 저장</button>
       </div>
-      <div class="row" style="margin-top:8px">
+      <div style="margin-top:12px">
+        <label for="guides" style="display:block; font-size:12.5px; color:var(--muted);
+               font-weight:600; margin-bottom:5px">이 식당 이용 방법 (한 줄에 하나씩)</label>
+        <textarea id="guides" rows="4" placeholder="직원이 자리에서 고기를 구워줍니다&#10;고기는 2인분부터 주문합니다&#10;계산은 나갈 때 카운터에서. 팁 문화가 없습니다"
+                  style="width:100%; font-size:13px; line-height:1.6"></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="ghost small" id="saveGuides" style="flex:0 1 130px">가이드 저장</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
         <button class="ghost small" id="copyLink" disabled>고객 전달용 링크 복사</button>
+        <button class="ghost small" id="sendMail" disabled>결과 메일 보내기</button>
       </div>
       <div class="row" style="margin-top:8px">
         <button class="ghost small" id="markNoShow">노쇼로 기록</button>
@@ -407,6 +418,7 @@
     $("nv-msg").textContent = "";
     $("vresult").innerHTML = "";
     matchedVenue = null;
+    if (typeof fillGuides === "function") fillGuides();
     searchVenue();
     resetCall();
   }
@@ -581,7 +593,7 @@
     var q = ($("vq").value || "").trim();
     if (!connected() || q.length < 2) { $("vresult").innerHTML = "<p class='msg'>두 글자 이상 입력하세요.</p>"; return; }
     $("vresult").innerHTML = "<p class='msg'>검색 중…</p>";
-    api("venues?select=id,name,phone,address,category,phone_verified_at,ai_call_blocked&name=ilike.*" +
+    api("venues?select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes&name=ilike.*" +
         encodeURIComponent(q) + "*&limit=5")
       .then(function (rows) {
         if (!rows || !rows.length) {
@@ -601,6 +613,7 @@
           el.addEventListener("click", function () {
             var vid = el.getAttribute("data-vid");
             matchedVenue = rows.filter(function (v) { return v.id === vid; })[0];
+            fillGuides();
             $("script").textContent = buildScript();
     checkDuplicateName();
     checkNoShowHistory();
@@ -614,6 +627,7 @@
         // 결과가 하나뿐이면 자동 선택
         if (rows.length === 1) {
           matchedVenue = rows[0];
+          fillGuides();
           $("vresult").querySelector(".item").classList.add("on");
           $("script").textContent = buildScript();
     checkDuplicateName();
@@ -959,6 +973,7 @@
     $("report").textContent = L.join("\n");
     $("saveResult").disabled = false;
     $("copyLink").disabled = false;
+    $("sendMail").disabled = false;
   }
 
   function resetCall() {
@@ -971,7 +986,228 @@
     $("utter").disabled = true; $("send").disabled = true;
     $("saveResult").disabled = true; $("handoff").disabled = true; $("saveMsg").textContent = "";
     $("copyLink").disabled = true;
+    $("sendMail").disabled = true;
   }
+
+
+  /* ---------- 결과 메일 발송 ---------- */
+  function collectGuides() {
+    var txt = ($("guides").value || "").trim();
+    if (!txt) return [];
+    return txt.split(/\r?\n/).map(function (s) { return s.trim(); })
+              .filter(Boolean).slice(0, 6);
+  }
+
+  /* 식당을 고르면 저장된 가이드를 불러온다 */
+  function fillGuides() {
+    var box = $("guides");
+    if (!box) return;
+    box.value = (matchedVenue && matchedVenue.guide_notes) ? matchedVenue.guide_notes : "";
+  }
+
+  $("saveGuides").addEventListener("click", function () {
+    if (!connected()) return;
+    if (!matchedVenue) { $("saveMsg").textContent = "먼저 식당을 선택하세요."; return; }
+    var txt = ($("guides").value || "").trim();
+    $("saveGuides").disabled = true;
+    api("venues?id=eq." + matchedVenue.id, {
+      method: "PATCH", prefer: "return=minimal", body: { guide_notes: txt }
+    })
+      .then(function () {
+        matchedVenue.guide_notes = txt;
+        $("saveMsg").textContent = "가이드를 저장했습니다. 다음에 이 식당을 고르면 자동으로 채워집니다.";
+      })
+      .catch(function (e) { $("saveMsg").textContent = "저장 실패: " + e.message; })
+      .then(function () { $("saveGuides").disabled = false; });
+  });
+
+  /* 고객 언어별 메일 문구 */
+  var MAILT = {
+    ja: { s1:"【予約確定】{v} {w}", s2:"【予約確定】{v} {w}（時間を調整しました）",
+      s3:"【確認のお願い】{v}", s4:"【満席】{v}", hi:"{n} 様",
+      m1:"ご希望のお店の予約が取れました。",
+      m2:"ご希望の時間が満席でしたので、お知らせいただいた範囲内で調整しました。",
+      m3:"お店から確認が必要な条件の提示がありました。",
+      m4:"申し訳ございません。ご希望の日時ではお席が取れませんでした。料金は全額返金いたします。",
+      lv:"お店", lw:"日時", lp:"人数", ln:"予約者名", lc:"確認コード",
+      gt:"このお店の利用方法", kt:"お店で見せる文章",
+      kh:"入口でこの画面をスタッフに見せてください。", btn:"予約の詳細を見る",
+      cn:"行けなくなった場合は、予約日の前日までにお知らせください。当日のキャンセルは返金されませんが、お店には必ずお伝えします。",
+      ft:"CallBridge｜電話でしか予約できない韓国のレストランを代わりに予約します" },
+    "zh-TW": { s1:"【訂位成功】{v} {w}", s2:"【訂位成功】{v} {w}（已調整時間）",
+      s3:"【需要確認】{v}", s4:"【客滿】{v}", hi:"{n} 您好",
+      m1:"已為您訂到位子。", m2:"您希望的時段已客滿，我們在您允許的範圍內做了調整。",
+      m3:"餐廳提出了需要您確認的條件。", m4:"很抱歉，您希望的時段無法訂位。費用將全額退還。",
+      lv:"餐廳", lw:"時間", lp:"人數", ln:"訂位人", lc:"查詢代碼",
+      gt:"這家店的用餐方式", kt:"給店家看的文字",
+      kh:"到店時請將此畫面出示給店員。", btn:"查看訂位詳情",
+      cn:"若無法前往，請於訂位日前一天告知。當天取消不退款，但我們仍會通知餐廳。",
+      ft:"CallBridge｜只收電話訂位的韓國餐廳，我們替您預約" },
+    "zh-CN": { s1:"【预订成功】{v} {w}", s2:"【预订成功】{v} {w}（已调整时间）",
+      s3:"【需要确认】{v}", s4:"【客满】{v}", hi:"{n} 您好",
+      m1:"已为您订到位子。", m2:"您希望的时段已客满，我们在您允许的范围内做了调整。",
+      m3:"餐厅提出了需要您确认的条件。", m4:"很抱歉，您希望的时段无法预订。费用将全额退还。",
+      lv:"餐厅", lw:"时间", lp:"人数", ln:"预订人", lc:"查询代码",
+      gt:"这家店的用餐方式", kt:"给店家看的文字",
+      kh:"到店时请将此画面出示给店员。", btn:"查看预订详情",
+      cn:"若无法前往，请于预订日前一天告知。当天取消不退款，但我们仍会通知餐厅。",
+      ft:"CallBridge｜只收电话预订的韩国餐厅，我们替您预约" },
+    en: { s1:"Confirmed - {v}, {w}", s2:"Confirmed - {v}, {w} (time adjusted)",
+      s3:"Need your confirmation - {v}", s4:"Fully booked - {v}", hi:"Hi {n},",
+      m1:"Your table is booked.",
+      m2:"Your first choice was full, so we confirmed within the range you allowed.",
+      m3:"The restaurant raised a condition that needs your confirmation.",
+      m4:"We could not get a table for the times you gave us. You will be refunded in full.",
+      lv:"Restaurant", lw:"When", lp:"People", ln:"Name", lc:"Your code",
+      gt:"How this place works", kt:"Show this at the door",
+      kh:"Show this screen to the staff when you arrive.", btn:"See booking details",
+      cn:"If you cannot make it, tell us the day before. Cancelling on the day is not refunded, but we will still tell the restaurant.",
+      ft:"CallBridge - we call the Korean restaurants that only take bookings by phone" },
+    ko: { s1:"[예약 확정] {v} {w}", s2:"[예약 확정] {v} {w} (시간 조정됨)",
+      s3:"[확인 필요] {v}", s4:"[만석] {v}", hi:"{n} 님",
+      m1:"요청하신 식당 예약이 완료되었습니다.",
+      m2:"희망하신 시간이 만석이어서, 알려주신 범위 안에서 조정했습니다.",
+      m3:"식당에서 확인이 필요한 조건을 제시했습니다.",
+      m4:"죄송합니다. 희망하신 일시로는 자리를 잡지 못했습니다. 요금은 전액 환불해 드립니다.",
+      lv:"식당", lw:"일시", lp:"인원", ln:"예약자명", lc:"조회 코드",
+      gt:"이 식당 이용 방법", kt:"가게에서 보여줄 문장",
+      kh:"도착하시면 이 화면을 직원에게 보여주세요.", btn:"예약 상세 보기",
+      cn:"못 가시게 되면 예약일 전날까지 알려주세요. 당일 취소는 환불되지 않지만 식당에는 전달해 드립니다.",
+      ft:"CallBridge - 전화로만 예약되는 한국 식당, 저희가 대신 전화합니다" }
+  };
+
+  function mt(lang, k) {
+    var d = MAILT[lang] || MAILT.ja;
+    return d[k] || MAILT.ja[k] || "";
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function buildMailHtml(d) {
+    var l = d.lang, k = d.kind;
+    var ok = k === "confirmed" || k === "alt_confirmed";
+    var hc = ok ? "#C9962F" : k === "hold" ? "#F0603F" : "#8A5A52";
+    var msg = k === "confirmed" ? mt(l, "m1") : k === "alt_confirmed" ? mt(l, "m2")
+            : k === "hold" ? mt(l, "m3") : mt(l, "m4");
+
+    function row(a, b2) {
+      return "<tr><td style='padding:7px 0;color:#6B7A77;font-size:14px;width:38%'>" + esc(a) +
+             "</td><td style='padding:7px 0;color:#1A2422;font-size:14px;font-weight:600'>" + esc(b2) + "</td></tr>";
+    }
+
+    var gb = (d.guides && d.guides.length)
+      ? "<div style='background:#F3F7F6;border-radius:12px;padding:18px;margin-top:16px'>" +
+        "<p style='margin:0 0 10px;font-size:14px;font-weight:700;color:#0F5E5C'>" + esc(mt(l, "gt")) + "</p>" +
+        d.guides.map(function (g) {
+          return "<p style='margin:0 0 7px;font-size:14px;color:#1A2422;line-height:1.6'>· " + esc(g) + "</p>";
+        }).join("") + "</div>" : "";
+
+    var kb = d.koText
+      ? "<div style='border:2px solid #0F5E5C;border-radius:12px;padding:18px;margin-top:16px'>" +
+        "<p style='margin:0 0 4px;font-size:13px;font-weight:700;color:#0F5E5C'>" + esc(mt(l, "kt")) + "</p>" +
+        "<p style='margin:0 0 11px;font-size:12.5px;color:#6B7A77'>" + esc(mt(l, "kh")) + "</p>" +
+        "<p style='margin:0;font-size:17px;font-weight:700;color:#1A2422;line-height:1.65;" +
+        "background:#F3F7F6;border-radius:9px;padding:14px'>" + esc(d.koText) + "</p></div>" : "";
+
+    var url = "https://callbridge-kr.vercel.app/result.html#" + encodeURIComponent(d.code || "");
+
+    return "<!doctype html><html><body style='margin:0;padding:0;background:#FFFBF8'>" +
+      "<table width='100%' cellpadding='0' cellspacing='0' style='background:#FFFBF8;padding:28px 14px'>" +
+      "<tr><td align='center'><table width='100%' cellpadding='0' cellspacing='0' " +
+      "style='max-width:520px;background:#fff;border:1px solid #E6E2DD;border-radius:16px;" +
+      "font-family:Helvetica,Arial,sans-serif'>" +
+      "<tr><td style='padding:22px 24px 0'><p style='margin:0;font-size:17px;font-weight:800;color:#0F5E5C'>" +
+      "<span style='display:inline-block;width:8px;height:8px;border-radius:4px;background:#F0603F;margin-right:7px'></span>CallBridge</p></td></tr>" +
+      "<tr><td style='padding:18px 24px 0'><p style='margin:0 0 14px;font-size:15px;color:#1A2422'>" +
+      esc(mt(l, "hi").replace("{n}", d.name || "")) + "</p>" +
+      "<p style='margin:0 0 18px;font-size:15px;color:#6B7A77;line-height:1.65'>" + esc(msg) + "</p></td></tr>" +
+      (ok ? "<tr><td style='padding:0 24px'><div style='background:" + hc +
+        ";border-radius:14px;padding:22px 20px;color:#fff'>" +
+        "<p style='margin:0 0 5px;font-size:12.5px;opacity:.85'>" + esc(mt(l, "lw")) + "</p>" +
+        "<p style='margin:0;font-size:21px;font-weight:800'>" + esc(d.when || "") + "</p></div></td></tr>" : "") +
+      "<tr><td style='padding:16px 24px 0'><table width='100%' cellpadding='0' cellspacing='0' " +
+      "style='border:1px solid #E6E2DD;border-radius:12px;padding:6px 16px'>" +
+      row(mt(l, "lv"), d.venue) + (ok ? "" : row(mt(l, "lw"), d.when || "-")) +
+      row(mt(l, "lp"), d.party) + row(mt(l, "ln"), d.name) + row(mt(l, "lc"), d.code) +
+      "</table></td></tr>" +
+      "<tr><td style='padding:0 24px'>" + gb + kb + "</td></tr>" +
+      "<tr><td align='center' style='padding:22px 24px 6px'><a href='" + url +
+      "' style='display:inline-block;background:#F0603F;color:#fff;text-decoration:none;" +
+      "font-size:15px;font-weight:700;padding:15px 34px;border-radius:10px'>" + esc(mt(l, "btn")) + "</a></td></tr>" +
+      (ok ? "<tr><td style='padding:14px 24px 0'><p style='margin:0;font-size:12.5px;color:#6B7A77;line-height:1.6'>" +
+        esc(mt(l, "cn")) + "</p></td></tr>" : "") +
+      "<tr><td style='padding:20px 24px 24px'><p style='margin:0;padding-top:16px;" +
+      "border-top:1px solid #E6E2DD;font-size:12px;color:#6B7A77'>" + esc(mt(l, "ft")) + "</p></td></tr>" +
+      "</table></td></tr></table></body></html>";
+  }
+
+  function sendResultMail() {
+    if (!cur) return;
+    if (!S || !S.done) { $("saveMsg").textContent = "통화를 먼저 마쳐주세요."; return; }
+
+    var btn = $("sendMail");
+    btn.disabled = true;
+    $("saveMsg").textContent = "메일 보내는 중…";
+
+    api("customers?select=email,display_name,locale&id=eq." + cur.customer_id)
+      .then(function (rs) {
+        var c = (rs && rs[0]) || {};
+        if (!c.email) throw new Error("고객 이메일이 없습니다.");
+
+        var kind = S.kind === "ok" ? (S.matched.gap === 0 ? "confirmed" : "alt_confirmed")
+                 : S.kind === "hold" ? "hold" : "unavailable";
+        var slots = slotList();
+        var when = S.matched
+          ? dateKo(S.matched.slot.date) + " " + speak(S.matched.at)
+          : (slots[0] ? dateKo(slots[0].date) + " " + speak(slots[0].min) : "-");
+
+        var koText = "";
+        if (S.kind === "ok") {
+          koText = when + "에 " + (cur.booking_name || "") + " 이름으로 " +
+                   cur.party_size + "명 예약했습니다.";
+        }
+
+        var d = {
+          lang: c.locale || "ja",
+          kind: kind,
+          venue: (matchedVenue ? matchedVenue.name : (cur.venue_name_raw || "").split(" | ")[0]),
+          when: when,
+          party: cur.party_size + "명",
+          name: cur.booking_name || c.display_name || "",
+          code: cur.lookup_code || "",
+          guides: collectGuides(),
+          koText: koText
+        };
+
+        var sk = kind === "confirmed" ? "s1" : kind === "alt_confirmed" ? "s2"
+               : kind === "hold" ? "s3" : "s4";
+        var subject = mt(d.lang, sk).replace("{v}", d.venue).replace("{w}", d.when);
+
+        return fetch(cfg.url + "/functions/v1/sendmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": cfg.key },
+          body: JSON.stringify({ to: c.email, subject: subject, html: buildMailHtml(d) })
+        }).then(function (r) { return r.json(); });
+      })
+      .then(function (d) {
+        if (d && d.ok) {
+          $("saveMsg").textContent = "메일을 보냈습니다.";
+          btn.textContent = "메일 보냄";
+        } else {
+          $("saveMsg").textContent = "메일 실패: " + ((d && d.msg) || "알 수 없음");
+          btn.disabled = false;
+        }
+      })
+      .catch(function (e) {
+        $("saveMsg").textContent = "메일 실패: " + e.message;
+        btn.disabled = false;
+      });
+  }
+
+  $("sendMail").addEventListener("click", sendResultMail);
 
   /* ---------- 결과 저장 ---------- */
   function saveResult() {
@@ -1064,6 +1300,7 @@
     api("venues", { method: "POST", body: body })
       .then(function (r) {
         matchedVenue = r[0];
+        fillGuides();
         return api("requests?id=eq." + cur.id, { method: "PATCH", body: { venue_id: r[0].id } });
       })
       .then(function () {
