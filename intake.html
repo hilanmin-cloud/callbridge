@@ -192,7 +192,7 @@
 
 <header class="bar">
   <div class="wrap in">
-    <a class="logo" href="#"><span class="dot"></span>CallBridge</a>
+    <a class="logo" href="index.html"><span class="dot"></span>CallBridge</a>
     <nav class="langs" id="langs" aria-label="Language"></nav>
     <div id="authBox"></div>
   </div>
@@ -755,8 +755,11 @@
     var box = $("authBox");
     if (!box) return;
     if (user) {
-      box.innerHTML = "<span class='who'>" + (user.email || "") +
-        " <button type='button' id='signOut'>" + t("signOut") + "</button></span>";
+      var nm = (user.email || "").split("@")[0];
+      var left = (myCredit ? (myCredit.total - myCredit.used) : 0);
+      box.innerHTML = "<span class='who'>" +
+        (left > 0 ? "<b style='color:var(--teal)'>" + t("creditUse").replace("{n}", left).replace(/\(|\)/g, "") + "</b> · " : "") +
+        nm + " <button type='button' id='signOut'>" + t("signOut") + "</button></span>";
       $("signOut").addEventListener("click", function () {
         if (sb) sb.auth.signOut().then(function () { user = null; authToken = null; drawAuth(); });
       });
@@ -801,7 +804,7 @@
           var ok = !c.expires_at || new Date(c.expires_at).getTime() > now;
           return left > 0 && ok;
         });
-        if (!live.length) { myCredit = null; box.style.display = "none"; useCredit = false; drawTotal(); return; }
+        if (!live.length) { myCredit = null; box.style.display = "none"; useCredit = false; drawTotal(); drawAuth(); return; }
 
         myCredit = live[0];
         var left = myCredit.total - myCredit.used;
@@ -822,7 +825,7 @@
         $("useCredit").addEventListener("change", function () {
           useCredit = this.checked; drawTotal();
         });
-        drawTotal();
+        drawTotal(); drawAuth();
       })
       .catch(function () { box.style.display = "none"; });
   }
@@ -997,7 +1000,7 @@
           api("credits?id=eq." + myCredit.id, {
             method: "PATCH", prefer: "return=minimal",
             body: { used: myCredit.used + 1 }
-          }).catch(function () {});
+          }).then(function () { loadCredits(); }).catch(function () {});
           api("requests?id=eq." + ids.request, {
             method: "PATCH", prefer: "return=minimal",
             body: { credit_id: myCredit.id }
