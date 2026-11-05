@@ -133,6 +133,11 @@
   .langs button:hover { border-color: var(--teal); color: var(--teal); }
   .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
 
+  .chk-link { font-size: 13.5px; color: var(--muted); text-decoration: none;
+    min-height: 36px; display: inline-flex; align-items: center; padding: 0 4px;
+    border-bottom: 1px solid transparent; transition: color .18s, border-color .18s; }
+  .chk-link:hover { color: var(--teal); border-color: var(--teal); }
+
   /* 계정 */
   .acct { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
   .acct .me { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted);
@@ -219,6 +224,25 @@
   /* ===== 섹션 공통 ===== */
   section h2.t { margin: 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.35; font-weight: 800; letter-spacing: -.01em; }
   .label { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; color: var(--coral); }
+
+  /* 최근 요청 */
+  .mine { padding: 0 28px 56px; }
+  .mine .mt { margin: 0 0 14px; font-size: 18px; font-weight: 700; }
+  .mineRow { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+    padding: 14px 16px; margin-bottom: 9px; }
+  .mineRow .l { flex: 1 1 200px; min-width: 0; }
+  .mineRow .l b { display: block; font-size: 15px; }
+  .mineRow .l span { font-size: 13px; color: var(--muted); }
+  .mineRow .st { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 11px;
+    background: var(--mist); color: var(--muted); }
+  .mineRow .st.confirmed { background: var(--gold); color: #fff; }
+  .mineRow .st.received { background: var(--soft); color: var(--coral); }
+  .mineRow a { font-size: 13.5px; font-weight: 600; color: var(--teal); text-decoration: none;
+    min-height: 38px; display: inline-flex; align-items: center; padding: 0 13px;
+    border: 1px solid var(--line); border-radius: 19px; transition: border-color .18s; }
+  .mineRow a:hover { border-color: var(--teal); }
+  .mineNone { font-size: 14px; color: var(--muted); }
 
   /* ===== 02-A 이용 방법 (회색 배경, 가로 띠) ===== */
   .how { background: var(--mist); padding: 112px 0 96px; }
@@ -385,6 +409,7 @@
     <div class="right">
       <nav class="langs" id="langs" aria-label="Language"></nav>
       <div id="authBox"></div>
+      <a href="result.html" class="chk-link" data-t="checkNav"></a>
       <a href="intake.html" class="btn sm" data-t="navCta">予約する</a>
     </div>
   </div>
@@ -427,6 +452,12 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- 로그인 사용자: 최근 요청 -->
+  <section class="wrap mine" id="mineSec" style="display:none">
+    <h2 class="mt" data-t="myTitle"></h2>
+    <div id="mineList"></div>
   </section>
 
   <!-- 02-A 이용 방법 -->
@@ -600,6 +631,7 @@
   <div class="wrap in">
     <span>CallBridge</span>
     <span data-t="footerHours"></span>
+    <a href="result.html" class="chk-link" data-t="checkFoot"></a>
   </div>
 </footer>
 
@@ -608,6 +640,11 @@
   "use strict";
   var T = {
     ja: { label:"日本語",
+      myTitle: "最近のリクエスト",
+      myNone: "まだリクエストがありません",
+      myView: "確認",
+      checkNav: "予約を確認",
+      checkFoot: "予約状況の確認",
       signIn: "Googleでログイン",
       signOut: "ログアウト",
       passLeft: "パス残り {n} 件",
@@ -702,6 +739,11 @@
       footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
     },
     "zh-TW": { label:"繁體中文",
+      myTitle: "最近的委託",
+      myNone: "尚無委託紀錄",
+      myView: "查看",
+      checkNav: "查詢訂位",
+      checkFoot: "查詢訂位狀態",
       signIn: "使用 Google 登入",
       signOut: "登出",
       passLeft: "剩餘 {n} 次",
@@ -796,6 +838,11 @@
       footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
     },
     "zh-CN": { label:"简体中文",
+      myTitle: "最近的委托",
+      myNone: "暂无委托记录",
+      myView: "查看",
+      checkNav: "查询预订",
+      checkFoot: "查询预订状态",
       signIn: "使用 Google 登录",
       signOut: "退出",
       passLeft: "剩余 {n} 次",
@@ -890,6 +937,11 @@
       footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
     },
     en: { label:"English",
+      myTitle: "Your recent requests",
+      myNone: "No requests yet",
+      myView: "View",
+      checkNav: "Check booking",
+      checkFoot: "Check your booking",
       signIn: "Sign in with Google",
       signOut: "Sign out",
       passLeft: "{n} left on your pass",
@@ -984,6 +1036,11 @@
       footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
     },
     ko: { label:"한국어",
+      myTitle: "최근 요청",
+      myNone: "아직 요청이 없습니다",
+      myView: "보기",
+      checkNav: "예약 조회",
+      checkFoot: "예약 상태 조회",
       signIn: "Google로 로그인",
       signOut: "로그아웃",
       passLeft: "남은 패스 {n}건",
@@ -1168,6 +1225,37 @@
       .catch(function () { drawAuth(); });
   }
 
+  function loadMine() {
+    var sec = document.getElementById("mineSec");
+    var box = document.getElementById("mineList");
+    if (!sec || !box) return;
+    if (!authToken) { sec.style.display = "none"; return; }
+
+    fetch(SB.url + "/rest/v1/requests?select=lookup_code,venue_name_raw,party_size,status,created_at" +
+          "&order=created_at.desc&limit=5", {
+      headers: { "apikey": SB.key, "Authorization": "Bearer " + authToken }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (rs) {
+        sec.style.display = "block";
+        if (!rs || !rs.length) {
+          box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>";
+          return;
+        }
+        box.innerHTML = rs.map(function (q) {
+          var nm = (q.venue_name_raw || "").split(" | ")[0] || "-";
+          var cls = q.status === "confirmed" || q.status === "alt_confirmed" ? "confirmed"
+                  : q.status === "received" ? "received" : "";
+          return "<div class='mineRow'>" +
+            "<span class='l'><b>" + nm + "</b><span>" + q.party_size + " · " + (q.lookup_code || "") + "</span></span>" +
+            "<span class='st " + cls + "'>" + q.status + "</span>" +
+            (q.lookup_code ? "<a href='result.html#" + encodeURIComponent(q.lookup_code) + "'>" + t("myView") + "</a>" : "") +
+          "</div>";
+        }).join("");
+      })
+      .catch(function () { sec.style.display = "none"; });
+  }
+
   function initAuth() {
     if (!sb && window.supabase) {
       try { sb = window.supabase.createClient(SB.url, SB.key); } catch (e) { sb = null; }
@@ -1178,6 +1266,7 @@
       authToken = s ? s.access_token : null;
       drawAuth();
       loadPass();
+      loadMine();
     }
     sb.auth.getSession().then(function (r) { apply(r.data && r.data.session); });
     sb.auth.onAuthStateChange(function (_e, s) { apply(s); });

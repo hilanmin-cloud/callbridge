@@ -156,6 +156,28 @@
   .who button { font: inherit; font-size: 12px; min-height: 30px; padding: 0 10px; border-radius: 15px;
     border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
 
+  /* 접수 완료 */
+  .doneBox { max-width: 520px; margin: 0 auto; padding: 32px 0 20px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .doneIcon { width: 68px; height: 68px; border-radius: 34px; background: var(--gold);
+    position: relative; box-shadow: 0 4px 18px rgba(201,150,47,.26); }
+  .doneIcon::after { content: ""; position: absolute; left: 50%; top: 46%;
+    width: 15px; height: 27px; border: solid #fff; border-width: 0 4px 4px 0;
+    transform: translate(-50%,-50%) rotate(45deg); }
+  .doneBox h1 { margin: 0; font-size: clamp(22px, 3vw, 28px); font-weight: 800; letter-spacing: -.02em; }
+  .doneBox .sub { margin: 0; font-size: 15px; color: var(--muted); max-width: 40ch; }
+  .codeCard { width: 100%; background: var(--card); border: 2px solid var(--teal); border-radius: 16px;
+    padding: 22px 20px; display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .codeCard .lbl { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .codeCard strong { font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: .12em;
+    color: var(--teal); font-family: "Consolas", monospace; word-break: break-all; }
+  .codeCard .copy { font: inherit; font-size: 13px; font-weight: 600; min-height: 38px; padding: 0 16px;
+    border-radius: 19px; border: 1px solid var(--line); background: transparent; color: var(--teal);
+    cursor: pointer; transition: background .18s; }
+  .codeCard .copy:hover { background: var(--mist); }
+  .warn2 { margin: 0; font-size: 13.5px; color: var(--coral); font-weight: 600; }
+  .doneBox .pay { width: 100%; max-width: 320px; text-decoration: none; }
+
   /* 패스 */
   .credit { border: 2px solid var(--teal); border-radius: 11px; padding: 13px 14px;
     display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
@@ -347,6 +369,13 @@
 
   var T = {
     ja: {
+      doneTitle: "リクエストを受け付けました",
+      doneCode: "確認コード",
+      doneHow: "このコードで予約状況を確認できます。結果はメールでもお送りします。",
+      doneGo: "予約状況を確認",
+      doneCopy: "コードをコピー",
+      doneCopied: "コピーしました",
+      doneSave: "このコードは必ず控えてください。",
       creditTitle: "残りのパス",
       creditUse: "パスを使う（残り {n} 件）",
       creditExp: "有効期限 {d}",
@@ -419,6 +448,13 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      doneTitle: "已收到您的委託",
+      doneCode: "查詢代碼",
+      doneHow: "可用此代碼查詢訂位狀態。結果也會寄到您的信箱。",
+      doneGo: "查詢訂位狀態",
+      doneCopy: "複製代碼",
+      doneCopied: "已複製",
+      doneSave: "請務必保存此代碼。",
       creditTitle: "剩餘次數",
       creditUse: "使用次數（剩 {n} 次）",
       creditExp: "有效期限 {d}",
@@ -491,6 +527,13 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      doneTitle: "已收到您的委托",
+      doneCode: "查询代码",
+      doneHow: "可用此代码查询预订状态。结果也会发到您的邮箱。",
+      doneGo: "查询预订状态",
+      doneCopy: "复制代码",
+      doneCopied: "已复制",
+      doneSave: "请务必保存此代码。",
       creditTitle: "剩余次数",
       creditUse: "使用次数（剩 {n} 次）",
       creditExp: "有效期至 {d}",
@@ -563,6 +606,13 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      doneTitle: "Request received",
+      doneCode: "Your code",
+      doneHow: "Use this code to check your booking. We will email you the result as well.",
+      doneGo: "Check your booking",
+      doneCopy: "Copy code",
+      doneCopied: "Copied",
+      doneSave: "Please save this code.",
       creditTitle: "Your pass",
       creditUse: "Use a pass ({n} left)",
       creditExp: "Valid until {d}",
@@ -635,6 +685,13 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      doneTitle: "요청을 접수했습니다",
+      doneCode: "조회 코드",
+      doneHow: "이 코드로 예약 상태를 확인하실 수 있습니다. 결과는 이메일로도 보내드립니다.",
+      doneGo: "예약 상태 확인",
+      doneCopy: "코드 복사",
+      doneCopied: "복사했습니다",
+      doneSave: "이 코드를 꼭 보관해 주세요.",
       creditTitle: "남은 패스",
       creditUse: "패스 사용 (남은 {n}건)",
       creditExp: "{d}까지 유효",
@@ -933,6 +990,38 @@
   /* ---------- 동의 ---------- */
   $("ok").addEventListener("change", function () { $("pay").disabled = !this.checked; });
 
+  /* ---------- 접수 완료 화면 ---------- */
+  function showDone(code) {
+    var main = document.querySelector(".main");
+    if (!main) return;
+    main.innerHTML =
+      "<div class='doneBox'>" +
+        "<div class='doneIcon'></div>" +
+        "<h1>" + t("doneTitle") + "</h1>" +
+        "<p class='sub'>" + t("doneHow") + "</p>" +
+        "<div class='codeCard'>" +
+          "<span class='lbl'>" + t("doneCode") + "</span>" +
+          "<strong id='theCode'>" + code + "</strong>" +
+          "<button type='button' class='copy' id='copyCode'>" + t("doneCopy") + "</button>" +
+        "</div>" +
+        "<p class='warn2'>" + t("doneSave") + "</p>" +
+        "<a class='pay' href='result.html#" + encodeURIComponent(code) + "'>" + t("doneGo") + "</a>" +
+      "</div>";
+    window.scrollTo(0, 0);
+
+    $("copyCode").addEventListener("click", function () {
+      navigator.clipboard.writeText(code).then(function () {
+        $("copyCode").textContent = t("doneCopied");
+      });
+    });
+
+    // 진행 표시를 2단계로
+    var steps = document.querySelectorAll(".pstep");
+    if (steps[1]) steps[1].classList.add("on");
+    var lines = document.querySelectorAll(".pline");
+    if (lines[0]) lines[0].classList.add("on");
+  }
+
   /* ---------- 제출 ---------- */
   function collect() {
     var slots = [];
@@ -1014,7 +1103,7 @@
         return api("request_conditions", { method: "POST", body: d.conditions, prefer: "return=minimal" });
       })
       .then(function () {
-        toast("ok", t("saved") + (ids.code || ids.request.slice(0, 8)));
+        var showCode = ids.code || ids.request.slice(0, 8).toUpperCase();
         try {
           fetch(cfg.url + "/functions/v1/notify", {
             method: "POST",
@@ -1032,6 +1121,7 @@
             keepalive: true
           }).catch(function () {});
         } catch (e) {}
+        showDone(showCode);
       })
       .catch(function (e) { toast("err", t("failed") + e.message); $("pay").disabled = false; });
   });
