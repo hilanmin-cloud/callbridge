@@ -117,6 +117,7 @@
       <div class="row" style="margin-bottom:10px">
         <button class="ghost small" id="refresh">새로고침</button>
         <button class="ghost small" id="purgeTest" style="flex:0 1 110px">테스트 정리</button>
+        <button class="ghost small" id="giveCredit" style="flex:0 1 110px">패스 지급</button>
         <select id="filter" style="min-height:36px">
           <option value="received">대기 중</option>
           <option value="cancel_requested">취소 요청</option>
@@ -220,6 +221,16 @@
       <div class="row" style="margin-top:8px">
         <button class="ghost small" id="markNoShow">노쇼로 기록</button>
         <button class="ghost small" id="markVisited">방문 확인</button>
+      </div>
+
+      <div id="cancelBox" style="display:none; margin-top:12px; border:1px solid var(--no);
+           border-radius:10px; padding:12px">
+        <b style="color:var(--no); font-size:13px">취소 요청 들어옴</b>
+        <p id="cancelInfo" style="margin:6px 0 0; font-size:13px; color:var(--muted)"></p>
+        <div class="row" style="margin-top:9px">
+          <button class="ghost small" id="copyCancelScript">취소 통화 지시문 복사</button>
+          <button class="ghost small" id="doneCancel">식당에 전달 완료</button>
+        </div>
       </div>
       <p class="msg" id="saveMsg" style="margin-top:8px"></p>
     </div>
@@ -386,6 +397,7 @@
     $("script").textContent = buildScript();
     checkDuplicateName();
     checkNoShowHistory();
+    drawCancel();
     if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
     $("vq").value = vname.replace(/\(.*?\)/g, "").trim();
     $("nv-name").value = vname === "-" ? "" : vname;
@@ -397,6 +409,118 @@
     resetCall();
   }
 
+
+
+  /* ---------- 환불 가능 여부 판정 ---------- */
+  // 예약일 전일 23:59까지 취소하면 환불. 예약 당일 취소는 환불 없음.
+  function refundable(slotAt, cancelAt) {
+    var s = new Date(slotAt), c = new Date(cancelAt || Date.now());
+    var cutoff = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 0, 0, 0); // 예약일 00:00
+    return c < cutoff;
+  }
+
+  /* ---------- 취소 통화 지시문 ---------- */
+  function buildCancelScript() {
+    if (!cur) return "";
+    var L = [], slots = slotList(), s0 = slots[0];
+    var vname = (cur.venue_name_raw || "").split(" | ")[0] || "(식당명 없음)";
+
+    L.push("## 역할");
+    L.push("손님을 대신해 이미 잡아둔 예약을 취소한다고 전하는 AI 비서입니다.");
+    L.push("한국어로 정중하고 짧게 말합니다. 사과의 뜻을 분명히 전합니다.");
+    L.push("");
+    L.push("## 취소할 예약");
+    L.push("- 식당: " + vname);
+    if (matchedVenue && matchedVenue.phone) L.push("- 전화번호: " + matchedVenue.phone);
+    L.push("- 일시: " + (s0 ? dateKo(s0.date) + " " + speak(s0.min) : "(확인 필요)"));
+    L.push("- 인원: " + cur.party_size + "명");
+    L.push("- 예약자명: " + (cur.booking_name || "(미입력)"));
+    L.push("");
+    L.push("## 말할 내용");
+    L.push("1. 손님을 대신해 연락드리는 AI 비서임을 밝힙니다.");
+    L.push("2. 위 예약을 취소한다고 전합니다. 날짜·시각·이름을 함께 말합니다.");
+    L.push("3. 갑작스러운 취소에 대해 사과합니다.");
+    L.push("4. 상대가 확인했다고 하면 감사 인사 후 종료합니다.");
+    L.push("");
+    L.push("예시: \"안녕하세요, 손님을 대신해 연락드리는 AI 비서입니다.");
+    L.push("      " + (s0 ? dateKo(s0.date) + " " + speak(s0.min) : "(일시)") + " " +
+           (cur.booking_name || "(이름)") + " 이름으로 " + cur.party_size + "명 예약을 취소하려고 합니다.");
+    L.push("      갑작스럽게 연락드려 죄송합니다.\"");
+    L.push("");
+    L.push("## 주의");
+    L.push("- 취소 사유를 지어내지 마세요. 묻는다면 손님 일정이 바뀌었다고만 전합니다.");
+    L.push("- 다시 예약을 잡으려 하지 마세요. 취소만 전하고 끝냅니다.");
+    L.push("- 위약금이나 취소 수수료를 요구하면 금액만 받아 적고 즉시 보류합니다.");
+
+    return L.join("\n");
+  }
+
+  /* ---------- 취소 요청 표시 ---------- */
+  function drawCancel() {
+    var box = $("cancelBox");
+    if (!box || !cur) return;
+    if (cur.status !== "cancel_requested") { box.style.display = "none"; return; }
+
+    box.style.display = "block";
+    var slots = slotList(), s0 = slots[0];
+    var when = cur.cancel_requested_at || new Date().toISOString();
+    var ok = s0 ? refundable(s0.date, when) : true;
+    $("cancelInfo").innerHTML =
+      "요청 시각: " + new Date(when).toLocaleString("ko-KR") + "<br>" +
+      "예약 일시: " + (s0 ? dateKo(s0.date) + " " + speak(s0.min) : "-") + "<br>" +
+      "<b style='color:" + (ok ? "var(--ok)" : "var(--no)") + "'>" +
+      (ok ? "환불 대상 (예약일 전에 요청)" : "환불 없음 (예약 당일 요청)") + "</b>";
+  }
+
+  $("copyCancelScript").addEventListener("click", function () {
+    var t = buildCancelScript();
+    if (!t) return;
+    navigator.clipboard.writeText(t).then(function () {
+      $("copyCancelScript").textContent = "복사됨";
+      setTimeout(function () { $("copyCancelScript").textContent = "취소 통화 지시문 복사"; }, 1600);
+    });
+  });
+
+  $("doneCancel").addEventListener("click", function () {
+    if (!connected() || !cur) return;
+    var slots = slotList(), s0 = slots[0];
+    var when = cur.cancel_requested_at || new Date().toISOString();
+    var ok = s0 ? refundable(s0.date, when) : true;
+    if (!window.confirm("식당에 취소를 전달했습니다. " +
+        (ok ? "환불 대상으로 기록합니다." : "환불 없음으로 기록합니다.") + " 진행할까요?")) return;
+
+    api("requests?id=eq." + cur.id, {
+      method: "PATCH", prefer: "return=minimal",
+      body: { status: "cancelled", refundable: ok }
+    })
+      .then(function () {
+        alert("취소 처리했습니다." + (ok ? " 환불 대상입니다." : " 환불 없음입니다."));
+        loadList();
+      })
+      .catch(function (e) { alert("처리 실패: " + e.message); });
+  });
+
+  /* ---------- 패스 지급 ---------- */
+  $("giveCredit").addEventListener("click", function () {
+    if (!connected()) return;
+    var email = window.prompt("패스를 지급할 고객의 이메일을 입력하세요.\n(구글 로그인을 한 번이라도 한 계정이어야 합니다)");
+    if (!email) return;
+    var n = parseInt(window.prompt("몇 건을 지급할까요?", "3"), 10);
+    if (!n || n < 1) return;
+
+    fetch(cfg.url + "/rest/v1/rpc/grant_credit", {
+      method: "POST",
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
+                 "Content-Type": "application/json" },
+      body: JSON.stringify({ p_email: email.trim(), p_count: n })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.ok) alert(email + " 계정에 " + n + "건을 지급했습니다. (30일 유효)");
+        else alert("지급 실패: " + ((d && d.msg) || "알 수 없는 오류"));
+      })
+      .catch(function (e) { alert("지급 실패: " + e.message); });
+  });
 
   /* ---------- 노쇼 이력 확인 ---------- */
   function checkNoShowHistory() {
@@ -478,6 +602,7 @@
             $("script").textContent = buildScript();
     checkDuplicateName();
     checkNoShowHistory();
+    drawCancel();
     if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
             Array.prototype.forEach.call($("vresult").querySelectorAll(".item"), function (x) {
               x.classList.toggle("on", x === el);
@@ -491,6 +616,7 @@
           $("script").textContent = buildScript();
     checkDuplicateName();
     checkNoShowHistory();
+    drawCancel();
     if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
         }
       })
@@ -515,7 +641,11 @@
     L.push("");
     L.push("## 첫 인사 (반드시 이 내용을 포함)");
     L.push("- 손님을 대신해 예약 문의드리는 AI 비서임을 밝힙니다.");
-    L.push("- 바로 1순위 일시와 인원을 제시합니다.");
+    L.push("- 1순위 일시·인원·예약자명을 한 번에 전달합니다.");
+    L.push("- 예시: \"안녕하세요, 손님을 대신해 예약 문의드리는 AI 비서입니다.");
+    L.push("        " + (slots[0] ? dateKo(slots[0].date) + " " + speak(slots[0].min) : "(일시)") + "에 " +
+           (cur.booking_name || "(이름)") + " 이름으로 " + cur.party_size + "명 예약 가능할까요?\"");
+    L.push("- 이름을 처음부터 말해두면 상대가 한 번에 적을 수 있고, 나중에 되물을 일이 없습니다.");
     L.push("");
     L.push("## 예약 정보 (이미 손님에게서 받은 것 — 상대에게 되묻지 마세요)");
     L.push("- 식당: " + (matchedVenue ? matchedVenue.name : vname));
@@ -524,6 +654,22 @@
     L.push("- 인원: " + cur.party_size + "명");
     L.push("- 예약자명: " + (cur.booking_name || "(미입력)"));
     if (cur.note_to_venue) L.push("- 손님 요청사항: " + cur.note_to_venue);
+    L.push("");
+
+    L.push("## 확인 질문 금지 — 우리가 가진 정보는 통보하는 것입니다");
+    L.push("예약자명, 인원, 희망 일시는 손님에게서 이미 받은 정보입니다.");
+    L.push("상대는 이 정보를 모릅니다. 따라서 상대에게 맞는지 확인받으려 하지 마세요.");
+    L.push("물음표를 붙이지 말고 평서문으로 전달하세요.");
+    L.push("");
+    L.push("금지: \"예약자명은 OOO로 맞으신가요?\"");
+    L.push("금지: \"두 분 맞으시죠?\"");
+    L.push("금지: \"오후 일곱시로 하시면 될까요?\" (이미 제시한 뒤 다시 묻는 경우)");
+    L.push("");
+    L.push("올바름: \"예약자명은 OOO로 해주세요.\"");
+    L.push("올바름: \"두 명입니다.\"");
+    L.push("올바름: \"그럼 오후 일곱시로 부탁드립니다.\"");
+    L.push("");
+    L.push("상대에게 물어야 하는 것은 오직 하나입니다. 그 일시에 자리가 있는지.");
     L.push("");
 
     L.push("## 가장 중요한 원칙 — 조건 수용과 예약 확정은 다릅니다");
@@ -582,7 +728,8 @@
     L.push("");
 
     L.push("## 종료 멘트");
-    L.push("확정된 경우에만: 날짜, 시각, 인원, 예약자명을 한 번 복창하고 감사 인사 후 종료합니다.");
+    L.push("확정된 경우에만: 날짜, 시각, 인원, 예약자명을 한 번에 복창하고 감사 인사 후 종료합니다.");
+    L.push("이때도 맞는지 묻지 말고 평서문으로 말합니다.");
     L.push("보류·불가한 경우: 확인 후 다시 연락드리겠다고 안내하고 종료합니다.");
     L.push("확정되지 않은 상태에서 \"예약 감사합니다\"라고 말하지 마세요.");
     L.push("");

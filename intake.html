@@ -156,6 +156,14 @@
   .who button { font: inherit; font-size: 12px; min-height: 30px; padding: 0 10px; border-radius: 15px;
     border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
 
+  /* 패스 */
+  .credit { border: 2px solid var(--teal); border-radius: 11px; padding: 13px 14px;
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .credit input { width: 19px; height: 19px; min-height: 19px; margin-top: 2px; flex: 0 0 auto; accent-color: var(--teal); }
+  .credit .t { flex: 1 1 auto; font-size: 14px; }
+  .credit .t b { display: block; color: var(--teal); }
+  .credit .t span { font-size: 12.5px; color: var(--muted); }
+
   /* 알림 */
   .toast { display: none; border-radius: 11px; padding: 14px 16px; font-size: 14.5px; font-weight: 600; }
   .toast.ok { background: var(--gold); color: #fff; }
@@ -312,7 +320,9 @@
 
       <div class="hr"></div>
 
-      <div class="total"><span class="k" data-t="totalK"></span><span class="v">₩9,900</span></div>
+      <div id="creditBox" style="display:none"></div>
+
+      <div class="total"><span class="k" data-t="totalK"></span><span class="v" id="totalAmt">₩9,900</span></div>
 
       <label class="agree">
         <input type="checkbox" id="ok">
@@ -337,6 +347,11 @@
 
   var T = {
     ja: {
+      creditTitle: "残りのパス",
+      creditUse: "パスを使う（残り {n} 件）",
+      creditExp: "有効期限 {d}",
+      creditFree: "追加のお支払いはありません",
+      payNew: "今回だけお支払い（₩9,900）",
       stepInput: "入力",
       stepPay: "お支払い",
       stepResult: "結果",
@@ -404,6 +419,11 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      creditTitle: "剩餘次數",
+      creditUse: "使用次數（剩 {n} 次）",
+      creditExp: "有效期限 {d}",
+      creditFree: "本次不需額外付款",
+      payNew: "本次單獨付款（₩9,900）",
       stepInput: "填寫",
       stepPay: "付款",
       stepResult: "結果",
@@ -471,6 +491,11 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      creditTitle: "剩余次数",
+      creditUse: "使用次数（剩 {n} 次）",
+      creditExp: "有效期至 {d}",
+      creditFree: "本次无需额外付款",
+      payNew: "本次单独付款（₩9,900）",
       stepInput: "填写",
       stepPay: "付款",
       stepResult: "结果",
@@ -538,6 +563,11 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      creditTitle: "Your pass",
+      creditUse: "Use a pass ({n} left)",
+      creditExp: "Valid until {d}",
+      creditFree: "No payment needed this time",
+      payNew: "Pay for this one (₩9,900)",
       stepInput: "Details",
       stepPay: "Payment",
       stepResult: "Result",
@@ -605,6 +635,11 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      creditTitle: "남은 패스",
+      creditUse: "패스 사용 (남은 {n}건)",
+      creditExp: "{d}까지 유효",
+      creditFree: "이번 요청은 추가 결제가 없습니다",
+      payNew: "이번만 결제 (₩9,900)",
       stepInput: "입력",
       stepPay: "결제",
       stepResult: "결과",
@@ -743,9 +778,59 @@
       user = s ? s.user : null;
       authToken = s ? s.access_token : null;
       drawAuth();
+      loadCredits();
     }
     sb.auth.getSession().then(function (r) { apply(r.data && r.data.session); });
     sb.auth.onAuthStateChange(function (_e, s) { apply(s); });
+  }
+
+
+  /* ---------- 패스(잔여 횟수) ---------- */
+  var myCredit = null, useCredit = false;
+
+  function loadCredits() {
+    var box = $("creditBox");
+    if (!box) return;
+    if (!user || !authToken) { box.style.display = "none"; useCredit = false; drawTotal(); return; }
+
+    api("credits?select=id,total,used,expires_at&order=expires_at.asc")
+      .then(function (rs) {
+        var now = Date.now();
+        var live = (rs || []).filter(function (c) {
+          var left = (c.total || 0) - (c.used || 0);
+          var ok = !c.expires_at || new Date(c.expires_at).getTime() > now;
+          return left > 0 && ok;
+        });
+        if (!live.length) { myCredit = null; box.style.display = "none"; useCredit = false; drawTotal(); return; }
+
+        myCredit = live[0];
+        var left = myCredit.total - myCredit.used;
+        var exp = myCredit.expires_at
+          ? new Intl.DateTimeFormat(
+              { ja:"ja-JP","zh-TW":"zh-TW","zh-CN":"zh-CN",en:"en-US",ko:"ko-KR" }[lang] || "ja-JP",
+              { year:"numeric", month:"short", day:"numeric" }).format(new Date(myCredit.expires_at))
+          : "";
+
+        useCredit = true;
+        box.style.display = "block";
+        box.innerHTML =
+          "<label class='credit'>" +
+            "<input type='checkbox' id='useCredit' checked>" +
+            "<span class='t'><b>" + t("creditUse").replace("{n}", left) + "</b>" +
+            "<span>" + (exp ? t("creditExp").replace("{d}", exp) + " · " : "") + t("creditFree") + "</span></span>" +
+          "</label>";
+        $("useCredit").addEventListener("change", function () {
+          useCredit = this.checked; drawTotal();
+        });
+        drawTotal();
+      })
+      .catch(function () { box.style.display = "none"; });
+  }
+
+  function drawTotal() {
+    var el = $("totalAmt");
+    if (!el) return;
+    el.textContent = (useCredit && myCredit) ? "₩0" : "₩9,900";
   }
 
   /* ---------- 화면 ---------- */
@@ -766,7 +851,7 @@
     $("venue").placeholder = t("venuePh");
     $("note").placeholder = t("notePh");
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
-    drawAuth(); drawSummary();
+    drawAuth(); drawSummary(); loadCredits();
   }
 
   Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
@@ -907,6 +992,17 @@
       .then(function (r) {
         ids.request = r[0].id;
         ids.code = r[0].lookup_code || "";
+        // 패스를 썼다면 사용 횟수를 올린다
+        if (useCredit && myCredit) {
+          api("credits?id=eq." + myCredit.id, {
+            method: "PATCH", prefer: "return=minimal",
+            body: { used: myCredit.used + 1 }
+          }).catch(function () {});
+          api("requests?id=eq." + ids.request, {
+            method: "PATCH", prefer: "return=minimal",
+            body: { credit_id: myCredit.id }
+          }).catch(function () {});
+        }
         return api("request_slots", { method: "POST", prefer: "return=minimal",
           body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
       })
