@@ -120,12 +120,12 @@
   /* ===== 상단 바 ===== */
   .bar { border-bottom: 1px solid var(--line); background: rgba(255,251,248,.92);
     backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 20; }
-  .bar .in { height: 68px; display: flex; flex-wrap: wrap; gap: 14px;
-    align-items: center; justify-content: space-between; }
+  .bar .in { min-height: 68px; display: flex; flex-wrap: wrap; gap: 9px;
+    align-items: center; justify-content: space-between; padding: 10px 0; }
   .logo { display: flex; align-items: center; gap: 9px; font-size: 18px; font-weight: 800;
     color: var(--teal); text-decoration: none; }
   .logo .dot { width: 10px; height: 10px; border-radius: 5px; background: var(--coral); }
-  .right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .right { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
   .langwrap { position: relative; }
   .langbtn { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 13.5px;
     min-height: 38px; padding: 0 13px; border-radius: 19px; border: 1px solid var(--line);
@@ -134,9 +134,8 @@
   .langbtn:hover { border-color: var(--teal); }
   .langbtn svg { width: 16px; height: 16px; fill: none; stroke: var(--teal); stroke-width: 1.8;
     stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
-  .langbtn .caret { width: 13px; height: 13px; stroke: var(--muted); stroke-width: 2.4;
-    transition: transform .2s; }
-  .langbtn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .langTxt { font-size: 13px; }
+  @media (max-width: 720px) { .langTxt { display: none; } .langbtn { padding: 0 11px; } }
   .langbtn[aria-expanded="true"] { border-color: var(--teal); background: var(--mist); }
 
   .langs { display: none; position: absolute; right: 0; top: calc(100% + 7px); z-index: 30;
@@ -159,16 +158,37 @@
     border-bottom: 1px solid transparent; transition: color .18s, border-color .18s; }
   .chk-link:hover { color: var(--teal); border-color: var(--teal); }
 
-  /* 계정 */
-  .acct { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-  .acct .me { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted);
-    background: var(--mist); border-radius: 18px; padding: 6px 13px; }
-  .acct .me b { color: var(--teal); font-weight: 700; }
-  .acct button { font: inherit; font-size: 12.5px; min-height: 34px; padding: 0 12px; border-radius: 17px;
-    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
-    transition: border-color .18s, color .18s; }
-  .acct button:hover { border-color: var(--teal); color: var(--teal); }
-  .acct .gbtn { background: var(--card); color: var(--ink); }
+  /* 계정 드롭다운 */
+  .acctwrap { position: relative; }
+  .acctbtn { position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 19px; border: 1px solid var(--line);
+    background: var(--card); cursor: pointer; padding: 0;
+    transition: border-color .18s, background .18s; }
+  .acctbtn:hover { border-color: var(--teal); background: var(--mist); }
+  .acctbtn[aria-expanded="true"] { border-color: var(--teal); background: var(--mist); }
+  .acctbtn svg { width: 18px; height: 18px; fill: none; stroke: var(--teal); stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .dot-badge { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+    border-radius: 5px; background: var(--gold); border: 2px solid var(--bg); }
+
+  .acctmenu { display: none; position: absolute; right: 0; top: calc(100% + 8px); z-index: 30;
+    min-width: 232px; padding: 8px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 13px; box-shadow: 0 8px 26px rgba(15,94,92,.14); }
+  .acctmenu.open { display: block; animation: dropIn .18s ease both; }
+  .acctmenu .who { padding: 10px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+  .acctmenu .who b { display: block; font-size: 14px; }
+  .acctmenu .who span { font-size: 12.5px; color: var(--muted); }
+  .acctmenu .pass { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px;
+    font-size: 12.5px; font-weight: 700; color: #fff; background: var(--gold);
+    padding: 4px 11px; border-radius: 12px; }
+  .acctmenu a, .acctmenu button { display: flex; align-items: center; gap: 9px; width: 100%;
+    font: inherit; font-size: 14px; min-height: 42px; padding: 0 12px; border-radius: 8px;
+    border: 0; background: transparent; color: var(--ink); cursor: pointer; text-align: left;
+    text-decoration: none; transition: background .14s; }
+  .acctmenu a:hover, .acctmenu button:hover { background: var(--mist); }
+  .acctmenu svg { width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+  .acctmenu .out { color: var(--muted); font-size: 13.5px; }
 
   /* ===== 공통 버튼 ===== */
   .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px;
@@ -247,7 +267,7 @@
   .label { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; color: var(--coral); }
 
   /* 최근 요청 */
-  .mine { padding: 0 28px 44px; }
+  .mine { padding: 0 28px 40px; margin-top: -24px; }
   .mineToggle { display: inline-flex; align-items: center; gap: 9px; font: inherit; font-size: 14px;
     font-weight: 600; min-height: 44px; padding: 0 18px; border-radius: 22px;
     border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
@@ -439,17 +459,21 @@
   <div class="wrap in">
     <a class="logo" href="#"><span class="dot"></span>CallBridge</a>
     <div class="right">
+      <div class="acctwrap">
+        <button type="button" class="acctbtn" id="acctBtn" aria-expanded="false" aria-haspopup="menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+          <span class="dot-badge" id="acctBadge" hidden></span>
+        </button>
+        <div class="acctmenu" id="acctMenu" role="menu"></div>
+      </div>
+      <a href="intake.html" class="btn sm" data-t="navCta">予約する</a>
       <div class="langwrap">
-        <button type="button" class="langbtn" id="langBtn" aria-expanded="false" aria-haspopup="listbox">
+        <button type="button" class="langbtn" id="langBtn" aria-expanded="false" aria-haspopup="listbox" aria-label="Language">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
-          <span id="langNow">日本語</span>
-          <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <span id="langNow" class="langTxt">日本語</span>
         </button>
         <nav class="langs" id="langs" role="listbox" aria-label="Language"></nav>
       </div>
-      <div id="authBox"></div>
-      <a href="result.html" class="chk-link" data-t="checkNav"></a>
-      <a href="intake.html" class="btn sm" data-t="navCta">予約する</a>
     </div>
   </div>
 </header>
@@ -683,6 +707,9 @@
   "use strict";
   var T = {
     ja: { label:"日本語",
+      myAcct: "マイページ",
+      notSigned: "ログインしていません",
+      signInHint: "ログインすると予約の確認が簡単になります",
       myOpen: "マイリクエストを見る",
       myClose: "閉じる",
       myTitle: "最近のリクエスト",
@@ -784,6 +811,9 @@
       footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
     },
     "zh-TW": { label:"繁體中文",
+      myAcct: "我的",
+      notSigned: "尚未登入",
+      signInHint: "登入後可更方便查詢訂位",
       myOpen: "查看我的委託",
       myClose: "收起",
       myTitle: "最近的委託",
@@ -885,6 +915,9 @@
       footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
     },
     "zh-CN": { label:"简体中文",
+      myAcct: "我的",
+      notSigned: "尚未登录",
+      signInHint: "登录后可更方便查询预订",
       myOpen: "查看我的委托",
       myClose: "收起",
       myTitle: "最近的委托",
@@ -986,6 +1019,9 @@
       footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
     },
     en: { label:"English",
+      myAcct: "Account",
+      notSigned: "Not signed in",
+      signInHint: "Sign in to find your bookings easily",
       myOpen: "View my requests",
       myClose: "Hide",
       myTitle: "Your recent requests",
@@ -1087,6 +1123,9 @@
       footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
     },
     ko: { label:"한국어",
+      myAcct: "내 정보",
+      notSigned: "로그인하지 않았습니다",
+      signInHint: "로그인하면 예약 조회가 간편해집니다",
       myOpen: "내 요청 보기",
       myClose: "접기",
       myTitle: "최근 요청",
@@ -1255,27 +1294,78 @@
              key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW" };
   var sb = null, user = null, authToken = null, passLeft = 0;
 
+  function icon(d) {
+    return "<svg viewBox='0 0 24 24' aria-hidden='true'>" + d + "</svg>";
+  }
+
   function drawAuth() {
-    var el = document.getElementById("authBox");
-    if (!el) return;
+    var menu = document.getElementById("acctMenu");
+    var badge = document.getElementById("acctBadge");
+    if (!menu) return;
+
+    var ICO_CHECK = "<path d='M5 4h14v16l-7-3.5L5 20z'/>";
+    var ICO_SEARCH = "<circle cx='11' cy='11' r='7'/><path d='M20 20l-3.5-3.5'/>";
+    var ICO_OUT = "<path d='M15 4h4v16h-4'/><path d='M10 8l-4 4 4 4'/><path d='M6 12h9'/>";
+    var ICO_IN = "<path d='M9 4H5v16h4'/><path d='M14 8l4 4-4 4'/><path d='M18 12H9'/>";
+
     if (user) {
-      var name = (user.email || "").split("@")[0];
-      el.innerHTML = "<span class='acct'>" +
-        "<span class='me'>" + (passLeft > 0 ? "<b>" + t("passLeft").replace("{n}", passLeft) + "</b> · " : "") +
-        name + "</span>" +
-        "<button type='button' id='signOut'>" + t("signOut") + "</button></span>";
-      document.getElementById("signOut").addEventListener("click", function () {
+      var nm = (user.email || "").split("@")[0];
+      menu.innerHTML =
+        "<div class='who'><b>" + nm + "</b><span>" + (user.email || "") + "</span>" +
+        (passLeft > 0 ? "<span class='pass'>" + t("passLeft").replace("{n}", passLeft) + "</span>" : "") +
+        "</div>" +
+        "<button type='button' id='mMine'>" + icon(ICO_CHECK) + t("myOpen") + "</button>" +
+        "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>" +
+        "<button type='button' class='out' id='mOut'>" + icon(ICO_OUT) + t("signOut") + "</button>";
+
+      if (badge) badge.hidden = passLeft <= 0;
+
+      document.getElementById("mOut").addEventListener("click", function () {
         if (sb) sb.auth.signOut().then(function () { location.reload(); });
       });
+      document.getElementById("mMine").addEventListener("click", function () {
+        closeAcct();
+        var sec = document.getElementById("mineSec");
+        var tg = document.getElementById("mineToggle");
+        if (sec && tg) {
+          sec.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (tg.getAttribute("aria-expanded") !== "true") tg.click();
+        }
+      });
     } else {
-      el.innerHTML = "<span class='acct'><button type='button' class='gbtn' id='signIn'>" +
-        t("signIn") + "</button></span>";
-      document.getElementById("signIn").addEventListener("click", function () {
+      menu.innerHTML =
+        "<div class='who'><b>" + t("notSigned") + "</b><span>" + t("signInHint") + "</span></div>" +
+        "<button type='button' id='mIn'>" + icon(ICO_IN) + t("signIn") + "</button>" +
+        "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>";
+
+      if (badge) badge.hidden = true;
+
+      document.getElementById("mIn").addEventListener("click", function () {
         if (sb) sb.auth.signInWithOAuth({ provider: "google",
           options: { redirectTo: location.origin + location.pathname } });
       });
     }
   }
+
+  function closeAcct() {
+    var m = document.getElementById("acctMenu"), b = document.getElementById("acctBtn");
+    if (m) m.classList.remove("open");
+    if (b) b.setAttribute("aria-expanded", "false");
+  }
+
+  (function initAcct() {
+    var b = document.getElementById("acctBtn"), m = document.getElementById("acctMenu");
+    if (!b || !m) return;
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = m.classList.toggle("open");
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", function (e) {
+      if (!m.contains(e.target) && !b.contains(e.target)) closeAcct();
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAcct(); });
+  })();
 
   function loadPass() {
     if (!authToken) { passLeft = 0; drawAuth(); return; }
