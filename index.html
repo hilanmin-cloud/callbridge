@@ -344,6 +344,22 @@
 </style>
 </head>
 <body>
+<script>
+/* 운영자 로그인이 메인으로 튕긴 경우, 인증 정보를 그대로 들고 원래 화면으로 되돌린다 */
+(function () {
+  "use strict";
+  try {
+    var back = sessionStorage.getItem("cb-back");
+    if (!back) return;
+    var h = location.hash || "";
+    var q = location.search || "";
+    // 구글 로그인이 남기는 흔적이 있을 때만 이동한다
+    if (h.indexOf("access_token") < 0 && q.indexOf("code=") < 0) return;
+    sessionStorage.removeItem("cb-back");
+    location.replace(back + q + h);
+  } catch (e) {}
+})();
+</script>
 
 
 <a class="skip" href="#main" data-t="skip">本文へスキップ</a>

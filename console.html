@@ -288,9 +288,11 @@
     if (!sb) { showGate("로그인 모듈을 불러오지 못했습니다."); return; }
 
     $("gateSignIn").addEventListener("click", function () {
+      // 로그인 후 돌아올 위치를 남긴다 (메인으로 튕기는 경우 대비)
+      try { sessionStorage.setItem("cb-back", location.pathname + location.search); } catch (e) {}
       sb.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: location.origin + location.pathname }
+        options: { redirectTo: location.origin + location.pathname + location.search }
       });
     });
 
