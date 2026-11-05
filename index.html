@@ -126,12 +126,33 @@
     color: var(--teal); text-decoration: none; }
   .logo .dot { width: 10px; height: 10px; border-radius: 5px; background: var(--coral); }
   .right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .langs { display: flex; gap: 4px; flex-wrap: wrap; }
-  .langs button { font: inherit; font-size: 12.5px; min-height: 36px; padding: 0 11px; border-radius: 18px;
-    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
-    transition: background .18s, color .18s, border-color .18s; }
-  .langs button:hover { border-color: var(--teal); color: var(--teal); }
-  .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+  .langwrap { position: relative; }
+  .langbtn { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 13.5px;
+    min-height: 38px; padding: 0 13px; border-radius: 19px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); cursor: pointer;
+    transition: border-color .18s, background .18s; }
+  .langbtn:hover { border-color: var(--teal); }
+  .langbtn svg { width: 16px; height: 16px; fill: none; stroke: var(--teal); stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+  .langbtn .caret { width: 13px; height: 13px; stroke: var(--muted); stroke-width: 2.4;
+    transition: transform .2s; }
+  .langbtn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .langbtn[aria-expanded="true"] { border-color: var(--teal); background: var(--mist); }
+
+  .langs { display: none; position: absolute; right: 0; top: calc(100% + 7px); z-index: 30;
+    flex-direction: column; gap: 2px; min-width: 150px; padding: 6px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(15,94,92,.14); }
+  .langs.open { display: flex; animation: dropIn .18s ease both; }
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+  .langs button { font: inherit; font-size: 14px; min-height: 42px; padding: 0 13px; border-radius: 8px;
+    border: 0; background: transparent; color: var(--ink); cursor: pointer; text-align: left;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    transition: background .14s; }
+  .langs button:hover { background: var(--mist); }
+  .langs button[aria-pressed="true"] { background: var(--mist); color: var(--teal); font-weight: 700; }
+  .langs button[aria-pressed="true"]::after { content: ""; width: 5px; height: 9px;
+    border: solid var(--teal); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px,-1px); }
 
   .chk-link { font-size: 13.5px; color: var(--muted); text-decoration: none;
     min-height: 36px; display: inline-flex; align-items: center; padding: 0 4px;
@@ -226,8 +247,19 @@
   .label { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; color: var(--coral); }
 
   /* 최근 요청 */
-  .mine { padding: 0 28px 56px; }
-  .mine .mt { margin: 0 0 14px; font-size: 18px; font-weight: 700; }
+  .mine { padding: 0 28px 44px; }
+  .mineToggle { display: inline-flex; align-items: center; gap: 9px; font: inherit; font-size: 14px;
+    font-weight: 600; min-height: 44px; padding: 0 18px; border-radius: 22px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
+    transition: border-color .18s, background .18s; }
+  .mineToggle:hover { border-color: var(--teal); background: var(--mist); }
+  .mineToggle svg { width: 16px; height: 16px; fill: none; stroke: var(--teal); stroke-width: 1.9;
+    stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+  .mineToggle .caret { width: 13px; height: 13px; stroke: var(--muted); stroke-width: 2.4;
+    transition: transform .2s; }
+  .mineToggle[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .mineToggle[aria-expanded="true"] { border-color: var(--teal); background: var(--mist); }
+  #mineList { animation: dropIn .22s ease both; max-width: 640px; }
   .mineRow { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
     background: var(--card); border: 1px solid var(--line); border-radius: 13px;
     padding: 14px 16px; margin-bottom: 9px; }
@@ -407,7 +439,14 @@
   <div class="wrap in">
     <a class="logo" href="#"><span class="dot"></span>CallBridge</a>
     <div class="right">
-      <nav class="langs" id="langs" aria-label="Language"></nav>
+      <div class="langwrap">
+        <button type="button" class="langbtn" id="langBtn" aria-expanded="false" aria-haspopup="listbox">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+          <span id="langNow">日本語</span>
+          <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <nav class="langs" id="langs" role="listbox" aria-label="Language"></nav>
+      </div>
       <div id="authBox"></div>
       <a href="result.html" class="chk-link" data-t="checkNav"></a>
       <a href="intake.html" class="btn sm" data-t="navCta">予約する</a>
@@ -456,8 +495,12 @@
 
   <!-- 로그인 사용자: 최근 요청 -->
   <section class="wrap mine" id="mineSec" style="display:none">
-    <h2 class="mt" data-t="myTitle"></h2>
-    <div id="mineList"></div>
+    <button type="button" class="mineToggle" id="mineToggle" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16l-7-3.5L5 20z"/></svg>
+      <span data-t="myOpen"></span>
+      <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div id="mineList" style="display:none; margin-top:12px"></div>
   </section>
 
   <!-- 02-A 이용 방법 -->
@@ -640,6 +683,8 @@
   "use strict";
   var T = {
     ja: { label:"日本語",
+      myOpen: "マイリクエストを見る",
+      myClose: "閉じる",
       myTitle: "最近のリクエスト",
       myNone: "まだリクエストがありません",
       myView: "確認",
@@ -739,6 +784,8 @@
       footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
     },
     "zh-TW": { label:"繁體中文",
+      myOpen: "查看我的委託",
+      myClose: "收起",
       myTitle: "最近的委託",
       myNone: "尚無委託紀錄",
       myView: "查看",
@@ -838,6 +885,8 @@
       footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
     },
     "zh-CN": { label:"简体中文",
+      myOpen: "查看我的委托",
+      myClose: "收起",
       myTitle: "最近的委托",
       myNone: "暂无委托记录",
       myView: "查看",
@@ -937,6 +986,8 @@
       footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
     },
     en: { label:"English",
+      myOpen: "View my requests",
+      myClose: "Hide",
       myTitle: "Your recent requests",
       myNone: "No requests yet",
       myView: "View",
@@ -1036,6 +1087,8 @@
       footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
     },
     ko: { label:"한국어",
+      myOpen: "내 요청 보기",
+      myClose: "접기",
       myTitle: "최근 요청",
       myNone: "아직 요청이 없습니다",
       myView: "보기",
@@ -1169,12 +1222,30 @@
     Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-l") === lang ? "true" : "false");
     });
+    if (langNow) langNow.textContent = T[lang].label;
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
     if (typeof drawAuth === "function") drawAuth();
   }
 
+  var langBtn = document.getElementById("langBtn");
+  var langNow = document.getElementById("langNow");
+
+  function closeLang() { box.classList.remove("open"); langBtn.setAttribute("aria-expanded", "false"); }
+  function toggleLang() {
+    var open = box.classList.toggle("open");
+    langBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  langBtn.addEventListener("click", function (e) { e.stopPropagation(); toggleLang(); });
+  document.addEventListener("click", function (e) {
+    if (!box.contains(e.target) && e.target !== langBtn) closeLang();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeLang(); });
+
   Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
-    b.addEventListener("click", function () { lang = b.getAttribute("data-l"); apply(); });
+    b.addEventListener("click", function () {
+      lang = b.getAttribute("data-l"); apply(); closeLang();
+    });
   });
 
   apply();
@@ -1225,11 +1296,26 @@
       .catch(function () { drawAuth(); });
   }
 
+  var mineLoaded = false;
+
   function loadMine() {
     var sec = document.getElementById("mineSec");
+    if (!sec) return;
+    sec.style.display = authToken ? "block" : "none";
+    mineLoaded = false;
+    var list = document.getElementById("mineList");
+    if (list) { list.style.display = "none"; list.innerHTML = ""; }
+    var tg = document.getElementById("mineToggle");
+    if (tg) {
+      tg.setAttribute("aria-expanded", "false");
+      tg.querySelector("span").textContent = t("myOpen");
+    }
+  }
+
+  function fetchMine() {
     var box = document.getElementById("mineList");
-    if (!sec || !box) return;
-    if (!authToken) { sec.style.display = "none"; return; }
+    if (!box || !authToken) return;
+    box.innerHTML = "<p class='mineNone'>…</p>";
 
     fetch(SB.url + "/rest/v1/requests?select=lookup_code,venue_name_raw,party_size,status,created_at" +
           "&order=created_at.desc&limit=5", {
@@ -1237,14 +1323,10 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (rs) {
-        sec.style.display = "block";
-        if (!rs || !rs.length) {
-          box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>";
-          return;
-        }
+        if (!rs || !rs.length) { box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>"; return; }
         box.innerHTML = rs.map(function (q) {
           var nm = (q.venue_name_raw || "").split(" | ")[0] || "-";
-          var cls = q.status === "confirmed" || q.status === "alt_confirmed" ? "confirmed"
+          var cls = (q.status === "confirmed" || q.status === "alt_confirmed") ? "confirmed"
                   : q.status === "received" ? "received" : "";
           return "<div class='mineRow'>" +
             "<span class='l'><b>" + nm + "</b><span>" + q.party_size + " · " + (q.lookup_code || "") + "</span></span>" +
@@ -1252,9 +1334,29 @@
             (q.lookup_code ? "<a href='result.html#" + encodeURIComponent(q.lookup_code) + "'>" + t("myView") + "</a>" : "") +
           "</div>";
         }).join("");
+        mineLoaded = true;
       })
-      .catch(function () { sec.style.display = "none"; });
+      .catch(function () { box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>"; });
   }
+
+  (function initMineToggle() {
+    var tg = document.getElementById("mineToggle");
+    if (!tg) return;
+    tg.addEventListener("click", function () {
+      var box = document.getElementById("mineList");
+      var open = tg.getAttribute("aria-expanded") === "true";
+      if (open) {
+        tg.setAttribute("aria-expanded", "false");
+        box.style.display = "none";
+        tg.querySelector("span").textContent = t("myOpen");
+      } else {
+        tg.setAttribute("aria-expanded", "true");
+        box.style.display = "block";
+        tg.querySelector("span").textContent = t("myClose");
+        if (!mineLoaded) fetchMine();
+      }
+    });
+  })();
 
   function initAuth() {
     if (!sb && window.supabase) {
