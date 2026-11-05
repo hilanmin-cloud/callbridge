@@ -189,6 +189,24 @@
   .acctmenu svg { width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 1.8;
     stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
   .acctmenu .out { color: var(--muted); font-size: 13.5px; }
+  .acctmenu { max-height: min(78vh, 560px); overflow-y: auto; }
+
+  /* 메뉴 안 최근 요청 */
+  .mineWrap { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
+  .mineWrap .ttl { font-size: 12px; font-weight: 700; color: var(--muted);
+    padding: 7px 12px 5px; letter-spacing: .3px; }
+  .mineRow { display: block; padding: 10px 12px; border-radius: 9px; text-decoration: none;
+    transition: background .14s; }
+  .mineRow:hover { background: var(--mist); }
+  .mineRow .top { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+  .mineRow b { font-size: 13.5px; color: var(--ink); font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mineRow .st { flex: 0 0 auto; font-size: 11px; font-weight: 700; padding: 3px 9px;
+    border-radius: 10px; background: var(--mist); color: var(--muted); }
+  .mineRow .st.confirmed { background: var(--gold); color: #fff; }
+  .mineRow .st.received { background: var(--soft); color: var(--coral); }
+  .mineRow .sub2 { display: block; font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .mineNone { font-size: 13px; color: var(--muted); padding: 9px 12px 11px; margin: 0; }
 
   /* ===== 공통 버튼 ===== */
   .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px;
@@ -265,36 +283,6 @@
   /* ===== 섹션 공통 ===== */
   section h2.t { margin: 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.35; font-weight: 800; letter-spacing: -.01em; }
   .label { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; color: var(--coral); }
-
-  /* 최근 요청 */
-  .mine { padding: 0 28px 40px; margin-top: -24px; }
-  .mineToggle { display: inline-flex; align-items: center; gap: 9px; font: inherit; font-size: 14px;
-    font-weight: 600; min-height: 44px; padding: 0 18px; border-radius: 22px;
-    border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
-    transition: border-color .18s, background .18s; }
-  .mineToggle:hover { border-color: var(--teal); background: var(--mist); }
-  .mineToggle svg { width: 16px; height: 16px; fill: none; stroke: var(--teal); stroke-width: 1.9;
-    stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
-  .mineToggle .caret { width: 13px; height: 13px; stroke: var(--muted); stroke-width: 2.4;
-    transition: transform .2s; }
-  .mineToggle[aria-expanded="true"] .caret { transform: rotate(180deg); }
-  .mineToggle[aria-expanded="true"] { border-color: var(--teal); background: var(--mist); }
-  #mineList { animation: dropIn .22s ease both; max-width: 640px; }
-  .mineRow { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--line); border-radius: 13px;
-    padding: 14px 16px; margin-bottom: 9px; }
-  .mineRow .l { flex: 1 1 200px; min-width: 0; }
-  .mineRow .l b { display: block; font-size: 15px; }
-  .mineRow .l span { font-size: 13px; color: var(--muted); }
-  .mineRow .st { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 11px;
-    background: var(--mist); color: var(--muted); }
-  .mineRow .st.confirmed { background: var(--gold); color: #fff; }
-  .mineRow .st.received { background: var(--soft); color: var(--coral); }
-  .mineRow a { font-size: 13.5px; font-weight: 600; color: var(--teal); text-decoration: none;
-    min-height: 38px; display: inline-flex; align-items: center; padding: 0 13px;
-    border: 1px solid var(--line); border-radius: 19px; transition: border-color .18s; }
-  .mineRow a:hover { border-color: var(--teal); }
-  .mineNone { font-size: 14px; color: var(--muted); }
 
   /* ===== 02-A 이용 방법 (회색 배경, 가로 띠) ===== */
   .how { background: var(--mist); padding: 112px 0 96px; }
@@ -517,16 +505,6 @@
     </div>
   </section>
 
-  <!-- 로그인 사용자: 최근 요청 -->
-  <section class="wrap mine" id="mineSec" style="display:none">
-    <button type="button" class="mineToggle" id="mineToggle" aria-expanded="false">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16l-7-3.5L5 20z"/></svg>
-      <span data-t="myOpen"></span>
-      <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div id="mineList" style="display:none; margin-top:12px"></div>
-  </section>
-
   <!-- 02-A 이용 방법 -->
   <section class="how" id="how">
     <div class="wrap">
@@ -710,11 +688,8 @@
       myAcct: "マイページ",
       notSigned: "ログインしていません",
       signInHint: "ログインすると予約の確認が簡単になります",
-      myOpen: "マイリクエストを見る",
-      myClose: "閉じる",
       myTitle: "最近のリクエスト",
       myNone: "まだリクエストがありません",
-      myView: "確認",
       checkNav: "予約を確認",
       checkFoot: "予約状況の確認",
       signIn: "Googleでログイン",
@@ -814,11 +789,8 @@
       myAcct: "我的",
       notSigned: "尚未登入",
       signInHint: "登入後可更方便查詢訂位",
-      myOpen: "查看我的委託",
-      myClose: "收起",
       myTitle: "最近的委託",
       myNone: "尚無委託紀錄",
-      myView: "查看",
       checkNav: "查詢訂位",
       checkFoot: "查詢訂位狀態",
       signIn: "使用 Google 登入",
@@ -918,11 +890,8 @@
       myAcct: "我的",
       notSigned: "尚未登录",
       signInHint: "登录后可更方便查询预订",
-      myOpen: "查看我的委托",
-      myClose: "收起",
       myTitle: "最近的委托",
       myNone: "暂无委托记录",
-      myView: "查看",
       checkNav: "查询预订",
       checkFoot: "查询预订状态",
       signIn: "使用 Google 登录",
@@ -1022,11 +991,8 @@
       myAcct: "Account",
       notSigned: "Not signed in",
       signInHint: "Sign in to find your bookings easily",
-      myOpen: "View my requests",
-      myClose: "Hide",
       myTitle: "Your recent requests",
       myNone: "No requests yet",
-      myView: "View",
       checkNav: "Check booking",
       checkFoot: "Check your booking",
       signIn: "Sign in with Google",
@@ -1126,11 +1092,8 @@
       myAcct: "내 정보",
       notSigned: "로그인하지 않았습니다",
       signInHint: "로그인하면 예약 조회가 간편해집니다",
-      myOpen: "내 요청 보기",
-      myClose: "접기",
       myTitle: "최근 요청",
       myNone: "아직 요청이 없습니다",
-      myView: "보기",
       checkNav: "예약 조회",
       checkFoot: "예약 상태 조회",
       signIn: "Google로 로그인",
@@ -1314,7 +1277,8 @@
         "<div class='who'><b>" + nm + "</b><span>" + (user.email || "") + "</span>" +
         (passLeft > 0 ? "<span class='pass'>" + t("passLeft").replace("{n}", passLeft) + "</span>" : "") +
         "</div>" +
-        "<button type='button' id='mMine'>" + icon(ICO_CHECK) + t("myOpen") + "</button>" +
+        "<div class='mineWrap' id='mineWrap'><p class='ttl'>" + t("myTitle") + "</p>" +
+        "<p class='mineNone' id='mineList'>…</p></div>" +
         "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>" +
         "<button type='button' class='out' id='mOut'>" + icon(ICO_OUT) + t("signOut") + "</button>";
 
@@ -1323,15 +1287,7 @@
       document.getElementById("mOut").addEventListener("click", function () {
         if (sb) sb.auth.signOut().then(function () { location.reload(); });
       });
-      document.getElementById("mMine").addEventListener("click", function () {
-        closeAcct();
-        var sec = document.getElementById("mineSec");
-        var tg = document.getElementById("mineToggle");
-        if (sec && tg) {
-          sec.scrollIntoView({ behavior: "smooth", block: "center" });
-          if (tg.getAttribute("aria-expanded") !== "true") tg.click();
-        }
-      });
+      if (mineCache) renderMine();
     } else {
       menu.innerHTML =
         "<div class='who'><b>" + t("notSigned") + "</b><span>" + t("signInHint") + "</span></div>" +
@@ -1360,6 +1316,7 @@
       e.stopPropagation();
       var open = m.classList.toggle("open");
       b.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open && user) { if (mineCache) renderMine(); else fetchMine(); }
     });
     document.addEventListener("click", function (e) {
       if (!m.contains(e.target) && !b.contains(e.target)) closeAcct();
@@ -1386,67 +1343,39 @@
       .catch(function () { drawAuth(); });
   }
 
-  var mineLoaded = false;
+  var mineCache = null;
 
-  function loadMine() {
-    var sec = document.getElementById("mineSec");
-    if (!sec) return;
-    sec.style.display = authToken ? "block" : "none";
-    mineLoaded = false;
-    var list = document.getElementById("mineList");
-    if (list) { list.style.display = "none"; list.innerHTML = ""; }
-    var tg = document.getElementById("mineToggle");
-    if (tg) {
-      tg.setAttribute("aria-expanded", "false");
-      tg.querySelector("span").textContent = t("myOpen");
+  function renderMine() {
+    var box = document.getElementById("mineList");
+    if (!box) return;
+    if (!mineCache) { box.textContent = "…"; return; }
+    if (!mineCache.length) {
+      box.outerHTML = "<p class='mineNone' id='mineList'>" + t("myNone") + "</p>";
+      return;
     }
+    var html = mineCache.map(function (q) {
+      var nm = (q.venue_name_raw || "").split(" | ")[0] || "-";
+      var cls = (q.status === "confirmed" || q.status === "alt_confirmed") ? "confirmed"
+              : q.status === "received" ? "received" : "";
+      return "<a class='mineRow' href='result.html#" + encodeURIComponent(q.lookup_code || "") + "'>" +
+        "<span class='top'><b>" + nm + "</b><span class='st " + cls + "'>" + q.status + "</span></span>" +
+        "<span class='sub2'>" + q.party_size + " · " + (q.lookup_code || "") + "</span></a>";
+    }).join("");
+    box.outerHTML = "<div id='mineList'>" + html + "</div>";
   }
 
   function fetchMine() {
-    var box = document.getElementById("mineList");
-    if (!box || !authToken) return;
-    box.innerHTML = "<p class='mineNone'>…</p>";
-
+    if (!authToken) return;
     fetch(SB.url + "/rest/v1/requests?select=lookup_code,venue_name_raw,party_size,status,created_at" +
           "&order=created_at.desc&limit=5", {
       headers: { "apikey": SB.key, "Authorization": "Bearer " + authToken }
     })
       .then(function (r) { return r.json(); })
-      .then(function (rs) {
-        if (!rs || !rs.length) { box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>"; return; }
-        box.innerHTML = rs.map(function (q) {
-          var nm = (q.venue_name_raw || "").split(" | ")[0] || "-";
-          var cls = (q.status === "confirmed" || q.status === "alt_confirmed") ? "confirmed"
-                  : q.status === "received" ? "received" : "";
-          return "<div class='mineRow'>" +
-            "<span class='l'><b>" + nm + "</b><span>" + q.party_size + " · " + (q.lookup_code || "") + "</span></span>" +
-            "<span class='st " + cls + "'>" + q.status + "</span>" +
-            (q.lookup_code ? "<a href='result.html#" + encodeURIComponent(q.lookup_code) + "'>" + t("myView") + "</a>" : "") +
-          "</div>";
-        }).join("");
-        mineLoaded = true;
-      })
-      .catch(function () { box.innerHTML = "<p class='mineNone'>" + t("myNone") + "</p>"; });
+      .then(function (rs) { mineCache = rs || []; renderMine(); })
+      .catch(function () { mineCache = []; renderMine(); });
   }
 
-  (function initMineToggle() {
-    var tg = document.getElementById("mineToggle");
-    if (!tg) return;
-    tg.addEventListener("click", function () {
-      var box = document.getElementById("mineList");
-      var open = tg.getAttribute("aria-expanded") === "true";
-      if (open) {
-        tg.setAttribute("aria-expanded", "false");
-        box.style.display = "none";
-        tg.querySelector("span").textContent = t("myOpen");
-      } else {
-        tg.setAttribute("aria-expanded", "true");
-        box.style.display = "block";
-        tg.querySelector("span").textContent = t("myClose");
-        if (!mineLoaded) fetchMine();
-      }
-    });
-  })();
+  function loadMine() { mineCache = null; if (authToken) fetchMine(); }
 
   function initAuth() {
     if (!sb && window.supabase) {
