@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>식당 조사 기록 — CallBridge</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --teal: #0F5E5C; --teal-d: #0A4443;
+    --coral: #F0603F; --coral-d: #D4482A;
+    --gold: #C9962F;
+    --ink: #1A2422; --muted: #6B7A77; --line: #E6E2DD;
+    --soft: #FFF1EB; --mist: #F3F7F6; --bg: #FFFBF8; --card: #FFFFFF;
+    --ok: #0F5E5C; --no: #A04545;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --teal: #4E8F8C; --teal-d: #6FA9A6; --coral: #F57757; --coral-d: #F0603F;
+      --gold: #D9A845; --ink: #EDF2F1; --muted: #9FB0AD; --line: #2E3A38;
+      --soft: #2A1F1B; --mist: #16211F; --bg: #0E1413; --card: #141D1C;
+      --ok: #4E8F8C; --no: #D98A8A;
+    }
+  }
+  * { box-sizing: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.65; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 120px; }
+
+  header { border-bottom: 1px solid var(--line); background: var(--bg);
+    position: sticky; top: 0; z-index: 20; margin: 0 -16px 0; padding: 0 16px; }
+  header .in { min-height: 58px; display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center; justify-content: space-between; padding: 9px 0; }
+  h1 { margin: 0; font-size: 17px; font-weight: 800; color: var(--teal);
+    display: inline-flex; align-items: center; gap: 8px; }
+  h1::before { content: ""; width: 8px; height: 8px; border-radius: 4px; background: var(--coral); }
+  .who { font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+  .who button { font: inherit; font-size: 12px; min-height: 32px; padding: 0 11px;
+    border-radius: 16px; border: 1px solid var(--line); background: transparent;
+    color: var(--muted); cursor: pointer; }
+
+  /* 게이트 */
+  #gate { display: none; max-width: 380px; margin: 70px auto; text-align: center; }
+  #gate h2 { font-size: 18px; margin: 0 0 8px; }
+  #gate p { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+  #gate button { width: 100%; }
+
+  /* 진행 현황 */
+  .stats { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0 20px; }
+  .stat { flex: 1 1 100px; min-width: 0; border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; background: var(--card); }
+  .stat b { display: block; font-size: 21px; font-weight: 800; color: var(--teal); }
+  .stat span { font-size: 11.5px; color: var(--muted); }
+
+  /* 검색 */
+  .search { display: flex; gap: 8px; margin-bottom: 14px; }
+  .search input { flex: 1 1 auto; }
+
+  /* 입력 */
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
+  input[type=text], input[type=url], input[type=tel], textarea, select {
+    width: 100%; min-height: 48px; padding: 10px 13px; font: inherit; font-size: 16px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+  textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+  input:focus, textarea:focus, select:focus { outline: 0; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(15,94,92,.14); }
+  input::placeholder, textarea::placeholder { color: #B5BFBD; }
+  .hint { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    background: var(--card); margin-bottom: 14px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; color: var(--teal); }
+  .card .sub { margin: 0 0 6px; font-size: 12.5px; color: var(--muted); }
+
+  .two { display: flex; flex-wrap: wrap; gap: 10px; }
+  .two > div { flex: 1 1 200px; min-width: 0; }
+
+  /* 토글 칩 */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; transition: all .16s; }
+  .chip:hover { border-color: var(--teal); }
+  .chip[aria-pressed="true"] { background: var(--teal); border-color: var(--teal);
+    color: #fff; font-weight: 600; }
+  .chip.danger[aria-pressed="true"] { background: var(--no); border-color: var(--no); }
+
+  /* 난이도 */
+  .levels { display: flex; gap: 8px; }
+  .levels button { flex: 1 1 0; min-height: 56px; border-radius: 11px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: 13.5px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    transition: all .16s; }
+  .levels button b { font-size: 17px; }
+  .levels button:hover { border-color: var(--teal); }
+  .levels button[aria-pressed="true"] { color: #fff; font-weight: 700; }
+  .levels button[data-v="1"][aria-pressed="true"] { background: #2E8B57; border-color: #2E8B57; }
+  .levels button[data-v="2"][aria-pressed="true"] { background: var(--teal); border-color: var(--teal); }
+  .levels button[data-v="3"][aria-pressed="true"] { background: var(--gold); border-color: var(--gold); }
+  .levels button[data-v="4"][aria-pressed="true"] { background: var(--coral); border-color: var(--coral); }
+  .levels button[data-v="5"][aria-pressed="true"] { background: var(--no); border-color: var(--no); }
+
+  /* 버튼 */
+  button.main { width: 100%; min-height: 54px; border-radius: 11px; border: 0;
+    background: var(--coral); color: #fff; font: inherit; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: background .18s, transform .18s; }
+  button.main:hover { background: var(--coral-d); transform: translateY(-1px); }
+  button.main:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; transform: none; }
+  button.ghost { min-height: 48px; padding: 0 16px; border-radius: 10px;
+    border: 1px solid var(--line); background: transparent; color: var(--teal);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button.ghost:hover { background: var(--mist); border-color: var(--teal); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* 알림 */
+  .toast { display: none; border-radius: 11px; padding: 13px 15px; font-size: 14.5px;
+    font-weight: 600; margin-bottom: 14px; }
+  .toast.ok { background: var(--gold); color: #fff; }
+  .toast.err { background: var(--no); color: #fff; }
+  .toast.info { background: var(--mist); color: var(--muted); }
+
+  /* 목록 */
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item { border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px;
+    background: var(--card); cursor: pointer; transition: border-color .16s; }
+  .item:hover { border-color: var(--teal); }
+  .item .top { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+  .item b { font-size: 14.5px; }
+  .item .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px;
+    background: var(--mist); color: var(--muted); }
+  .tag.ok { background: var(--teal); color: #fff; }
+  .tag.no { background: var(--no); color: #fff; }
+  .tag.lv { background: var(--gold); color: #fff; }
+  .item .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  @media (max-width: 460px) {
+    .wrap { padding: 0 14px 110px; }
+    .levels button { min-height: 60px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h2>운영자 로그인</h2>
+  <p>등록된 운영자 계정으로만 접근할 수 있습니다.</p>
+  <button class="main" id="gateIn">Google로 로그인</button>
+  <p id="gateMsg" style="color:var(--no); margin-top:14px"></p>
+</div>
+
+<div id="main" style="display:none">
+<div class="wrap">
+
+  <header>
+    <div class="in">
+      <h1>식당 조사 기록</h1>
+      <div id="authBox"></div>
+    </div>
+  </header>
+
+  <!-- 진행 현황 -->
+  <div class="stats">
+    <div class="stat"><b id="sTotal">—</b><span>전체 식당</span></div>
+    <div class="stat"><b id="sChecked">—</b><span>조사 완료</span></div>
+    <div class="stat"><b id="sOk">—</b><span>예약 가능</span></div>
+    <div class="stat"><b id="sGuide">—</b><span>가이드 있음</span></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 검색 -->
+  <div class="card">
+    <h2>식당 찾기</h2>
+    <p class="sub">이미 등록된 곳이면 불러와서 수정하고, 없으면 새로 만듭니다.</p>
+    <div class="search">
+      <input type="text" id="q" placeholder="식당명 일부를 입력">
+      <button class="ghost" id="btnFind">검색</button>
+    </div>
+    <div class="list" id="found"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="btnNew">새 식당으로 입력</button>
+      <button class="ghost" id="btnTodo">조사 안 한 곳 보기</button>
+    </div>
+  </div>
+
+  <!-- 입력 -->
+  <div class="card" id="form" style="display:none">
+    <h2 id="formTitle">새 식당 기록</h2>
+    <p class="sub" id="formSub">통화하면서 바로 적으시면 됩니다.</p>
+
+    <div class="two">
+      <div>
+        <label for="vname">식당명</label>
+        <input type="text" id="vname" placeholder="연남동 갈비">
+      </div>
+      <div>
+        <label for="vphone">전화번호</label>
+        <input type="tel" id="vphone" placeholder="02-123-4567">
+      </div>
+    </div>
+
+    <label for="vlink">지도 링크 (선택)</label>
+    <input type="url" id="vlink" placeholder="https://naver.me/xxxxx">
+
+    <label for="vaddr">주소 (선택)</label>
+    <input type="text" id="vaddr" placeholder="서울 마포구 ...">
+
+    <label>통화 결과</label>
+    <div class="chips">
+      <button type="button" class="chip" id="cAlive">번호 살아있음</button>
+      <button type="button" class="chip" id="cRsv">예약 받음</button>
+      <button type="button" class="chip danger" id="cDead">폐업·결번</button>
+    </div>
+    <p class="hint">전화를 걸어 확인한 내용을 표시하세요.</p>
+
+    <label for="vhours">영업시간</label>
+    <input type="text" id="vhours" placeholder="11:30-21:30 (브레이크 15:00-17:00, 월 휴무)">
+    <p class="hint">전화 걸기 좋은 시간을 판단하는 데 씁니다.</p>
+
+    <label>통화 난이도</label>
+    <div class="levels">
+      <button type="button" data-v="1"><b>1</b>쉬움</button>
+      <button type="button" data-v="2"><b>2</b>보통</button>
+      <button type="button" data-v="3"><b>3</b>주의</button>
+      <button type="button" data-v="4"><b>4</b>어려움</button>
+      <button type="button" data-v="5"><b>5</b>불가</button>
+    </div>
+    <p class="hint">1 친절하고 빠름 · 3 바쁘면 끊음 · 5 AI 통화 거부</p>
+
+    <label for="vcall">통화 메모</label>
+    <textarea id="vcall" placeholder="점심에 걸면 안 받음&#10;사장님이 일본어 조금 하심&#10;2인분부터만 예약 받음"></textarea>
+    <p class="hint">다음에 전화할 때 알아야 할 것을 적으세요.</p>
+
+    <label for="vguide">이 식당 이용 방법 (고객에게 전달)</label>
+    <textarea id="vguide" placeholder="직원이 자리에서 고기를 구워줍니다&#10;고기는 2인분부터 주문합니다&#10;계산은 나갈 때 카운터에서. 팁 문화가 없습니다"></textarea>
+    <p class="hint">한 줄에 하나씩. 결과 메일과 안내 페이지에 그대로 쓰입니다.</p>
+
+    <div class="row" style="margin-top:18px">
+      <button class="main" id="btnSave" style="flex:1 1 200px">저장</button>
+      <button class="ghost" id="btnClear" style="flex:0 1 110px">비우기</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var cfg = {
+    url: "https://knxggqpdsosmequgdawb.supabase.co",
+    key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW"
+  };
+  var sb = null, me = null, authToken = null;
+  var editing = null;   // 수정 중인 식당 id (없으면 새로 만듦)
+
+  /* ---------- 공통 ---------- */
+  function api(path, options) {
+    options = options || {};
+    return fetch(cfg.url + "/rest/v1/" + path, {
+      method: options.method || "GET",
+      headers: { "apikey": cfg.key,
+                 "Authorization": "Bearer " + (authToken || cfg.key),
+                 "Content-Type": "application/json",
+                 "Prefer": options.prefer || "return=representation" },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    }).then(function (res) {
+      return res.text().then(function (txt) {
+        var d = null; try { d = txt ? JSON.parse(txt) : null; } catch (e) { d = txt; }
+        if (!res.ok) throw new Error((d && d.message) ? d.message : "HTTP " + res.status);
+        return d;
+      });
+    });
+  }
+
+  function toast(kind, msg) {
+    var el = $("toast");
+    el.className = "toast " + kind;
+    el.textContent = msg;
+    el.style.display = "block";
+    if (kind === "ok") setTimeout(function () { el.style.display = "none"; }, 4000);
+  }
+
+  /* ---------- 로그인 ---------- */
+  function drawAuth() {
+    var box = $("authBox");
+    if (!box) return;
+    box.innerHTML = me
+      ? "<span class='who'>" + (me.email || "").split("@")[0] +
+        " <button type='button' id='out'>로그아웃</button></span>" : "";
+    var o = $("out");
+    if (o) o.addEventListener("click", function () {
+      if (sb) sb.auth.signOut().then(function () { location.reload(); });
+    });
+  }
+
+  function initAuth() {
+    if (!sb && window.supabase) {
+      try { sb = window.supabase.createClient(cfg.url, cfg.key); } catch (e) { sb = null; }
+    }
+    if (!sb) { $("gate").style.display = "block"; return; }
+
+    $("gateIn").addEventListener("click", function () {
+      sb.auth.signInWithOAuth({ provider: "google",
+        options: { redirectTo: location.origin + location.pathname } });
+    });
+
+    function apply(s) {
+      me = s ? s.user : null;
+      authToken = s ? s.access_token : null;
+      drawAuth();
+      if (!me) { $("gate").style.display = "block"; $("main").style.display = "none"; return; }
+
+      api("staff?select=role&user_id=eq." + me.id)
+        .then(function (rs) {
+          if (!rs || !rs.length) {
+            $("gate").style.display = "block";
+            $("main").style.display = "none";
+            $("gateMsg").textContent = "이 계정은 운영자로 등록되어 있지 않습니다. (" + me.email + ")";
+            return;
+          }
+          $("gate").style.display = "none";
+          $("main").style.display = "block";
+          loadStats();
+        })
+        .catch(function (e) {
+          $("gate").style.display = "block";
+          $("gateMsg").textContent = "권한 확인 실패: " + e.message;
+        });
+    }
+
+    sb.auth.getSession().then(function (r) { apply(r.data && r.data.session); });
+    sb.auth.onAuthStateChange(function (_e, s) { apply(s); });
+  }
+
+  /* ---------- 진행 현황 ---------- */
+  function loadStats() {
+    function count(q) {
+      return fetch(cfg.url + "/rest/v1/venues?select=id&" + q, {
+        headers: { "apikey": cfg.key, "Authorization": "Bearer " + authToken,
+                   "Prefer": "count=exact", "Range": "0-0" }
+      }).then(function (r) {
+        var cr = r.headers.get("content-range") || "0/0";
+        return parseInt(cr.split("/")[1], 10) || 0;
+      }).catch(function () { return 0; });
+    }
+    count("id=not.is.null").then(function (n) { $("sTotal").textContent = n; });
+    count("checked_at=not.is.null").then(function (n) { $("sChecked").textContent = n; });
+    count("takes_reservation=is.true").then(function (n) { $("sOk").textContent = n; });
+    count("guide_notes=not.is.null").then(function (n) { $("sGuide").textContent = n; });
+  }
+
+  /* ---------- 칩·난이도 ---------- */
+  function chipOn(id) { return $(id).getAttribute("aria-pressed") === "true"; }
+  function setChip(id, v) { $(id).setAttribute("aria-pressed", v ? "true" : "false"); }
+
+  ["cAlive", "cRsv", "cDead"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      var on = !chipOn(id);
+      setChip(id, on);
+      // 폐업을 켜면 나머지를 끈다
+      if (id === "cDead" && on) { setChip("cAlive", false); setChip("cRsv", false); }
+      if ((id === "cAlive" || id === "cRsv") && on) setChip("cDead", false);
+    });
+  });
+
+  var level = null;
+  Array.prototype.forEach.call(document.querySelectorAll(".levels button"), function (b) {
+    b.addEventListener("click", function () {
+      var v = parseInt(b.getAttribute("data-v"), 10);
+      level = (level === v) ? null : v;
+      Array.prototype.forEach.call(document.querySelectorAll(".levels button"), function (x) {
+        x.setAttribute("aria-pressed",
+          parseInt(x.getAttribute("data-v"), 10) === level ? "true" : "false");
+      });
+    });
+  });
+
+  /* ---------- 폼 ---------- */
+  function clearForm() {
+    editing = null;
+    ["vname", "vphone", "vlink", "vaddr", "vhours", "vcall", "vguide"].forEach(function (id) {
+      $(id).value = "";
+    });
+    setChip("cAlive", false); setChip("cRsv", false); setChip("cDead", false);
+    level = null;
+    Array.prototype.forEach.call(document.querySelectorAll(".levels button"), function (x) {
+      x.setAttribute("aria-pressed", "false");
+    });
+    $("formTitle").textContent = "새 식당 기록";
+    $("formSub").textContent = "통화하면서 바로 적으시면 됩니다.";
+  }
+
+  function fillForm(v) {
+    editing = v.id;
+    $("vname").value = v.name || "";
+    $("vphone").value = v.phone || "";
+    $("vlink").value = v.map_link || "";
+    $("vaddr").value = v.address || "";
+    $("vhours").value = v.open_hours || "";
+    $("vcall").value = v.call_notes || "";
+    $("vguide").value = v.guide_notes || "";
+    setChip("cAlive", v.phone_alive === true);
+    setChip("cRsv", v.takes_reservation === true);
+    setChip("cDead", v.phone_alive === false);
+    level = v.call_difficulty || null;
+    Array.prototype.forEach.call(document.querySelectorAll(".levels button"), function (x) {
+      x.setAttribute("aria-pressed",
+        parseInt(x.getAttribute("data-v"), 10) === level ? "true" : "false");
+    });
+    $("formTitle").textContent = "기록 수정";
+    $("formSub").textContent = v.checked_at
+      ? "마지막 조사: " + new Date(v.checked_at).toLocaleDateString("ko-KR")
+      : "아직 조사하지 않은 식당입니다.";
+    $("form").style.display = "block";
+    $("form").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* ---------- 검색 ---------- */
+  function renderList(rows, emptyMsg) {
+    var box = $("found");
+    if (!rows || !rows.length) {
+      box.innerHTML = "<p class='hint' style='margin:6px 0 0'>" + emptyMsg + "</p>";
+      return;
+    }
+    box.innerHTML = rows.map(function (v) {
+      var tags = "";
+      if (v.phone_alive === false) tags += "<span class='tag no'>폐업·결번</span>";
+      else if (v.takes_reservation === true) tags += "<span class='tag ok'>예약 가능</span>";
+      else if (v.phone_alive === true) tags += "<span class='tag'>번호 확인됨</span>";
+      if (v.call_difficulty) tags += "<span class='tag lv'>난이도 " + v.call_difficulty + "</span>";
+      if (v.guide_notes) tags += "<span class='tag'>가이드</span>";
+      if (!v.checked_at) tags += "<span class='tag'>미조사</span>";
+
+      return "<div class='item' data-id='" + v.id + "'>" +
+        "<div class='top'><b>" + (v.name || "-") + "</b><span class='tags'>" + tags + "</span></div>" +
+        "<div class='meta'>" + (v.phone || "번호 없음") +
+        (v.open_hours ? " · " + v.open_hours : "") + "</div></div>";
+    }).join("");
+
+    Array.prototype.forEach.call(box.querySelectorAll(".item"), function (el) {
+      el.addEventListener("click", function () {
+        var id = el.getAttribute("data-id");
+        api("venues?select=*&id=eq." + id)
+          .then(function (rs) { if (rs && rs[0]) fillForm(rs[0]); })
+          .catch(function (e) { toast("err", "불러오기 실패: " + e.message); });
+      });
+    });
+  }
+
+  var FIELDS = "id,name,phone,address,map_link,open_hours,guide_notes," +
+               "phone_alive,takes_reservation,call_difficulty,call_notes,checked_at";
+
+  $("btnFind").addEventListener("click", function () {
+    var q = ($("q").value || "").trim();
+    if (!q) return;
+    $("found").innerHTML = "<p class='hint' style='margin:6px 0 0'>찾는 중…</p>";
+    api("venues?select=" + FIELDS + "&name=ilike.*" + encodeURIComponent(q) + "*&limit=20")
+      .then(function (rs) { renderList(rs, "찾는 식당이 없습니다. 새로 입력하세요."); })
+      .catch(function (e) { toast("err", "검색 실패: " + e.message); });
+  });
+
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") $("btnFind").click();
+  });
+
+  $("btnTodo").addEventListener("click", function () {
+    $("found").innerHTML = "<p class='hint' style='margin:6px 0 0'>불러오는 중…</p>";
+    api("venues?select=" + FIELDS + "&checked_at=is.null&order=name.asc&limit=20")
+      .then(function (rs) { renderList(rs, "조사하지 않은 식당이 없습니다."); })
+      .catch(function (e) { toast("err", "불러오기 실패: " + e.message); });
+  });
+
+  $("btnNew").addEventListener("click", function () {
+    clearForm();
+    $("form").style.display = "block";
+    $("vname").focus();
+  });
+
+  $("btnClear").addEventListener("click", function () {
+    clearForm();
+    toast("info", "입력을 비웠습니다.");
+  });
+
+  /* ---------- 저장 ---------- */
+  $("btnSave").addEventListener("click", function () {
+    var name = ($("vname").value || "").trim();
+    if (!name) { toast("err", "식당명을 입력하세요."); return; }
+
+    var dead = chipOn("cDead");
+    var d = {
+      name: name,
+      phone: ($("vphone").value || "").trim() || null,
+      address: ($("vaddr").value || "").trim() || null,
+      map_link: ($("vlink").value || "").trim() || null,
+      open_hours: ($("vhours").value || "").trim() || null,
+      call_notes: ($("vcall").value || "").trim() || null,
+      guide_notes: ($("vguide").value || "").trim() || null,
+      phone_alive: dead ? false : (chipOn("cAlive") ? true : null),
+      takes_reservation: dead ? false : (chipOn("cRsv") ? true : null),
+      call_difficulty: level,
+      checked_at: new Date().toISOString()
+    };
+    if (!editing) d.source = "manual";
+
+    $("btnSave").disabled = true;
+    toast("info", "저장 중…");
+
+    var req = editing
+      ? api("venues?id=eq." + editing, { method: "PATCH", body: d, prefer: "return=minimal" })
+      : api("venues", { method: "POST", body: d, prefer: "return=minimal" });
+
+    req
+      .then(function () {
+        toast("ok", editing ? "수정했습니다." : "새로 등록했습니다.");
+        clearForm();
+        $("form").style.display = "none";
+        $("found").innerHTML = "";
+        $("q").value = "";
+        loadStats();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+      .catch(function (e) { toast("err", "저장 실패: " + e.message); })
+      .then(function () { $("btnSave").disabled = false; });
+  });
+
+  initAuth();
+})();
+</script>
+</body>
+</html>
