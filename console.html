@@ -6,21 +6,13 @@
 <title>운영자 화면</title>
 <style>
   :root {
-    color-scheme: light;
-    --teal: #0F5E5C; --gold: #C08A2E; --ink: #15211F; --muted: #5A6A67;
-    --line: #DCE6E5; --soft: #F4F8F7; --bg: #FFFFFF;
+    color-scheme: light only;
+    --teal: #0F5E5C; --gold: #C08A2E; --ink: #1A2422; --muted: #5A6A67;
+    --line: #E6E2DD; --soft: #F4F8F7; --bg: #FFFBF8;
     --ok: #0F5E5C; --hold: #C08A2E; --no: #8A3B3B; --ai: #EAF2F1; --owner: #F3F1EC;
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --teal: #4E8F8C; --gold: #D9A450; --ink: #E8EFEE; --muted: #9FB0AD;
-      --line: #2A3836; --soft: #16211F; --bg: #0E1716;
-      --ok: #4E8F8C; --hold: #D9A450; --no: #D98A8A; --ai: #17302E; --owner: #262320;
-    }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -1155,7 +1147,7 @@
     api("customers?select=email,display_name,locale&id=eq." + cur.customer_id)
       .then(function (rs) {
         var c = (rs && rs[0]) || {};
-        if (!c.email) throw new Error("고객 이메일이 없습니다.");
+        if (!c.email) throw new Error("고객 이메일이 없습니다. 접수 폼에서 이메일을 입력했는지 확인하세요.");
 
         var kind = S.kind === "ok" ? (S.matched.gap === 0 ? "confirmed" : "alt_confirmed")
                  : S.kind === "hold" ? "hold" : "unavailable";
@@ -1197,7 +1189,15 @@
           $("saveMsg").textContent = "메일을 보냈습니다.";
           btn.textContent = "메일 보냄";
         } else {
-          $("saveMsg").textContent = "메일 실패: " + ((d && d.msg) || "알 수 없음");
+          var m = (d && d.msg) || "알 수 없음";
+          $("saveMsg").textContent = "메일 실패: " + m;
+          // 도메인 인증 전 흔한 오류는 따로 안내
+          if (/testing email address|Invalid .to. field/.test(m)) {
+            alert("Resend 도메인 인증 전이라 가입 때 쓴 본인 이메일로만 발송됩니다.\n\n" +
+                  "받는 주소: " + m.slice(0, 120));
+          } else {
+            alert("메일 발송 실패\n\n" + m);
+          }
           btn.disabled = false;
         }
       })
