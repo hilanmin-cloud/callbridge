@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
   :root {
-    color-scheme: light dark;
+    color-scheme: light only;
     --teal: #0F5E5C; --teal-d: #0A4443;
     --coral: #F0603F; --coral-d: #D4482A;
     --gold: #C9962F;
@@ -17,14 +17,6 @@
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --teal: #4E8F8C; --teal-d: #6FA9A6; --coral: #F57757; --coral-d: #F0603F;
-      --gold: #D9A845; --ink: #EDF2F1; --muted: #9FB0AD; --line: #2E3A38;
-      --soft: #2A1F1B; --mist: #16211F; --bg: #0E1413; --card: #141D1C;
-      --ok: #4E8F8C; --no: #D98A8A;
-    }
   }
   * { box-sizing: inherit; }
   body { margin: 0; background: var(--bg); color: var(--ink);
