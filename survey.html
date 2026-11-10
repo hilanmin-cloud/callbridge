@@ -310,8 +310,10 @@
     if (!sb) { $("gate").style.display = "block"; return; }
 
     $("gateIn").addEventListener("click", function () {
+      // 로그인 후 메인으로 튕기는 경우를 대비해 돌아올 위치를 남긴다
+      try { sessionStorage.setItem("cb-back", location.pathname + location.search); } catch (e) {}
       sb.auth.signInWithOAuth({ provider: "google",
-        options: { redirectTo: location.origin + location.pathname } });
+        options: { redirectTo: location.origin + location.pathname + location.search } });
     });
 
     function apply(s) {
