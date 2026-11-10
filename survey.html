@@ -163,6 +163,7 @@
     <div class="stat"><b id="sChecked">—</b><span>조사 완료</span></div>
     <div class="stat"><b id="sOk">—</b><span>예약 가능</span></div>
     <div class="stat"><b id="sGuide">—</b><span>가이드 있음</span></div>
+    <div class="stat"><b id="sBlocked">—</b><span>차단됨</span></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -351,6 +352,7 @@
     count("checked_at=not.is.null").then(function (n) { $("sChecked").textContent = n; });
     count("takes_reservation=is.true").then(function (n) { $("sOk").textContent = n; });
     count("guide_notes=not.is.null").then(function (n) { $("sGuide").textContent = n; });
+    count("blocked=is.true").then(function (n) { $("sBlocked").textContent = n; });
   }
 
   /* ---------- 칩·난이도 ---------- */
@@ -428,6 +430,7 @@
     }
     box.innerHTML = rows.map(function (v) {
       var tags = "";
+      if (v.blocked) tags += "<span class='tag no'>차단됨</span>";
       if (v.phone_alive === false) tags += "<span class='tag no'>폐업·결번</span>";
       else if (v.takes_reservation === true) tags += "<span class='tag ok'>예약 가능</span>";
       else if (v.phone_alive === true) tags += "<span class='tag'>번호 확인됨</span>";
@@ -452,7 +455,8 @@
   }
 
   var FIELDS = "id,name,phone,address,map_link,open_hours,guide_notes," +
-               "phone_alive,takes_reservation,call_difficulty,call_notes,checked_at";
+               "phone_alive,takes_reservation,call_difficulty,call_notes,checked_at," +
+               "blocked,blocked_reason";
 
   $("btnFind").addEventListener("click", function () {
     var q = ($("q").value || "").trim();

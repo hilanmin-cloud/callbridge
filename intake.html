@@ -402,6 +402,11 @@
 
   var T = {
     ja: {
+      closedTitle: "現在リクエストを受け付けていません",
+      closedHours: "受付時間は韓国時間 {from} ～ {to} です。この時間内にもう一度お試しください。",
+      closedFull: "本日の受付が上限に達しました。明日またお越しください。",
+      closedOff: "ただいま受付を停止しています。再開までしばらくお待ちください。",
+      closedBack: "トップへ戻る",
       myAcct: "マイページ",
       notSigned: "ログインしていません",
       signInHint: "ログインするとパスが使えます",
@@ -485,6 +490,11 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      closedTitle: "目前暫停接受委託",
+      closedHours: "受理時間為韓國時間 {from} ～ {to}。請在此時段內再試一次。",
+      closedFull: "今日受理已達上限，請明天再來。",
+      closedOff: "目前暫停受理，請稍候再試。",
+      closedBack: "返回首頁",
       myAcct: "我的",
       notSigned: "尚未登入",
       signInHint: "登入後可使用次數券",
@@ -568,6 +578,11 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      closedTitle: "目前暂停接受委托",
+      closedHours: "受理时间为韩国时间 {from} ～ {to}。请在此时段内再试一次。",
+      closedFull: "今日受理已达上限，请明天再来。",
+      closedOff: "目前暂停受理，请稍后再试。",
+      closedBack: "返回首页",
       myAcct: "我的",
       notSigned: "尚未登录",
       signInHint: "登录后可使用次数券",
@@ -651,6 +666,11 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      closedTitle: "We are not taking requests right now",
+      closedHours: "We take requests between {from} and {to} Korean time. Please try again within those hours.",
+      closedFull: "We have reached today’s limit. Please come back tomorrow.",
+      closedOff: "Requests are paused at the moment. Please check back shortly.",
+      closedBack: "Back to home",
       myAcct: "Account",
       notSigned: "Not signed in",
       signInHint: "Sign in to use your pass",
@@ -734,6 +754,11 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      closedTitle: "지금은 요청을 받지 않습니다",
+      closedHours: "접수 시간은 한국 시간 {from} ~ {to} 입니다. 그 시간에 다시 시도해 주세요.",
+      closedFull: "오늘 접수가 한도에 찼습니다. 내일 다시 와주세요.",
+      closedOff: "지금은 접수를 멈춘 상태입니다. 잠시 후 다시 확인해 주세요.",
+      closedBack: "메인으로",
       myAcct: "내 정보",
       notSigned: "로그인하지 않았습니다",
       signInHint: "로그인하면 패스를 쓸 수 있습니다",
@@ -1091,6 +1116,74 @@
   /* ---------- 동의 ---------- */
   $("ok").addEventListener("change", function () { $("pay").disabled = !this.checked; });
 
+  /* ---------- 접수 가능 여부 확인 ---------- */
+  function hhmm(s) { return (s || "").slice(0, 5); }
+
+  function showClosed(kind, cfgRow) {
+    var main = document.querySelector(".main");
+    if (!main) return;
+
+    var msg = kind === "full" ? t("closedFull")
+            : kind === "off" ? t("closedOff")
+            : t("closedHours").replace("{from}", hhmm(cfgRow && cfgRow.open_from))
+                              .replace("{to}", hhmm(cfgRow && cfgRow.open_to));
+
+    main.innerHTML =
+      "<div class='closedBox'>" +
+        "<div class='closedIcon'>" +
+          "<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='9'/>" +
+          "<path d='M12 7v5l3 2'/></svg>" +
+        "</div>" +
+        "<h1>" + t("closedTitle") + "</h1>" +
+        "<p>" + msg + "</p>" +
+        "<a href='index.html'>" + t("closedBack") + "</a>" +
+      "</div>";
+    window.scrollTo(0, 0);
+  }
+
+  function checkOpen() {
+    // 테스트 모드는 차단하지 않는다
+    if (TEST_MODE) return;
+
+    api("ops_config?select=*&id=eq.1")
+      .then(function (rs) {
+        var c = (rs && rs[0]) || null;
+        if (!c) return;
+
+        if (c.accepting === false) { showClosed("off", c); return; }
+
+        // 한국 시간 기준 현재 시각
+        var now = new Date();
+        var kst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+        var cur = kst.getHours() * 60 + kst.getMinutes();
+        var from = parseInt(hhmm(c.open_from).split(":")[0], 10) * 60 +
+                   parseInt(hhmm(c.open_from).split(":")[1], 10);
+        var toH = parseInt(hhmm(c.open_to).split(":")[0], 10);
+        var to = (toH >= 24 ? 24 * 60 : toH * 60) +
+                 parseInt(hhmm(c.open_to).split(":")[1], 10);
+
+        if (cur < from || cur >= to) { showClosed("hours", c); return; }
+
+        // 오늘 접수 건수 확인
+        if (!c.daily_limit || c.daily_limit < 1) return;
+        var start = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
+        var iso = new Date(start.getTime() - 9 * 3600000).toISOString();
+
+        fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + iso +
+              "&service_type=neq.test", {
+          headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+                     "Prefer": "count=exact", "Range": "0-0" }
+        })
+          .then(function (r) {
+            var cr = r.headers.get("content-range") || "0/0";
+            var n = parseInt(cr.split("/")[1], 10) || 0;
+            if (n >= c.daily_limit) showClosed("full", c);
+          })
+          .catch(function () {});
+      })
+      .catch(function () { /* 설정을 못 읽으면 접수를 막지 않는다 */ });
+  }
+
   /* ---------- 접수 완료 화면 ---------- */
   function showDone(code) {
     var main = document.querySelector(".main");
@@ -1239,6 +1332,7 @@
 
   applyLang();
   initAuth();
+  checkOpen();
 })();
 </script>
 </body>

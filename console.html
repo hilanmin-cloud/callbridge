@@ -106,6 +106,22 @@
     <div class="card">
       <h2>접수된 요청</h2>
       <p class="hint">처리할 요청을 선택하세요.</p>
+      <div id="opsBar" style="display:none; margin-bottom:10px; border:1px solid var(--line);
+           border-radius:10px; padding:11px 13px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap">
+          <span id="opsState" style="font-size:13px; font-weight:600"></span>
+          <button class="ghost small" id="opsToggle" style="flex:0 1 110px">접수 중단</button>
+        </div>
+        <p id="opsDetail" style="margin:6px 0 0; font-size:12px; color:var(--muted)"></p>
+        <div class="row" style="margin-top:8px">
+          <input type="time" id="opsFrom" style="flex:1 1 90px; min-height:36px; font-size:13px">
+          <input type="time" id="opsTo" style="flex:1 1 90px; min-height:36px; font-size:13px">
+          <input type="number" id="opsLimit" min="0" max="200" placeholder="한도"
+                 style="flex:0 1 80px; min-height:36px; font-size:13px">
+          <button class="ghost small" id="opsSave" style="flex:0 1 70px">저장</button>
+        </div>
+      </div>
+
       <div class="row" style="margin-bottom:10px">
         <button class="ghost small" id="refresh">새로고침</button>
         <button class="ghost small" id="purgeTest" style="flex:0 1 110px">테스트 정리</button>
@@ -224,6 +240,7 @@
       <div class="row" style="margin-top:8px">
         <button class="ghost small" id="markNoShow">노쇼로 기록</button>
         <button class="ghost small" id="markVisited">방문 확인</button>
+        <button class="ghost small" id="blockVenue">이 식당 차단</button>
       </div>
 
       <div id="cancelBox" style="display:none; margin-top:12px; border:1px solid var(--no);
@@ -313,6 +330,7 @@
           }
           showMain();
           loadList();
+          loadOps();
         })
         .catch(function (e) {
           showGate("권한 확인에 실패했습니다: " + e.message);
@@ -411,6 +429,7 @@
     $("vresult").innerHTML = "";
     matchedVenue = null;
     if (typeof fillGuides === "function") fillGuides();
+    if (typeof drawBlockState === "function") drawBlockState();
     searchVenue();
     resetCall();
   }
@@ -528,6 +547,116 @@
       .catch(function (e) { alert("지급 실패: " + e.message); });
   });
 
+
+  /* ---------- 운영 설정 ---------- */
+  var ops = null;
+
+  function hhmm(s) { return (s || "").slice(0, 5); }
+
+  function drawOps() {
+    var bar = $("opsBar");
+    if (!bar || !ops) return;
+    bar.style.display = "block";
+
+    var on = ops.accepting !== false;
+    $("opsState").innerHTML = on
+      ? "<span style='color:var(--ok)'>● 접수 중</span>"
+      : "<span style='color:var(--no)'>● 접수 중단</span>";
+    $("opsToggle").textContent = on ? "접수 중단" : "접수 재개";
+
+    $("opsFrom").value = hhmm(ops.open_from);
+    $("opsTo").value = hhmm(ops.open_to) === "24:00" ? "23:59" : hhmm(ops.open_to);
+    $("opsLimit").value = ops.daily_limit || 0;
+
+    // 오늘 접수 건수
+    var kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    var start = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
+    var iso = new Date(start.getTime() - 9 * 3600000).toISOString();
+
+    fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + iso + "&service_type=neq.test", {
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
+                 "Prefer": "count=exact", "Range": "0-0" }
+    })
+      .then(function (r) {
+        var cr = r.headers.get("content-range") || "0/0";
+        var n = parseInt(cr.split("/")[1], 10) || 0;
+        var lim = ops.daily_limit || 0;
+        $("opsDetail").textContent =
+          "오늘 " + n + "건" + (lim ? " / 한도 " + lim + "건" : "") +
+          " · 접수 시간 " + hhmm(ops.open_from) + "~" + hhmm(ops.open_to) +
+          (lim && n >= lim ? " · 한도 도달, 신규 접수 차단 중" : "");
+      })
+      .catch(function () { $("opsDetail").textContent = ""; });
+  }
+
+  function loadOps() {
+    if (!connected()) return;
+    api("ops_config?select=*&id=eq.1")
+      .then(function (rs) { ops = (rs && rs[0]) || null; drawOps(); })
+      .catch(function () {});
+  }
+
+  function saveOps(patch) {
+    if (!connected()) return;
+    api("ops_config?id=eq.1", {
+      method: "PATCH", prefer: "return=representation",
+      body: Object.assign({ updated_at: new Date().toISOString() }, patch)
+    })
+      .then(function (rs) { ops = (rs && rs[0]) || ops; drawOps(); })
+      .catch(function (e) { alert("설정 저장 실패: " + e.message); });
+  }
+
+  $("opsToggle").addEventListener("click", function () {
+    if (!ops) return;
+    var on = ops.accepting !== false;
+    if (on && !window.confirm("접수를 중단합니다. 고객에게 '지금은 요청을 받지 않습니다' 화면이 표시됩니다.")) return;
+    saveOps({ accepting: !on });
+  });
+
+  $("opsSave").addEventListener("click", function () {
+    var to = $("opsTo").value === "23:59" ? "24:00" : $("opsTo").value;
+    saveOps({
+      open_from: $("opsFrom").value || "09:00",
+      open_to: to || "24:00",
+      daily_limit: parseInt($("opsLimit").value, 10) || 0
+    });
+  });
+
+  /* ---------- 식당 차단 ---------- */
+  $("blockVenue").addEventListener("click", function () {
+    if (!connected()) return;
+    if (!matchedVenue) { $("saveMsg").textContent = "먼저 식당을 선택하세요."; return; }
+
+    var why = window.prompt(
+      matchedVenue.name + " 을(를) 차단합니다.\n이후 이 식당은 통화 대상에서 제외됩니다.\n\n사유를 적어주세요.",
+      "AI 통화 거부");
+    if (why === null) return;
+
+    api("venues?id=eq." + matchedVenue.id, {
+      method: "PATCH", prefer: "return=minimal",
+      body: { blocked: true, blocked_reason: why.trim() || null,
+              blocked_at: new Date().toISOString() }
+    })
+      .then(function () {
+        matchedVenue.blocked = true;
+        $("saveMsg").textContent = "차단했습니다. 이 식당은 검색에서 제외됩니다.";
+        $("blockVenue").textContent = "차단됨";
+      })
+      .catch(function (e) { $("saveMsg").textContent = "차단 실패: " + e.message; });
+  });
+
+  function drawBlockState() {
+    var b = $("blockVenue");
+    if (!b) return;
+    if (matchedVenue && matchedVenue.blocked) {
+      b.textContent = "차단됨";
+      b.disabled = true;
+    } else {
+      b.textContent = "이 식당 차단";
+      b.disabled = !matchedVenue;
+    }
+  }
+
   /* ---------- 노쇼 이력 확인 ---------- */
   function checkNoShowHistory() {
     if (!connected() || !cur || !cur.customer_id) return;
@@ -585,7 +714,7 @@
     var q = ($("vq").value || "").trim();
     if (!connected() || q.length < 2) { $("vresult").innerHTML = "<p class='msg'>두 글자 이상 입력하세요.</p>"; return; }
     $("vresult").innerHTML = "<p class='msg'>검색 중…</p>";
-    api("venues?select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes&name=ilike.*" +
+    api("venues?blocked=is.false&select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes&name=ilike.*" +
         encodeURIComponent(q) + "*&limit=5")
       .then(function (rows) {
         if (!rows || !rows.length) {
@@ -606,6 +735,10 @@
             var vid = el.getAttribute("data-vid");
             matchedVenue = rows.filter(function (v) { return v.id === vid; })[0];
             fillGuides();
+        drawBlockState();
+          drawBlockState();
+            drawBlockState();
+    drawBlockState();
             $("script").textContent = buildScript();
     checkDuplicateName();
     checkNoShowHistory();
@@ -620,6 +753,9 @@
         if (rows.length === 1) {
           matchedVenue = rows[0];
           fillGuides();
+        drawBlockState();
+          drawBlockState();
+    drawBlockState();
           $("vresult").querySelector(".item").classList.add("on");
           $("script").textContent = buildScript();
     checkDuplicateName();
@@ -1301,6 +1437,8 @@
       .then(function (r) {
         matchedVenue = r[0];
         fillGuides();
+        drawBlockState();
+    drawBlockState();
         return api("requests?id=eq." + cur.id, { method: "PATCH", body: { venue_id: r[0].id } });
       })
       .then(function () {
