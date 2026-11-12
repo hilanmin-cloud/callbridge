@@ -91,6 +91,18 @@
   .langs button[aria-pressed="true"]::after { content: ""; width: 5px; height: 9px;
     border: solid var(--teal); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px,-1px); }
 
+  .recents { display: flex; flex-direction: column; gap: 8px; }
+  .recent { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left;
+    font: inherit; padding: 12px 14px; border: 1px solid var(--line); border-radius: 11px;
+    background: var(--card); color: var(--ink); cursor: pointer; transition: border-color .16s; }
+  .recent:hover { border-color: var(--teal); }
+  .rc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .rc-top b { font-size: 15px; font-weight: 700; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; }
+  .rc-top span { flex: 0 0 auto; font-size: 12.5px; color: var(--muted); }
+  .rc-code { font-family: Consolas, monospace; font-size: 13px; color: var(--teal);
+    letter-spacing: .06em; }
+
   .lookup { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .lookup input { flex: 1 1 200px; min-width: 0; min-height: 48px; padding: 8px 12px; font: inherit;
     border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
@@ -183,6 +195,10 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      recentTitle: "この端末から送ったリクエスト",
+      recentHint: "コードを忘れても、ここから確認できます。",
+      recentNone: "この端末からのリクエストはまだありません。",
+      signInFind: "Googleでログインすると、どの端末からでも確認できます。",
       cancelFree2: "まだお店に電話していません。今キャンセルすれば全額返金されます。",
       cancelDone2: "キャンセルを承りました。お店にはまだ連絡していないため、このまま終了します。",
       lookupTitle:"予約結果の照会", lookupHint:"お申し込み時にお送りした照会コードを入力してください。", noConn:"現在ご利用いただけません。しばらくしてからお試しください。", lookupPh:"例: 60D99BC53C43",
@@ -200,6 +216,10 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      recentTitle: "從這台裝置送出的委託",
+      recentHint: "忘記代碼也可以從這裡查詢。",
+      recentNone: "這台裝置還沒有送出過委託。",
+      signInFind: "使用 Google 登入後，任何裝置都能查詢。",
       cancelFree2: "我們還沒有致電餐廳。現在取消將全額退款。",
       cancelDone2: "已接受取消。由於尚未聯繫餐廳，就此結束。",
       lookupTitle:"訂位結果查詢", lookupHint:"請輸入委託時收到的查詢碼。", noConn:"目前無法使用，請稍後再試。", lookupPh:"例: 60D99BC53C43",
@@ -217,6 +237,10 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      recentTitle: "从这台设备提交的委托",
+      recentHint: "忘记代码也可以从这里查询。",
+      recentNone: "这台设备还没有提交过委托。",
+      signInFind: "使用 Google 登录后，任何设备都能查询。",
       cancelFree2: "我们还没有致电餐厅。现在取消将全额退款。",
       cancelDone2: "已接受取消。由于尚未联系餐厅，就此结束。",
       lookupTitle:"预订结果查询", lookupHint:"请输入委托时收到的查询码。", noConn:"目前无法使用，请稍后再试。", lookupPh:"例: 60D99BC53C43",
@@ -234,6 +258,10 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      recentTitle: "Requests sent from this device",
+      recentHint: "Forgot your code? You can find it here.",
+      recentNone: "No requests from this device yet.",
+      signInFind: "Sign in with Google to check from any device.",
       cancelFree2: "We have not called the restaurant yet. Cancel now and you get a full refund.",
       cancelDone2: "Cancelled. We had not called the restaurant yet, so nothing further is needed.",
       lookupTitle:"Check your booking", lookupHint:"Enter the lookup code you received when you sent your request.", noConn:"This page is unavailable right now. Please try again later.", lookupPh:"e.g. 60D99BC53C43",
@@ -251,6 +279,10 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      recentTitle: "이 기기에서 보낸 요청",
+      recentHint: "코드를 잊어버리셨어도 여기서 찾으실 수 있습니다.",
+      recentNone: "이 기기에서 보낸 요청이 아직 없습니다.",
+      signInFind: "Google로 로그인하시면 다른 기기에서도 확인하실 수 있습니다.",
       cancelFree2: "아직 식당에 전화하지 않았습니다. 지금 취소하시면 전액 환불됩니다.",
       cancelDone2: "취소했습니다. 아직 식당에 연락하기 전이라 이대로 종료됩니다.",
       lookupTitle:"예약 결과 조회", lookupHint:"접수하실 때 받으신 조회 코드를 입력하세요.", noConn:"지금은 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.", lookupPh:"예: 60D99BC53C43",
@@ -497,18 +529,53 @@
     var cur = (location.hash || "").replace("#", "").trim();
     if (cur) { load(cur); } else { drawLookup(); }
   }
+  /* 이 기기에서 보낸 요청 목록 (접수 시 브라우저에 남겨둔 코드) */
+  function recentList() {
+    try { return JSON.parse(localStorage.getItem("cb-codes") || "[]"); }
+    catch (e) { return []; }
+  }
+
+  function recentHtml() {
+    var list = recentList();
+    var body = list.length
+      ? list.map(function (x) {
+          var d = "";
+          try {
+            d = new Intl.DateTimeFormat(
+              { ja: "ja-JP", "zh-TW": "zh-TW", "zh-CN": "zh-CN", en: "en-US", ko: "ko-KR" }[lang] || "ja-JP",
+              { month: "short", day: "numeric" }).format(new Date(x.at));
+          } catch (e) {}
+          return "<button type='button' class='recent' data-c='" + esc(x.code) + "'>" +
+            "<span class='rc-top'><b>" + esc(x.name || x.code) + "</b><span>" + d + "</span></span>" +
+            "<span class='rc-code'>" + esc(x.code) + "</span></button>";
+        }).join("")
+      : "<p class='sub' style='margin:0'>" + L("recentNone") + "</p>";
+
+    return "<div class='card'><h2>" + L("recentTitle") + "</h2>" +
+      "<p class='sub' style='margin-top:0'>" + L("recentHint") + "</p>" +
+      "<div class='recents'>" + body + "</div>" +
+      "<p class='sub' style='margin:12px 0 0'>" + L("signInFind") + "</p></div>";
+  }
+
   function drawLookup(append) {
     var head = append ? $("root").innerHTML : "<div class='state'>" + L("idle") + "</div>";
     $("root").innerHTML = head +
       "<div class='card'><h2>" + L("lookupTitle") + "</h2>" +
       "<p class='sub' style='margin-top:0'>" + L("lookupHint") + "</p>" +
       "<div class='lookup'><input id='rid' placeholder='" + L("lookupPh") + "'>" +
-      "<button class='btn' id='go'>" + L("go") + "</button></div></div>";
+      "<button class='btn' id='go'>" + L("go") + "</button></div></div>" +
+      recentHtml();
     $("go").addEventListener("click", function () {
       var v = ($("rid").value || "").trim(); if (v) { location.hash = v; load(v); }
     });
     $("rid").addEventListener("keydown", function (e) {
       if (e.key === "Enter") { var v = ($("rid").value || "").trim(); if (v) { location.hash = v; load(v); } }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".recent"), function (b) {
+      b.addEventListener("click", function () {
+        var c = b.getAttribute("data-c");
+        location.hash = c; load(c);
+      });
     });
   }
   Array.prototype.forEach.call($("langs").querySelectorAll("button"), function (b) {
