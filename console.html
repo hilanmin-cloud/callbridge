@@ -482,7 +482,11 @@
   /* ---------- 환불 가능 여부 판정 ---------- */
   // 예약일 전일 23:59까지 취소하면 환불. 예약 당일 취소는 환불 없음.
   function refundable(slotAt, cancelAt) {
-    var s = new Date(slotAt), c = new Date(cancelAt || Date.now());
+    // 기준은 한국 시간이다 (고객 화면과 같은 기준이어야 분쟁이 없다)
+    var toKst = function (v) {
+      return new Date(new Date(v).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    };
+    var s = toKst(slotAt), c = toKst(cancelAt || Date.now());
     var cutoff = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 0, 0, 0); // 예약일 00:00
     return c < cutoff;
   }

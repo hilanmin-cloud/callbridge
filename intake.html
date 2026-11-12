@@ -406,6 +406,7 @@
 
   var T = {
     ja: {
+      errSoon: "お電話に時間がかかるため、3時間以上先の日時をお選びください。",
       planNeedLogin: "パスのご購入にはログインが必要です。残りの回数はアカウントに保存されます。",
       errExpired: "ログインの有効期限が切れました。ページを再読み込みしてからもう一度お試しください。",
       errEmail: "メールアドレスを正しく入力してください。",
@@ -512,6 +513,7 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      errSoon: "致電需要時間，請選擇3小時以後的時段。",
       planNeedLogin: "購買次數券需要先登入，剩餘次數會存在您的帳號中。",
       errExpired: "登入已逾時，請重新整理頁面後再試一次。",
       errEmail: "請輸入正確的電子郵件。",
@@ -618,6 +620,7 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      errSoon: "致电需要时间，请选择3小时以后的时段。",
       planNeedLogin: "购买次数券需要先登录，剩余次数会存在您的账号中。",
       errExpired: "登录已超时，请刷新页面后再试一次。",
       errEmail: "请输入正确的电子邮件。",
@@ -724,6 +727,7 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      errSoon: "We need time to call. Please choose a time at least 3 hours from now.",
       planNeedLogin: "Sign in to buy a pass. Your remaining bookings are kept in your account.",
       errExpired: "Your sign-in expired. Please reload the page and try again.",
       errEmail: "Please enter a valid email address.",
@@ -830,6 +834,7 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      errSoon: "전화를 거는 데 시간이 필요합니다. 지금으로부터 3시간 이후로 선택해 주세요.",
       planNeedLogin: "패스를 사시려면 로그인이 필요합니다. 남은 횟수는 계정에 보관됩니다.",
       errExpired: "로그인이 만료되었습니다. 새로고침 후 다시 시도해 주세요.",
       errEmail: "이메일을 올바르게 입력해 주세요.",
@@ -1486,6 +1491,11 @@
     var now = Date.now();
     var past = d.slots.some(function (s) { return new Date(s.slot_at).getTime() < now; });
     if (past) { toast("err", t("errPast")); return; }
+    // 전화를 걸 시간이 필요하다. 모든 순위가 3시간 안이면 받지 않는다.
+    var soon = d.slots.every(function (s) {
+      return new Date(s.slot_at).getTime() < now + 3 * 3600000;
+    });
+    if (soon) { toast("err", t("errSoon")); return; }
 
     $("pay").disabled = true;
     toast("info", t("saving"));

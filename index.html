@@ -685,6 +685,13 @@
   "use strict";
   var T = {
     ja: { label:"日本語",
+      stReceived: "結果待ち",
+      stConfirmed: "予約確定",
+      stHold: "確認待ち",
+      stCancelReq: "キャンセル手続き中",
+      stCancelled: "キャンセル済み",
+      stChange: "変更手続き中",
+      stNo: "満席",
       myAcct: "マイページ",
       notSigned: "ログインしていません",
       signInHint: "ログインすると予約の確認が簡単になります",
@@ -786,6 +793,13 @@
       footerHours:"受付 09:00–24:00（韓国時間）・24時間以内に結果をご連絡"
     },
     "zh-TW": { label:"繁體中文",
+      stReceived: "等待結果",
+      stConfirmed: "訂位成功",
+      stHold: "等待確認",
+      stCancelReq: "取消處理中",
+      stCancelled: "已取消",
+      stChange: "變更處理中",
+      stNo: "客滿",
       myAcct: "我的",
       notSigned: "尚未登入",
       signInHint: "登入後可更方便查詢訂位",
@@ -887,6 +901,13 @@
       footerHours:"受理 09:00–24:00（韓國時間）・24小時內告知結果"
     },
     "zh-CN": { label:"简体中文",
+      stReceived: "等待结果",
+      stConfirmed: "预订成功",
+      stHold: "等待确认",
+      stCancelReq: "取消处理中",
+      stCancelled: "已取消",
+      stChange: "变更处理中",
+      stNo: "客满",
       myAcct: "我的",
       notSigned: "尚未登录",
       signInHint: "登录后可更方便查询预订",
@@ -988,6 +1009,13 @@
       footerHours:"受理 09:00–24:00（韩国时间）・24小时内告知结果"
     },
     en: { label:"English",
+      stReceived: "Waiting",
+      stConfirmed: "Confirmed",
+      stHold: "Needs confirmation",
+      stCancelReq: "Cancelling",
+      stCancelled: "Cancelled",
+      stChange: "Changing",
+      stNo: "Fully booked",
       myAcct: "Account",
       notSigned: "Not signed in",
       signInHint: "Sign in to find your bookings easily",
@@ -1089,6 +1117,13 @@
       footerHours:"Open 09:00–24:00 KST · Results within 24 hours"
     },
     ko: { label:"한국어",
+      stReceived: "결과 대기",
+      stConfirmed: "예약 확정",
+      stHold: "확인 필요",
+      stCancelReq: "취소 처리 중",
+      stCancelled: "취소됨",
+      stChange: "변경 처리 중",
+      stNo: "예약 불가",
       myAcct: "내 정보",
       notSigned: "로그인하지 않았습니다",
       signInHint: "로그인하면 예약 조회가 간편해집니다",
@@ -1355,10 +1390,14 @@
     }
     var html = mineCache.map(function (q) {
       var nm = (q.venue_name_raw || "").split(" | ")[0] || "-";
+      var ST = { received: "stReceived", confirmed: "stConfirmed", alt_confirmed: "stConfirmed",
+                 hold: "stHold", cancel_requested: "stCancelReq", cancelled: "stCancelled",
+                 change_requested: "stChange", unavailable: "stNo" };
+      var label = ST[q.status] ? t(ST[q.status]) : "";
       var cls = (q.status === "confirmed" || q.status === "alt_confirmed") ? "confirmed"
               : q.status === "received" ? "received" : "";
       return "<a class='mineRow' href='result.html#" + encodeURIComponent(q.lookup_code || "") + "'>" +
-        "<span class='top'><b>" + nm + "</b><span class='st " + cls + "'>" + q.status + "</span></span>" +
+        "<span class='top'><b>" + nm + "</b><span class='st " + cls + "'>" + label + "</span></span>" +
         "<span class='sub2'>" + q.party_size + " · " + (q.lookup_code || "") + "</span></a>";
     }).join("");
     box.outerHTML = "<div id='mineList'>" + html + "</div>";
