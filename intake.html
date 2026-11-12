@@ -1236,6 +1236,22 @@
 
   /* ---------- 접수 완료 화면 ---------- */
   /* 조회 코드를 이 브라우저에 남겨둔다. 코드를 잃어버려도 결과 화면에서 찾을 수 있다. */
+  /* 클립보드를 쓸 수 없는 환경용 */
+  function fallbackCopy(text, done) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      done();
+    } catch (e) {}
+  }
+
   function rememberCode(code) {
     try {
       var k = "cb-codes";
@@ -1269,9 +1285,13 @@
     window.scrollTo(0, 0);
 
     $("copyCode").addEventListener("click", function () {
-      navigator.clipboard.writeText(code).then(function () {
+      var done = function () {
         $("copyCode").textContent = t("doneCopied");
-      });
+        setTimeout(function () { $("copyCode").textContent = t("doneCopy"); }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done).catch(function () { fallbackCopy(code, done); });
+      } else { fallbackCopy(code, done); }
     });
 
     // 진행 표시를 2단계로
