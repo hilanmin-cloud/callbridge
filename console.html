@@ -769,7 +769,7 @@
     var q = ($("vq").value || "").trim();
     if (!connected() || q.length < 2) { $("vresult").innerHTML = "<p class='msg'>두 글자 이상 입력하세요.</p>"; return; }
     $("vresult").innerHTML = "<p class='msg'>검색 중…</p>";
-    api("venues?blocked=is.false&select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes,guide_keys,guide_extra,guide_extra_t&name=ilike.*" +
+    api("venues?blocked=is.false&select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes,guide_keys,guide_extra,guide_extra_t,guide_updated_at&name=ilike.*" +
         encodeURIComponent(q) + "*&limit=5")
       .then(function (rows) {
         if (!rows || !rows.length) {
@@ -1218,7 +1218,12 @@
     var ex = $("guideExtra");
     if (ex) ex.value = (matchedVenue && matchedVenue.guide_extra) || "";
     var msg = $("guideMsg");
-    if (msg) msg.textContent = "";
+    if (msg) {
+      var u = matchedVenue && matchedVenue.guide_updated_at;
+      msg.textContent = u
+        ? "마지막 확인: " + new Date(u).toLocaleDateString("ko-KR")
+        : "";
+    }
   }
 
   /* 직접 입력한 문장을 네 언어로 번역한다 (AI 호출은 저장할 때 한 번만) */
@@ -1268,13 +1273,15 @@
           method: "PATCH", prefer: "return=minimal",
           body: { guide_keys: keys.length ? keys : null,
                   guide_extra: extra || null,
-                  guide_extra_t: extra ? tr : null }
+                  guide_extra_t: extra ? tr : null,
+                  guide_updated_at: (keys.length || extra) ? new Date().toISOString() : null }
         }).then(function () { return tr; });
       })
       .then(function (tr) {
         matchedVenue.guide_keys = keys;
         matchedVenue.guide_extra = extra;
         matchedVenue.guide_extra_t = tr;
+        matchedVenue.guide_updated_at = (keys.length || extra) ? new Date().toISOString() : null;
         $("guideMsg").textContent = "저장했습니다." +
           (extra && !tr ? " (직접 입력은 번역하지 못해 한국어로 남습니다)" : "");
       })
@@ -1442,7 +1449,7 @@
       m3:"お店から確認が必要な条件の提示がありました。",
       m4:"申し訳ございません。ご希望の日時ではお席が取れませんでした。料金は全額返金いたします。",
       lv:"お店", lw:"日時", lp:"人数", ln:"予約者名", lc:"確認コード",
-      gt:"このお店の利用方法", kt:"お店で見せる文章",
+      gt:"このお店の利用方法", ao:"{d}時点の情報です。お店の都合で変わることがあります。", kt:"お店で見せる文章",
       kh:"入口でこの画面をスタッフに見せてください。", btn:"予約の詳細を見る",
       cn:"行けなくなった場合は、予約日の前日までにお知らせください。当日のキャンセルは返金されませんが、お店には必ずお伝えします。",
       ft:"CallBridge｜電話でしか予約できない韓国のレストランを代わりに予約します" },
@@ -1451,7 +1458,7 @@
       m1:"已為您訂到位子。", m2:"您希望的時段已客滿，我們在您允許的範圍內做了調整。",
       m3:"餐廳提出了需要您確認的條件。", m4:"很抱歉，您希望的時段無法訂位。費用將全額退還。",
       lv:"餐廳", lw:"時間", lp:"人數", ln:"訂位人", lc:"查詢代碼",
-      gt:"這家店的用餐方式", kt:"給店家看的文字",
+      gt:"這家店的用餐方式", ao:"此為{d}的資訊，店家可能會有變動。", kt:"給店家看的文字",
       kh:"到店時請將此畫面出示給店員。", btn:"查看訂位詳情",
       cn:"若無法前往，請於訂位日前一天告知。當天取消不退款，但我們仍會通知餐廳。",
       ft:"CallBridge｜只收電話訂位的韓國餐廳，我們替您預約" },
@@ -1460,7 +1467,7 @@
       m1:"已为您订到位子。", m2:"您希望的时段已客满，我们在您允许的范围内做了调整。",
       m3:"餐厅提出了需要您确认的条件。", m4:"很抱歉，您希望的时段无法预订。费用将全额退还。",
       lv:"餐厅", lw:"时间", lp:"人数", ln:"预订人", lc:"查询代码",
-      gt:"这家店的用餐方式", kt:"给店家看的文字",
+      gt:"这家店的用餐方式", ao:"此为{d}的信息，店家可能会有变动。", kt:"给店家看的文字",
       kh:"到店时请将此画面出示给店员。", btn:"查看预订详情",
       cn:"若无法前往，请于预订日前一天告知。当天取消不退款，但我们仍会通知餐厅。",
       ft:"CallBridge｜只收电话预订的韩国餐厅，我们替您预约" },
@@ -1471,7 +1478,7 @@
       m3:"The restaurant raised a condition that needs your confirmation.",
       m4:"We could not get a table for the times you gave us. You will be refunded in full.",
       lv:"Restaurant", lw:"When", lp:"People", ln:"Name", lc:"Your code",
-      gt:"How this place works", kt:"Show this at the door",
+      gt:"How this place works", ao:"Checked {d}. The restaurant may have changed things since.", kt:"Show this at the door",
       kh:"Show this screen to the staff when you arrive.", btn:"See booking details",
       cn:"If you cannot make it, tell us the day before. Cancelling on the day is not refunded, but we will still tell the restaurant.",
       ft:"CallBridge - we call the Korean restaurants that only take bookings by phone" },
@@ -1482,7 +1489,7 @@
       m3:"식당에서 확인이 필요한 조건을 제시했습니다.",
       m4:"죄송합니다. 희망하신 일시로는 자리를 잡지 못했습니다. 요금은 전액 환불해 드립니다.",
       lv:"식당", lw:"일시", lp:"인원", ln:"예약자명", lc:"조회 코드",
-      gt:"이 식당 이용 방법", kt:"가게에서 보여줄 문장",
+      gt:"이 식당 이용 방법", ao:"{d} 기준입니다. 식당 사정으로 달라질 수 있습니다.", kt:"가게에서 보여줄 문장",
       kh:"도착하시면 이 화면을 직원에게 보여주세요.", btn:"예약 상세 보기",
       cn:"못 가시게 되면 예약일 전날까지 알려주세요. 당일 취소는 환불되지 않지만 식당에는 전달해 드립니다.",
       ft:"CallBridge - 전화로만 예약되는 한국 식당, 저희가 대신 전화합니다" }
@@ -1515,7 +1522,10 @@
         "<p style='margin:0 0 10px;font-size:14px;font-weight:700;color:#0F5E5C'>" + esc(mt(l, "gt")) + "</p>" +
         d.guides.map(function (g) {
           return "<p style='margin:0 0 7px;font-size:14px;color:#1A2422;line-height:1.6'>· " + esc(g) + "</p>";
-        }).join("") + "</div>" : "";
+        }).join("") +
+        (d.asOf ? "<p style='margin:12px 0 0;padding-top:10px;border-top:1px solid #E6E2DD;" +
+          "font-size:12.5px;color:#6B7A77;line-height:1.6'>" + esc(d.asOf) + "</p>" : "") +
+        "</div>" : "";
 
     var kb = d.koText
       ? "<div style='border:2px solid #0F5E5C;border-radius:12px;padding:18px;margin-top:16px'>" +
@@ -1578,6 +1588,17 @@
     return (PARTY[lang] || PARTY.ja).replace("{n}", n);
   }
 
+  function asOfMail(lang) {
+    var u = matchedVenue && matchedVenue.guide_updated_at;
+    if (!u) return "";
+    var s;
+    try {
+      s = new Intl.DateTimeFormat(LOCALE[lang] || "ja-JP",
+            { year: "numeric", month: "long" }).format(new Date(u));
+    } catch (e) { s = new Date(u).getFullYear() + "." + (new Date(u).getMonth() + 1); }
+    return mt(lang, "ao").replace("{d}", s);
+  }
+
   function sendResultMail() {
     if (!cur) return;
     if (!S || !S.done) { $("saveMsg").textContent = "통화를 먼저 마쳐주세요."; return; }
@@ -1615,7 +1636,8 @@
           party: partyFor(mlang, cur.party_size),
           name: cur.booking_name || c.display_name || "",
           code: cur.lookup_code || "",
-          guides: guidesFor(d.lang),
+          guides: guidesFor(mlang),
+          asOf: asOfMail(mlang),
           koText: koText
         };
 

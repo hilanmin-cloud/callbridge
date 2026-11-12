@@ -73,6 +73,16 @@
   .two { display: flex; flex-wrap: wrap; gap: 10px; }
   .two > div { flex: 1 1 200px; min-width: 0; }
 
+  /* 가이드 선택 */
+  #guidePick { display: flex; flex-direction: column; gap: 2px;
+    max-height: 230px; overflow-y: auto; border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 13px; background: var(--card); }
+  #guidePick label { display: flex; align-items: flex-start; gap: 9px;
+    margin: 0; padding: 6px 0; font-size: 14px; font-weight: 400;
+    color: var(--ink); cursor: pointer; }
+  #guidePick input { width: 18px; height: 18px; min-height: 18px;
+    margin-top: 2px; flex: 0 0 auto; accent-color: var(--teal); }
+
   /* 토글 칩 */
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid var(--line);
@@ -137,6 +147,7 @@
     .levels button { min-height: 60px; font-size: 12px; }
   }
 </style>
+<script src="guide-items.js"></script>
 </head>
 <body>
 
@@ -231,9 +242,12 @@
     <textarea id="vcall" placeholder="점심에 걸면 안 받음&#10;사장님이 일본어 조금 하심&#10;2인분부터만 예약 받음"></textarea>
     <p class="hint">다음에 전화할 때 알아야 할 것을 적으세요.</p>
 
-    <label for="vguide">이 식당 이용 방법 (고객에게 전달)</label>
-    <textarea id="vguide" placeholder="직원이 자리에서 고기를 구워줍니다&#10;고기는 2인분부터 주문합니다&#10;계산은 나갈 때 카운터에서. 팁 문화가 없습니다"></textarea>
-    <p class="hint">한 줄에 하나씩. 결과 메일과 안내 페이지에 그대로 쓰입니다.</p>
+    <label>이 식당 이용 방법 (고객 언어로 자동 전달)</label>
+    <div id="guidePick"></div>
+    <p class="hint" id="guideAsOf"></p>
+
+    <label for="vextra">그 밖의 안내 (직접 입력 — 저장할 때 번역됩니다)</label>
+    <textarea id="vextra" rows="2" placeholder="지하 1층이고 간판이 작습니다"></textarea>
 
     <div class="row" style="margin-top:18px">
       <button class="main" id="btnSave" style="flex:1 1 200px">저장</button>
@@ -351,7 +365,7 @@
     count("id=not.is.null").then(function (n) { $("sTotal").textContent = n; });
     count("checked_at=not.is.null").then(function (n) { $("sChecked").textContent = n; });
     count("takes_reservation=is.true").then(function (n) { $("sOk").textContent = n; });
-    count("guide_notes=not.is.null").then(function (n) { $("sGuide").textContent = n; });
+    count("guide_keys=not.is.null").then(function (n) { $("sGuide").textContent = n; });
     count("blocked=is.true").then(function (n) { $("sBlocked").textContent = n; });
   }
 
@@ -381,12 +395,72 @@
     });
   });
 
+  /* ---------- 이용 가이드 ---------- */
+  var GUIDE = window.CB_GUIDE || [];
+
+  function drawGuidePick() {
+    var box = $("guidePick");
+    if (!box) return;
+    box.innerHTML = GUIDE.map(function (g) {
+      return "<label><input type='checkbox' class='gk' value='" + g.k + "'>" +
+        "<span>" + g.ko + "</span></label>";
+    }).join("");
+  }
+
+  function pickedKeys() {
+    return Array.prototype.slice.call(document.querySelectorAll(".gk"))
+      .filter(function (b) { return b.checked; })
+      .map(function (b) { return b.value; });
+  }
+
+  function setKeys(keys) {
+    keys = keys || [];
+    Array.prototype.forEach.call(document.querySelectorAll(".gk"), function (b) {
+      b.checked = keys.indexOf(b.value) >= 0;
+    });
+  }
+
+  function showAsOf(v) {
+    var el = $("guideAsOf");
+    if (!el) return;
+    var u = v && v.guide_updated_at;
+    el.textContent = u
+      ? "마지막 확인: " + new Date(u).toLocaleDateString("ko-KR") + " — 고객에게 이 시점 기준이라고 안내됩니다."
+      : "고객에게는 저장한 날짜가 기준 시점으로 함께 표시됩니다.";
+  }
+
+  /* 직접 입력한 문장을 네 언어로 번역 */
+  function translateExtra(text) {
+    if (!text) return Promise.resolve(null);
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content:
+          "한국 식당 이용 안내 문장을 외국인 손님이 읽을 수 있게 번역해 주세요.\n" +
+          "직역하지 말고, 손님이 무엇을 해야 하는지 알 수 있게 자연스럽게 쓰세요.\n" +
+          "JSON만 출력하세요. 설명이나 코드 블록 없이.\n" +
+          '형식: {"ja":"...","zh-TW":"...","zh-CN":"...","en":"..."}\n\n' +
+          "문장: " + text }]
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var txt = (d.content || []).map(function (x) { return x.text || ""; }).join("");
+        return JSON.parse(txt.replace(/```json|```/g, "").trim());
+      })
+      .catch(function () { return null; });
+  }
+
   /* ---------- 폼 ---------- */
   function clearForm() {
     editing = null;
-    ["vname", "vphone", "vlink", "vaddr", "vhours", "vcall", "vguide"].forEach(function (id) {
+    ["vname", "vphone", "vlink", "vaddr", "vhours", "vcall", "vextra"].forEach(function (id) {
       $(id).value = "";
     });
+    setKeys([]); showAsOf(null);
     setChip("cAlive", false); setChip("cRsv", false); setChip("cDead", false);
     level = null;
     Array.prototype.forEach.call(document.querySelectorAll(".levels button"), function (x) {
@@ -404,7 +478,9 @@
     $("vaddr").value = v.address || "";
     $("vhours").value = v.open_hours || "";
     $("vcall").value = v.call_notes || "";
-    $("vguide").value = v.guide_notes || "";
+    $("vextra").value = v.guide_extra || "";
+    setKeys(v.guide_keys);
+    showAsOf(v);
     setChip("cAlive", v.phone_alive === true);
     setChip("cRsv", v.takes_reservation === true);
     setChip("cDead", v.phone_alive === false);
@@ -435,7 +511,7 @@
       else if (v.takes_reservation === true) tags += "<span class='tag ok'>예약 가능</span>";
       else if (v.phone_alive === true) tags += "<span class='tag'>번호 확인됨</span>";
       if (v.call_difficulty) tags += "<span class='tag lv'>난이도 " + v.call_difficulty + "</span>";
-      if (v.guide_notes) tags += "<span class='tag'>가이드</span>";
+      if (v.guide_keys && v.guide_keys.length) tags += "<span class='tag'>가이드</span>";
       if (!v.checked_at) tags += "<span class='tag'>미조사</span>";
 
       return "<div class='item' data-id='" + v.id + "'>" +
@@ -454,7 +530,8 @@
     });
   }
 
-  var FIELDS = "id,name,phone,address,map_link,open_hours,guide_notes," +
+  var FIELDS = "id,name,phone,address,map_link,open_hours," +
+               "guide_keys,guide_extra,guide_extra_t,guide_updated_at," +
                "phone_alive,takes_reservation,call_difficulty,call_notes,checked_at," +
                "blocked,blocked_reason";
 
@@ -495,6 +572,8 @@
     if (!name) { toast("err", "식당명을 입력하세요."); return; }
 
     var dead = chipOn("cDead");
+    var keys = pickedKeys();
+    var extra = ($("vextra").value || "").trim();
     var d = {
       name: name,
       phone: ($("vphone").value || "").trim() || null,
@@ -502,7 +581,8 @@
       map_link: ($("vlink").value || "").trim() || null,
       open_hours: ($("vhours").value || "").trim() || null,
       call_notes: ($("vcall").value || "").trim() || null,
-      guide_notes: ($("vguide").value || "").trim() || null,
+      guide_keys: keys.length ? keys : null,
+      guide_extra: extra || null,
       phone_alive: dead ? false : (chipOn("cAlive") ? true : null),
       takes_reservation: dead ? false : (chipOn("cRsv") ? true : null),
       call_difficulty: level,
@@ -511,11 +591,17 @@
     if (!editing) d.source = "manual";
 
     $("btnSave").disabled = true;
-    toast("info", "저장 중…");
+    toast("info", extra ? "번역하는 중…" : "저장 중…");
 
-    var req = editing
-      ? api("venues?id=eq." + editing, { method: "PATCH", body: d, prefer: "return=minimal" })
-      : api("venues", { method: "POST", body: d, prefer: "return=minimal" });
+    var work = extra ? translateExtra(extra) : Promise.resolve(null);
+
+    var req = work.then(function (tr) {
+      d.guide_extra_t = extra ? tr : null;
+      d.guide_updated_at = (keys.length || extra) ? new Date().toISOString() : null;
+      return editing
+        ? api("venues?id=eq." + editing, { method: "PATCH", body: d, prefer: "return=minimal" })
+        : api("venues", { method: "POST", body: d, prefer: "return=minimal" });
+    });
 
     req
       .then(function () {
@@ -531,6 +617,7 @@
       .then(function () { $("btnSave").disabled = false; });
   });
 
+  drawGuidePick();
   initAuth();
 })();
 </script>
