@@ -1240,7 +1240,8 @@
     try {
       var k = "cb-codes";
       var list = JSON.parse(localStorage.getItem(k) || "[]");
-      var nm = ($("vname").value || "").trim() || ($("vlink").value || "").trim();
+      var el = $("venue"), lk = $("vlink");
+      var nm = ((el && el.value) || "").trim() || ((lk && lk.value) || "").trim();
       list = list.filter(function (x) { return x && x.code !== code; });
       list.unshift({ code: code, name: nm.slice(0, 40), at: Date.now() });
       localStorage.setItem(k, JSON.stringify(list.slice(0, 10)));
