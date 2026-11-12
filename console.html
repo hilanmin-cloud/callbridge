@@ -270,6 +270,9 @@
         <button class="ghost small" id="blockVenue">이 식당 차단</button>
       </div>
 
+      <div id="holdReplyBox" style="display:none; margin-top:12px; border:1px solid var(--line);
+           border-radius:10px; padding:12px"></div>
+
       <div id="cancelBox" style="display:none; margin-top:12px; border:1px solid var(--no);
            border-radius:10px; padding:12px">
         <b style="color:var(--no); font-size:13px">취소 요청 들어옴</b>
@@ -449,6 +452,7 @@
     checkDuplicateName();
     checkNoShowHistory();
     drawCancel();
+    drawHoldReply();
     if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
     $("vq").value = vname.replace(/\(.*?\)/g, "").trim();
     $("nv-name").value = vname === "-" ? "" : vname;
@@ -506,6 +510,22 @@
     L.push("- 위약금이나 취소 수수료를 요구하면 금액만 받아 적고 즉시 보류합니다.");
 
     return L.join("\n");
+  }
+
+  /* 고객이 보류 조건에 답했는지 보여준다 */
+  function drawHoldReply() {
+    var box = $("holdReplyBox");
+    if (!box) return;
+    if (!cur || !cur.hold_reply) { box.style.display = "none"; return; }
+    var ok = cur.hold_reply === "accept";
+    box.style.display = "block";
+    box.style.borderColor = ok ? "var(--ok)" : "var(--no)";
+    box.innerHTML =
+      "<b style='font-size:13px; color:" + (ok ? "var(--ok)" : "var(--no)") + "'>" +
+      (ok ? "고객이 조건을 수락했습니다" : "고객이 조건을 거절했습니다 (취소 요청)") + "</b>" +
+      "<p style='margin:6px 0 0; font-size:12.5px; color:var(--muted)'>" +
+      (cur.hold_replied_at ? new Date(cur.hold_replied_at).toLocaleString("ko-KR") : "") +
+      (ok ? " · 식당에 다시 연락해 확정하세요." : " · 식당에 취소를 전달하세요.") + "</p>";
   }
 
   /* ---------- 취소 요청 표시 ---------- */

@@ -98,6 +98,10 @@
     flex-direction: row; gap: 7px; border: 1px solid var(--line); border-radius: 22px;
     font-size: 13.5px; }
 
+  .holdCard { border: 2px solid var(--coral); }
+  .holdBtns { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
+  .holdBtns .btn { flex: 1 1 150px; }
+
   .asOf { margin: 13px 0 0; padding-top: 11px; border-top: 1px solid var(--line);
     font-size: 12.5px; color: var(--muted); line-height: 1.6; }
 
@@ -217,6 +221,17 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      tagCancelled: "キャンセル済み",
+      titleCancelled: "キャンセルを承りました",
+      descCancelled: "お店にもお伝えしました。ご利用ありがとうございました。",
+      tagCancelReq: "キャンセル手続き中",
+      titleCancelReq: "キャンセルを受け付けました",
+      descCancelReq: "お店へのご連絡が済み次第、確定します。",
+      holdQ: "この条件でよろしいですか？",
+      holdYes: "この条件で進める",
+      holdNo: "キャンセルする",
+      holdSent: "お返事を承りました。担当者がお店に連絡します。",
+      refundNone: "予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。",
       guideAsOf: "{d}時点の情報です。お店の都合で変わることがあります。",
       rHuman: "お店が担当者との直接のやり取りを希望しています。",
       rSlow: "お店が確認に時間が必要とのことです。",
@@ -250,6 +265,17 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      tagCancelled: "已取消",
+      titleCancelled: "已完成取消",
+      descCancelled: "我們也已通知餐廳。感謝您的使用。",
+      tagCancelReq: "取消處理中",
+      titleCancelReq: "已收到取消要求",
+      descCancelReq: "通知餐廳後即會完成取消。",
+      holdQ: "這個條件可以嗎？",
+      holdYes: "接受這個條件",
+      holdNo: "取消預約",
+      holdSent: "已收到您的回覆，負責人會聯繫餐廳。",
+      refundNone: "預約當天取消不退款，但我們仍會通知餐廳。",
       guideAsOf: "此為{d}的資訊，店家可能會有變動。",
       rHuman: "餐廳希望直接與負責人聯繫。",
       rSlow: "餐廳表示需要時間確認。",
@@ -283,6 +309,17 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      tagCancelled: "已取消",
+      titleCancelled: "已完成取消",
+      descCancelled: "我们也已通知餐厅。感谢您的使用。",
+      tagCancelReq: "取消处理中",
+      titleCancelReq: "已收到取消要求",
+      descCancelReq: "通知餐厅后即会完成取消。",
+      holdQ: "这个条件可以吗？",
+      holdYes: "接受这个条件",
+      holdNo: "取消预订",
+      holdSent: "已收到您的回复，负责人会联系餐厅。",
+      refundNone: "预约当天取消不退款，但我们仍会通知餐厅。",
       guideAsOf: "此为{d}的信息，店家可能会有变动。",
       rHuman: "餐厅希望直接与负责人联系。",
       rSlow: "餐厅表示需要时间确认。",
@@ -316,6 +353,17 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      tagCancelled: "Cancelled",
+      titleCancelled: "Your booking is cancelled",
+      descCancelled: "We told the restaurant as well. Thank you for using us.",
+      tagCancelReq: "Cancelling",
+      titleCancelReq: "We received your cancellation",
+      descCancelReq: "It is final once we have told the restaurant.",
+      holdQ: "Is this condition acceptable?",
+      holdYes: "Accept and continue",
+      holdNo: "Cancel the booking",
+      holdSent: "Thank you. We will get back to the restaurant.",
+      refundNone: "Cancelling on the day means no refund, but we will still tell the restaurant.",
       guideAsOf: "Checked {d}. The restaurant may have changed things since.",
       rHuman: "The restaurant wants to speak with a person directly.",
       rSlow: "The restaurant needs time to check.",
@@ -349,6 +397,17 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      tagCancelled: "취소됨",
+      titleCancelled: "취소되었습니다",
+      descCancelled: "식당에도 전달했습니다. 이용해 주셔서 감사합니다.",
+      tagCancelReq: "취소 처리 중",
+      titleCancelReq: "취소 요청을 받았습니다",
+      descCancelReq: "식당에 전달되면 취소가 확정됩니다.",
+      holdQ: "이 조건으로 진행할까요?",
+      holdYes: "이 조건으로 진행",
+      holdNo: "예약 취소",
+      holdSent: "답변을 받았습니다. 담당자가 식당에 연락합니다.",
+      refundNone: "예약 당일 취소는 환불이 없지만, 식당에는 반드시 전달해 드립니다.",
       guideAsOf: "{d} 기준입니다. 식당 사정으로 달라질 수 있습니다.",
       rHuman: "식당에서 담당자와 직접 통화를 원합니다.",
       rSlow: "식당에서 확인할 시간이 필요하다고 합니다.",
@@ -480,11 +539,32 @@
   /* 통화 전이면 언제 취소해도 전액 환불이다 */
   function beforeCall(kind) { return !kind || kind === "hold"; }
 
+  /* 지금 취소하면 환불 대상인가
+     - 통화 전: 항상 환불
+     - 확정 후: 예약일 전일 23:59까지만 환불 (운영자 화면과 같은 기준) */
+  function refundable(res) {
+    var kind = res ? res.outcome : null;
+    if (beforeCall(kind)) return true;
+    if (!res || !res.confirmed_at) return true;
+    var s = new Date(res.confirmed_at);
+    var cutoff = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 0, 0, 0);
+    return new Date() < cutoff;
+  }
+
   function render(req, res, venue) {
     var kind = res ? res.outcome : null;
     var hero, title, desc, tag;
 
-    if (kind === "confirmed" || kind === "alt_confirmed") {
+    // 취소된 건은 결과와 무관하게 취소 상태로 보여준다
+    var st = req && req.status;
+    if (st === "cancelled" || st === "cancel_requested") {
+      var done = st === "cancelled";
+      hero = " unavailable";
+      tag = done ? L("tagCancelled") : L("tagCancelReq");
+      title = done ? L("titleCancelled") : L("titleCancelReq");
+      desc = done ? L("descCancelled") : L("descCancelReq");
+      kind = "cancelled";   // 아래 블록들이 예약 상세·가이드를 그리지 않게 한다
+    } else if (kind === "confirmed" || kind === "alt_confirmed") {
       hero = ""; tag = L("tagOk");
       title = fmtDT(res.confirmed_at);
       desc = (venue ? venue.name : req.venue_name_raw) + " · " + req.party_size + "명 · 예약자 " + (req.booking_name || "");
@@ -571,6 +651,17 @@
         "<p class='sub' style='margin:10px 0 0'>" + L("codeKeep") + "</p></div>";
     }
 
+    // 보류 — 고객이 조건을 받아들일지 결정한다
+    if (kind === "hold" && !req.hold_reply) {
+      html += "<div class='card holdCard'><h2>" + L("holdQ") + "</h2>" +
+        "<div class='holdBtns'>" +
+        "<button type='button' class='btn' id='holdYes'>" + L("holdYes") + "</button>" +
+        "<button type='button' class='btn ghost' id='holdNo'>" + L("holdNo") + "</button>" +
+        "</div></div>";
+    } else if (kind === "hold" && req.hold_reply === "accept") {
+      html += "<div class='card'><p style='margin:0;font-size:15px'>" + L("holdSent") + "</p></div>";
+    }
+
     html += "<div class='btns'>" +
       (venue && venue.address ? "<a class='btn ghost' target='_blank' rel='noopener' href='https://map.naver.com/p/search/" +
         encodeURIComponent(venue.name + " " + venue.address) + "'>" + L("mapBtn") + "</a>" : "") +
@@ -581,10 +672,47 @@
 
     if (canCancel(req, kind)) {
       html += "<p class='sub' style='margin-top:12px'>" +
-        (beforeCall(kind) ? L("cancelFree2") : L("cancelNote")) + "</p>";
+        (beforeCall(kind) ? L("cancelFree2")
+         : refundable(res) ? L("cancelNote") : L("refundNone")) + "</p>";
     }
 
     $("root").innerHTML = html;
+
+    var hy = $("holdYes"), hn = $("holdNo");
+    function holdReply(accept, btn) {
+      btn.disabled = true;
+      if (hy) hy.disabled = true;
+      if (hn) hn.disabled = true;
+      rpc("request_hold_reply", { p_code: req.lookup_code, p_accept: accept })
+        .then(function (out) {
+          if (!out || !out.ok) throw new Error("failed");
+          // 운영자에게 알린다 (실패해도 고객 흐름은 유지)
+          try {
+            fetch(cfg.url + "/functions/v1/notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "apikey": cfg.key },
+              body: JSON.stringify({
+                kind: accept ? "hold_accept" : "cancel",
+                code: req.lookup_code || "", venue: req.venue_name_raw || "",
+                party: req.party_size, name: req.booking_name || "",
+                lang: lang, refundable: true, before_call: !accept
+              }),
+              keepalive: true
+            }).catch(function () {});
+          } catch (e) {}
+          load(req.lookup_code);   // 새 상태로 다시 그린다
+        })
+        .catch(function () {
+          btn.disabled = false;
+          if (hy) hy.disabled = false;
+          if (hn) hn.disabled = false;
+        });
+    }
+    if (hy) hy.addEventListener("click", function () { holdReply(true, hy); });
+    if (hn) hn.addEventListener("click", function () {
+      if (!window.confirm(L("cancelAsk") + "\n\n" + L("cancelFree2"))) return;
+      holdReply(false, hn);
+    });
 
     var cm = $("copyMine");
     if (cm) cm.addEventListener("click", function () {
@@ -604,15 +732,8 @@
 
     var cb = $("cancelBtn");
     if (cb) cb.addEventListener("click", function () {
-      // 예약일 전일까지 취소하면 환불, 예약 당일 취소는 환불 없음
-      var when = res && res.confirmed_at ? new Date(res.confirmed_at) : null;
-      var slotAt = (req && req.request_slots && req.request_slots[0]) ? new Date(req.request_slots[0].slot_at) : null;
       var pre = beforeCall(res ? res.outcome : null);
-      var free = true;
-      if (!pre && slotAt) {
-        var cutoff = new Date(slotAt.getFullYear(), slotAt.getMonth(), slotAt.getDate(), 0, 0, 0);
-        free = new Date() < cutoff;
-      }
+      var free = refundable(res);
       var note = pre ? L("cancelFree2") : (free ? L("cancelFree") : L("cancelPaid"));
       if (!window.confirm(L("cancelAsk") + "\n\n" + note)) return;
       cb.disabled = true;
