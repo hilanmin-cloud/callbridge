@@ -1366,16 +1366,17 @@
         return api("requests", { method: "POST", body: d.request, prefer: "return=minimal" });
       })
       .then(function () {
-        // 패스를 썼다면 사용 횟수를 올린다
-        if (useCredit && myCredit) {
-          api("credits?id=eq." + myCredit.id, {
-            method: "PATCH", prefer: "return=minimal",
-            body: { used: myCredit.used + 1 }
-          }).then(function () { loadCredits(); }).catch(function () {});
-          api("requests?id=eq." + ids.request, {
-            method: "PATCH", prefer: "return=minimal",
-            body: { credit_id: myCredit.id }
-          }).catch(function () {});
+        // 패스 차감은 서버 함수가 본인 확인 후 처리한다 (브라우저는 횟수를 직접 고칠 수 없다)
+        if (useCredit && myCredit && authToken) {
+          fetch(cfg.url + "/rest/v1/rpc/use_credit", {
+            method: "POST",
+            headers: { "apikey": cfg.key, "Authorization": "Bearer " + authToken,
+                       "Content-Type": "application/json" },
+            body: JSON.stringify({ p_request_id: ids.request })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function () { loadCredits(); })
+            .catch(function () {});
         }
         return api("request_slots", { method: "POST", prefer: "return=minimal",
           body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
