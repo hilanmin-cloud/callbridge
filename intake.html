@@ -379,6 +379,7 @@
       <div class="hr"></div>
 
       <div id="creditBox" style="display:none"></div>
+      <div id="planBox"></div>
 
       <div class="total"><span class="k" data-t="totalK"></span><span class="v" id="totalAmt">₩9,900</span></div>
 
@@ -405,6 +406,13 @@
 
   var T = {
     ja: {
+      planTitle: "お支払い方法",
+      plan1: "今回の1件",
+      plan1d: "1件のご依頼",
+      plan3: "3回パス",
+      plan3d: "今回1件を使い、2件が残ります・1年間有効",
+      planSave: "お得",
+      planRefund: "残りの回数は返金できます。",
       doneSignIn: "ログインしておくと、コードがなくても確認できます。",
       emailHint: "結果はこのメールにもお送りします。コードでいつでも確認できます。",
       closedTitle: "ただいま新しいご依頼の受付をお休みしています",
@@ -498,6 +506,13 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      planTitle: "付款方式",
+      plan1: "本次1件",
+      plan1d: "單次委託",
+      plan3: "3次券",
+      plan3d: "本次使用1次，剩餘2次・1年有效",
+      planSave: "划算",
+      planRefund: "剩餘次數可以退款。",
       doneSignIn: "登入後即使沒有代碼也能查詢。",
       emailHint: "結果也會寄到這個信箱。您隨時可用代碼查詢。",
       closedTitle: "目前暫停受理新的委託",
@@ -591,6 +606,13 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      planTitle: "付款方式",
+      plan1: "本次1件",
+      plan1d: "单次委托",
+      plan3: "3次券",
+      plan3d: "本次使用1次，剩余2次・1年有效",
+      planSave: "划算",
+      planRefund: "剩余次数可以退款。",
       doneSignIn: "登录后即使没有代码也能查询。",
       emailHint: "结果也会发到这个邮箱。您随时可用代码查询。",
       closedTitle: "目前暂停受理新的委托",
@@ -684,6 +706,13 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      planTitle: "How to pay",
+      plan1: "This one booking",
+      plan1d: "A single request",
+      plan3: "3-booking pass",
+      plan3d: "One used now, two left · valid 1 year",
+      planSave: "Save",
+      planRefund: "Unused bookings can be refunded.",
       doneSignIn: "Sign in and you can check without the code.",
       emailHint: "We also send the result here. You can always check with your code.",
       closedTitle: "We have paused new requests for now",
@@ -777,6 +806,13 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      planTitle: "결제 방법",
+      plan1: "이번 1건",
+      plan1d: "한 건 요청",
+      plan3: "3회 패스",
+      plan3d: "이번에 1건 사용, 2건 남음 · 1년 유효",
+      planSave: "할인",
+      planRefund: "남은 횟수는 환불받으실 수 있습니다.",
       doneSignIn: "로그인해 두시면 코드 없이도 확인하실 수 있습니다.",
       emailHint: "결과는 이 메일로도 보내드립니다. 코드로 언제든 확인하실 수 있습니다.",
       closedTitle: "지금은 새 요청 접수를 잠시 쉬고 있습니다",
@@ -1002,7 +1038,7 @@
           var ok = !c.expires_at || new Date(c.expires_at).getTime() > now;
           return left > 0 && ok;
         });
-        if (!live.length) { myCredit = null; box.style.display = "none"; useCredit = false; drawTotal(); drawAuth(); return; }
+        if (!live.length) { myCredit = null; box.style.display = "none"; useCredit = false; drawTotal(); drawAuth(); drawPlan(); return; }
 
         myCredit = live[0];
         var left = myCredit.total - myCredit.used;
@@ -1021,17 +1057,52 @@
             "<span>" + (exp ? t("creditExp").replace("{d}", exp) + " · " : "") + t("creditFree") + "</span></span>" +
           "</label>";
         $("useCredit").addEventListener("change", function () {
-          useCredit = this.checked; drawTotal();
+          useCredit = this.checked; drawTotal(); drawPlan();
         });
-        drawTotal(); drawAuth();
+        drawTotal(); drawAuth(); drawPlan();
       })
       .catch(function () { box.style.display = "none"; });
+  }
+
+  /* 결제 방법 선택 — 패스가 있으면 숨기고, 없으면 1건/3회 패스 중 고르게 한다 */
+  var plan = "single";   // single | pass3
+  var PRICE = { single: 9900, pass3: 19900 };
+
+  function drawPlan() {
+    var box = $("planBox");
+    if (!box) return;
+
+    // 쓸 수 있는 패스가 있으면 상품을 고를 필요가 없다
+    if (myCredit && useCredit) { box.innerHTML = ""; return; }
+
+    function opt(id, nm, ds, amt, save) {
+      return "<label class='planOpt" + (plan === id ? " on" : "") + "' data-p='" + id + "'>" +
+        (save ? "<span class='save'>" + t("planSave") + "</span>" : "") +
+        "<input type='radio' name='plan' value='" + id + "'" + (plan === id ? " checked" : "") + ">" +
+        "<span class='t'><b>" + t(nm) + "</b><span>" + t(ds) + "</span></span>" +
+        "<span class='amt'>₩" + amt.toLocaleString() + "</span></label>";
+    }
+
+    box.innerHTML = "<div class='planPick'>" +
+      "<span class='lbl'>" + t("planTitle") + "</span>" +
+      opt("single", "plan1", "plan1d", PRICE.single, false) +
+      opt("pass3", "plan3", "plan3d", PRICE.pass3, true) +
+      (plan === "pass3" ? "<p class='hint' style='margin:2px 0 0'>" + t("planRefund") + "</p>" : "") +
+      "</div>";
+
+    Array.prototype.forEach.call(box.querySelectorAll(".planOpt"), function (el) {
+      el.addEventListener("click", function () {
+        plan = el.getAttribute("data-p");
+        drawPlan(); drawTotal();
+      });
+    });
   }
 
   function drawTotal() {
     var el = $("totalAmt");
     if (!el) return;
-    el.textContent = (useCredit && myCredit) ? "₩0" : "₩9,900";
+    el.textContent = (useCredit && myCredit) ? "₩0"
+      : "₩" + PRICE[plan].toLocaleString();
   }
 
   /* ---------- 화면 ---------- */
@@ -1053,7 +1124,7 @@
     $("note").placeholder = t("notePh");
     if (langNow) langNow.textContent = T[lang].label;
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
-    drawAuth(); drawSummary(); loadCredits(); drawOps();
+    drawAuth(); drawSummary(); loadCredits(); drawOps(); drawPlan();
   }
 
   var langBtn = $("langBtn"), langNow = $("langNow");
@@ -1366,17 +1437,25 @@
         return api("requests", { method: "POST", body: d.request, prefer: "return=minimal" });
       })
       .then(function () {
-        // 패스 차감은 서버 함수가 본인 확인 후 처리한다 (브라우저는 횟수를 직접 고칠 수 없다)
-        if (useCredit && myCredit && authToken) {
-          fetch(cfg.url + "/rest/v1/rpc/use_credit", {
-            method: "POST",
-            headers: { "apikey": cfg.key, "Authorization": "Bearer " + authToken,
-                       "Content-Type": "application/json" },
-            body: JSON.stringify({ p_request_id: ids.request })
-          })
-            .then(function (r) { return r.json(); })
-            .then(function () { loadCredits(); })
-            .catch(function () {});
+        // 패스 처리는 서버 함수가 본인 확인 후 수행한다 (브라우저는 횟수를 직접 고칠 수 없다)
+        if (authToken) {
+          var fn = null, arg = null;
+          if (useCredit && myCredit) {
+            fn = "use_credit"; arg = { p_request_id: ids.request };
+          } else if (plan === "pass3") {
+            fn = "buy_pass"; arg = { p_request_id: ids.request, p_count: 3, p_price: PRICE.pass3 };
+          }
+          if (fn) {
+            fetch(cfg.url + "/rest/v1/rpc/" + fn, {
+              method: "POST",
+              headers: { "apikey": cfg.key, "Authorization": "Bearer " + authToken,
+                         "Content-Type": "application/json" },
+              body: JSON.stringify(arg)
+            })
+              .then(function (r) { return r.json(); })
+              .then(function () { loadCredits(); })
+              .catch(function () {});
+          }
         }
         return api("request_slots", { method: "POST", prefer: "return=minimal",
           body: d.slots.map(function (s) { s.request_id = ids.request; return s; }) });
@@ -1420,6 +1499,7 @@
   }
 
   applyLang();
+  drawPlan();
   initAuth();
   checkOpen();
 })();
