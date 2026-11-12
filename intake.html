@@ -406,6 +406,8 @@
 
   var T = {
     ja: {
+      planNeedLogin: "パスのご購入にはログインが必要です。残りの回数はアカウントに保存されます。",
+      errExpired: "ログインの有効期限が切れました。ページを再読み込みしてからもう一度お試しください。",
       errEmail: "メールアドレスを正しく入力してください。",
       errName: "予約者名を入力してください。",
       errPast: "過去の日時は選べません。",
@@ -510,6 +512,8 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      planNeedLogin: "購買次數券需要先登入，剩餘次數會存在您的帳號中。",
+      errExpired: "登入已逾時，請重新整理頁面後再試一次。",
       errEmail: "請輸入正確的電子郵件。",
       errName: "請輸入訂位人姓名。",
       errPast: "無法選擇過去的時間。",
@@ -614,6 +618,8 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      planNeedLogin: "购买次数券需要先登录，剩余次数会存在您的账号中。",
+      errExpired: "登录已超时，请刷新页面后再试一次。",
       errEmail: "请输入正确的电子邮件。",
       errName: "请输入预订人姓名。",
       errPast: "无法选择过去的时间。",
@@ -718,6 +724,8 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      planNeedLogin: "Sign in to buy a pass. Your remaining bookings are kept in your account.",
+      errExpired: "Your sign-in expired. Please reload the page and try again.",
       errEmail: "Please enter a valid email address.",
       errName: "Please enter the booking name.",
       errPast: "You cannot choose a time in the past.",
@@ -822,6 +830,8 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      planNeedLogin: "패스를 사시려면 로그인이 필요합니다. 남은 횟수는 계정에 보관됩니다.",
+      errExpired: "로그인이 만료되었습니다. 새로고침 후 다시 시도해 주세요.",
       errEmail: "이메일을 올바르게 입력해 주세요.",
       errName: "예약자명을 입력해 주세요.",
       errPast: "지난 일시는 선택할 수 없습니다.",
@@ -943,6 +953,25 @@
   };
   var sb = null, user = null, authToken = null;
 
+  /* 만료가 가까우면 토큰을 갱신해 돌려준다.
+     폼을 오래 열어둔 뒤 제출해도 실패하지 않게 하기 위함이다. */
+  function freshToken() {
+    if (!sb || !user) return Promise.resolve(null);
+    return sb.auth.getSession()
+      .then(function (r) {
+        var s = r && r.data && r.data.session;
+        if (!s) return null;
+        var left = (s.expires_at || 0) * 1000 - Date.now();
+        if (left > 120000) { authToken = s.access_token; return authToken; }
+        return sb.auth.refreshSession().then(function (r2) {
+          var s2 = r2 && r2.data && r2.data.session;
+          authToken = s2 ? s2.access_token : null;
+          return authToken;
+        }).catch(function () { return null; });
+      })
+      .catch(function () { return null; });
+  }
+
   function api(path, options) {
     options = options || {};
     return fetch(cfg.url + "/rest/v1/" + path, {
@@ -1036,6 +1065,7 @@
       authToken = s ? s.access_token : null;
       drawAuth();
       loadCredits();
+      drawPlan();
     }
     sb.auth.getSession().then(function (r) { apply(r.data && r.data.session); });
     sb.auth.onAuthStateChange(function (_e, s) { apply(s); });
@@ -1043,7 +1073,7 @@
 
 
   /* ---------- 패스(잔여 횟수) ---------- */
-  var myCredit = null, useCredit = false;
+  var myCredit = null, useCredit = false, creditTouched = false;
 
   function loadCredits() {
     var box = $("creditBox");
@@ -1068,15 +1098,17 @@
               { year:"numeric", month:"short", day:"numeric" }).format(new Date(myCredit.expires_at))
           : "";
 
-        useCredit = true;
+        // 고객이 직접 체크를 바꿨다면 그 선택을 유지한다 (토큰 갱신 등으로 다시 불러도 덮어쓰지 않는다)
+        if (!creditTouched) useCredit = true;
         box.style.display = "block";
         box.innerHTML =
           "<label class='credit'>" +
-            "<input type='checkbox' id='useCredit' checked>" +
+            "<input type='checkbox' id='useCredit'" + (useCredit ? " checked" : "") + ">" +
             "<span class='t'><b>" + t("creditUse").replace("{n}", left) + "</b>" +
             "<span>" + (exp ? t("creditExp").replace("{d}", exp) + " · " : "") + t("creditFree") + "</span></span>" +
           "</label>";
         $("useCredit").addEventListener("change", function () {
+          creditTouched = true;
           useCredit = this.checked; drawTotal(); drawPlan();
         });
         drawTotal(); drawAuth(); drawPlan();
@@ -1085,7 +1117,7 @@
   }
 
   /* 결제 방법 선택 — 패스가 있으면 숨기고, 없으면 1건/3회 패스 중 고르게 한다 */
-  var plan = "single";   // single | pass3
+  var plan = "single", planTouched = false;   // single | pass3
   var PRICE = { single: 9900, pass3: 19900 };
 
   function drawPlan() {
@@ -1103,6 +1135,20 @@
         "<span class='amt'>₩" + amt.toLocaleString() + "</span></label>";
     }
 
+    // 비로그인 상태에서는 패스를 살 수 없다 (횟수를 보관할 계정이 없다)
+    if (!user) {
+      plan = "single";
+      box.innerHTML = "<div class='planPick'>" +
+        "<span class='lbl'>" + t("planTitle") + "</span>" +
+        "<label class='planOpt on' data-p='single'>" +
+          "<input type='radio' name='plan' value='single' checked>" +
+          "<span class='t'><b>" + t("plan1") + "</b><span>" + t("plan1d") + "</span></span>" +
+          "<span class='amt'>₩" + PRICE.single.toLocaleString() + "</span></label>" +
+        "<p class='hint' style='margin:2px 0 0'>" + t("planNeedLogin") + "</p>" +
+        "</div>";
+      return;
+    }
+
     box.innerHTML = "<div class='planPick'>" +
       "<span class='lbl'>" + t("planTitle") + "</span>" +
       opt("single", "plan1", "plan1d", PRICE.single, false) +
@@ -1113,6 +1159,7 @@
     Array.prototype.forEach.call(box.querySelectorAll(".planOpt"), function (el) {
       el.addEventListener("click", function () {
         plan = el.getAttribute("data-p");
+        planTouched = true;
         drawPlan(); drawTotal();
       });
     });
@@ -1446,8 +1493,11 @@
     var ids = { customer: uuid() };
     d.customer.id = ids.customer;
 
+    // 로그인 상태라면 유효한 토큰을 먼저 확보한다 (만료된 토큰으로 보내면 저장이 실패한다)
+    freshToken().then(function () {
+
     // 로그인한 사람은 같은 고객으로 묶는다 (노쇼 이력이 흩어지지 않게)
-    fetch(cfg.url + "/rest/v1/rpc/upsert_customer", {
+    return fetch(cfg.url + "/rest/v1/rpc/upsert_customer", {
       method: "POST",
       headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
                  "Content-Type": "application/json" },
@@ -1522,7 +1572,14 @@
         } catch (e) {}
         showDone(showCode);
       })
-      .catch(function (e) { toast("err", t("failed") + e.message); $("pay").disabled = false; });
+      .catch(function (e) {
+        var m = String(e.message || "");
+        // 로그인이 풀린 경우는 따로 안내한다
+        toast("err", /JWT|expired|401/i.test(m) ? t("errExpired") : t("failed") + m);
+        $("pay").disabled = false;
+      });
+
+    });  // freshToken
   });
 
   /* ---------- 테스트 배너 ---------- */

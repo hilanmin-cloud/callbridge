@@ -147,7 +147,8 @@
         <button class="ghost small" id="giveCredit" style="flex:0 1 110px">패스 지급</button>
         <select id="filter" style="min-height:36px">
           <option value="received">대기 중</option>
-          <option value="cancel_requested">취소 요청</option>
+          <option value="change_requested">변경 요청</option>
+        <option value="cancel_requested">취소 요청</option>
           <option value="confirmed">확정됨</option>
           <option value="test">테스트 건</option>
           <option value="all">전체</option>
@@ -274,7 +275,13 @@
            border-radius:10px; padding:12px"></div>
 
       <div id="changeBox" style="display:none; margin-top:12px; border:1px solid var(--gold);
-           border-radius:10px; padding:12px"></div>
+           border-radius:10px; padding:12px">
+        <div id="changeInfo"></div>
+        <div class="row" style="margin-top:9px">
+          <button class="ghost small" id="applyChange">변경 반영 완료</button>
+          <button class="ghost small" id="rejectChange">변경 불가</button>
+        </div>
+      </div>
 
       <div id="cancelBox" style="display:none; margin-top:12px; border:1px solid var(--no);
            border-radius:10px; padding:12px">
@@ -525,7 +532,7 @@
 
     var at = cq.at ? new Date(cq.at) : null;
     box.style.display = "block";
-    box.innerHTML =
+    $("changeInfo").innerHTML =
       "<b style='font-size:13px; color:var(--gold)'>변경 요청 (" +
         (cq.free ? "무료 1회차" : "유료 — 9,900원 청구 대상") + ")</b>" +
       "<p style='margin:7px 0 0; font-size:13px'>" +
@@ -536,6 +543,38 @@
         (cur.change_req_at ? new Date(cur.change_req_at).toLocaleString("ko-KR") : "") +
         " · 같은 식당에 다시 전화해 변경을 요청하세요.</p>";
   }
+
+  /* 변경 요청을 마무리한다 — 반영했거나, 식당이 안 된다고 했거나 */
+  function finishChange(ok) {
+    if (!connected() || !cur) return;
+    var cq = cur.change_req || {};
+    var msg = ok
+      ? "식당에 변경을 반영했습니다. 고객에게 변경된 내용으로 확정 안내가 나갑니다."
+      : "식당이 변경을 받아주지 않았습니다. 고객에게 기존 예약 그대로라고 안내됩니다.";
+    if (!window.confirm(msg + "\n\n진행할까요?")) return;
+
+    var body = { status: ok ? "confirmed" : "confirmed" };
+    if (ok && cq.party) body.party_size = cq.party;
+
+    api("requests?id=eq." + cur.id, { method: "PATCH", prefer: "return=minimal", body: body })
+      .then(function () {
+        // 변경을 반영했으면 결과도 새 일시로 갱신한다
+        if (ok && cq.at) {
+          return api("results?request_id=eq." + cur.id, {
+            method: "PATCH", prefer: "return=minimal",
+            body: { confirmed_at: cq.at, outcome: "confirmed" }
+          }).catch(function () {});
+        }
+      })
+      .then(function () {
+        alert(ok ? "변경을 반영했습니다." : "변경 불가로 처리했습니다.");
+        loadList();
+      })
+      .catch(function (e) { alert("처리 실패: " + e.message); });
+  }
+
+  $("applyChange").addEventListener("click", function () { finishChange(true); });
+  $("rejectChange").addEventListener("click", function () { finishChange(false); });
 
   /* 고객이 보류 조건에 답했는지 보여준다 */
   function drawHoldReply() {
@@ -1072,10 +1111,10 @@
   }
 
   function condCheck(ex, md, trace) {
-    if (ex.deposit) { trace.push({ k: "fail", t: "예약금 요구 → 위임 범위 밖" }); return "예약금 요구"; }
-    if (ex.seatType && !md.seat) { trace.push({ k: "fail", t: "좌석 형태(" + ex.seatType + ") → 위임 범위에 없음" }); return "좌석 형태 확인 필요"; }
-    if (ex.split && !md.split) { trace.push({ k: "fail", t: "자리 분리 → 수용 설정 안 됨" }); return "자리 분리 불수용"; }
-    if (ex.course && !md.course) { trace.push({ k: "fail", t: "코스 메뉴 → 수용 설정 안 됨" }); return "코스 불수용"; }
+    if (ex.deposit) { trace.push({ k: "fail", t: "예약금 요구 → 위임 범위 밖" }); return { k: "deposit" }; }
+    if (ex.seatType && !md.seat) { trace.push({ k: "fail", t: "좌석 형태(" + ex.seatType + ") → 위임 범위에 없음" }); return { k: "seat_type", v: ex.seatType }; }
+    if (ex.split && !md.split) { trace.push({ k: "fail", t: "자리 분리 → 수용 설정 안 됨" }); return { k: "split" }; }
+    if (ex.course && !md.course) { trace.push({ k: "fail", t: "코스 메뉴 → 수용 설정 안 됨" }); return { k: "course" }; }
     if (ex.seatType && md.seat) trace.push({ k: "pass", t: "좌석 형태(" + ex.seatType + ") → 무관 설정됨" });
     if (ex.split && md.split) trace.push({ k: "pass", t: "자리 분리 → 수용 설정됨" });
     if (ex.course && md.course) trace.push({ k: "pass", t: "코스 메뉴 → 수용 설정됨" });
@@ -1222,8 +1261,15 @@
   /* 저장은 코드로, 운영자 화면 표시는 한국어로 */
   var REASON_KO = { human: "사람 인계 요청", slow: "확인 지연",
                     manual: "운영자 수동 인계", out_of_scope: "모든 순위가 위임 범위 밖",
-                    deposit: "예약금 요구" };
-  function reasonKo(r) { return REASON_KO[r] || r || ""; }
+                    deposit: "예약금 요구", split: "자리 분리 불수용",
+                    course: "코스 메뉴만 가능", seat_type: "좌석 형태 확인 필요" };
+  function reasonKo(r) {
+    if (!r) return "";
+    if (typeof r === "object") {
+      return (REASON_KO[r.k] || r.k) + (r.v ? " (" + r.v + ")" : "");
+    }
+    return REASON_KO[r] || r;
+  }
   function condKo(x) {
     if (!x) return "";
     if (typeof x === "string") return x;
@@ -1826,7 +1872,7 @@
         // 통화가 연결된 건이면 해당 식당의 번호를 검증됨으로 기록
         if (matchedVenue && S.turns > 0) {
           var vp = { phone_verified_at: new Date().toISOString() };
-          if (S.reason === "human") vp.ai_call_blocked = true;
+          if ((S.reason === "human" || (S.reason && S.reason.k === "human"))) vp.ai_call_blocked = true;
           return api("venues?id=eq." + matchedVenue.id, { method: "PATCH", body: vp });
         }
       })

@@ -231,6 +231,9 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      rSplit: "お席が離れてしまうとのことです。",
+      rCourse: "コース料理のみのご案内とのことです。",
+      rSeatType: "{v}のお席になるとのことです。",
       changeBtn: "日時・人数を変更",
       changeTitle: "予約の変更",
       changeSame: "同じお店の日時と人数のみ変更できます。別のお店をご希望の場合は、キャンセルして新しくご依頼ください。",
@@ -290,6 +293,9 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      rSplit: "座位可能無法安排在一起。",
+      rCourse: "店家表示只提供套餐。",
+      rSeatType: "座位會是{v}。",
       changeBtn: "變更時間・人數",
       changeTitle: "變更訂位",
       changeSame: "只能變更同一家店的時間和人數。若想換別家店，請取消後重新委託。",
@@ -349,6 +355,9 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      rSplit: "座位可能无法安排在一起。",
+      rCourse: "店家表示只提供套餐。",
+      rSeatType: "座位会是{v}。",
       changeBtn: "变更时间・人数",
       changeTitle: "变更预订",
       changeSame: "只能变更同一家店的时间和人数。若想换别家店，请取消后重新委托。",
@@ -408,6 +417,9 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      rSplit: "Your seats may not be together.",
+      rCourse: "The restaurant serves a set course only.",
+      rSeatType: "Your seating would be {v}.",
       changeBtn: "Change time or party",
       changeTitle: "Change your booking",
       changeSame: "You can change the time and party size at the same restaurant. For a different restaurant, cancel and send a new request.",
@@ -467,6 +479,9 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      rSplit: "자리가 떨어질 수 있다고 합니다.",
+      rCourse: "코스 메뉴만 가능하다고 합니다.",
+      rSeatType: "{v} 자리가 된다고 합니다.",
       changeBtn: "일시·인원 변경",
       changeTitle: "예약 변경",
       changeSame: "같은 식당의 일시와 인원만 바꿀 수 있습니다. 다른 식당을 원하시면 취소하고 새로 요청해 주세요.",
@@ -551,10 +566,16 @@
 
   /* 운영자가 저장한 코드를 고객 언어로 바꾼다 */
   var REASON_KEY = { human: "rHuman", slow: "rSlow", manual: "rManual",
-                     out_of_scope: "rOutOfScope", deposit: "rDeposit" };
+                     out_of_scope: "rOutOfScope", deposit: "rDeposit",
+                     split: "rSplit", course: "rCourse", seat_type: "rSeatType" };
 
   function reasonText(x) {
     if (!x) return "";
+    if (typeof x === "object") {
+      if (x.k === "seat_type") return L("rSeatType").replace("{v}", x.v || "");
+      var ko = REASON_KEY[x.k];
+      return ko ? L(ko) : "";
+    }
     var k = REASON_KEY[x];
     return k ? L(k) : "";      // 모르는 코드는 보여주지 않는다
   }
@@ -617,6 +638,7 @@
   function canCancel(req, kind) {
     if (!req) return false;
     if (req.status === "cancel_requested" || req.status === "cancelled") return false;
+    if (req.status === "change_requested") return true;   // 변경 대기 중에도 취소는 열어둔다
     if (kind === "confirmed" || kind === "alt_confirmed" || kind === "hold") return true;
     return !kind;   // 결과가 아직 없는 상태 = 통화 전
   }
