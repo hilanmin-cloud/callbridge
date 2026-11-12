@@ -98,6 +98,16 @@
     flex-direction: row; gap: 7px; border: 1px solid var(--line); border-radius: 22px;
     font-size: 13.5px; }
 
+  .fl { display: block; font-size: 13px; font-weight: 600; color: var(--muted);
+    margin: 14px 0 6px; }
+  .two { display: flex; gap: 8px; }
+  .two > input { flex: 1 1 0; min-width: 0; }
+  #cgDate, #cgTime, #cgParty, #cgNote { width: 100%; min-height: 48px; padding: 10px 13px;
+    font: inherit; font-size: 16px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); color: var(--ink); }
+  #cgDate:focus, #cgTime:focus, #cgParty:focus, #cgNote:focus { outline: 0;
+    border-color: var(--teal); box-shadow: 0 0 0 3px rgba(15,94,92,.14); }
+
   .holdCard { border: 2px solid var(--coral); }
   .holdBtns { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
   .holdBtns .btn { flex: 1 1 150px; }
@@ -221,6 +231,21 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      changeBtn: "日時・人数を変更",
+      changeTitle: "予約の変更",
+      changeSame: "同じお店の日時と人数のみ変更できます。別のお店をご希望の場合は、キャンセルして新しくご依頼ください。",
+      changeFree: "1回目の変更は無料です。",
+      changePaid: "2回目以降の変更は新しいご依頼として₩9,900かかります。",
+      changeDate: "新しい日時",
+      changeParty: "人数（7名まで）",
+      changeNote: "お店への伝言（任意）",
+      changeSend: "変更を依頼する",
+      changeDone: "変更のご依頼を承りました。お店に確認して結果をお知らせします。",
+      tagChange: "変更手続き中",
+      titleChange: "変更をご依頼いただきました",
+      descChange: "お店に確認しています。結果が出るまでお待ちください。",
+      errChangeParty: "8名以上は団体予約のため、別途ご相談ください。",
+      errChangePast: "過去の日時は選べません。",
       tagCancelled: "キャンセル済み",
       titleCancelled: "キャンセルを承りました",
       descCancelled: "お店にもお伝えしました。ご利用ありがとうございました。",
@@ -265,6 +290,21 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      changeBtn: "變更時間・人數",
+      changeTitle: "變更訂位",
+      changeSame: "只能變更同一家店的時間和人數。若想換別家店，請取消後重新委託。",
+      changeFree: "第1次變更免費。",
+      changePaid: "第2次以後的變更視為新委託，需₩9,900。",
+      changeDate: "新的時間",
+      changeParty: "人數（最多7人）",
+      changeNote: "給店家的留言（選填）",
+      changeSend: "送出變更",
+      changeDone: "已收到變更要求。我們會向餐廳確認後通知您。",
+      tagChange: "變更處理中",
+      titleChange: "已收到變更要求",
+      descChange: "正在向餐廳確認，請稍候。",
+      errChangeParty: "8人以上屬於團體訂位，請另外聯繫我們。",
+      errChangePast: "無法選擇過去的時間。",
       tagCancelled: "已取消",
       titleCancelled: "已完成取消",
       descCancelled: "我們也已通知餐廳。感謝您的使用。",
@@ -309,6 +349,21 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      changeBtn: "变更时间・人数",
+      changeTitle: "变更预订",
+      changeSame: "只能变更同一家店的时间和人数。若想换别家店，请取消后重新委托。",
+      changeFree: "第1次变更免费。",
+      changePaid: "第2次以后的变更视为新委托，需₩9,900。",
+      changeDate: "新的时间",
+      changeParty: "人数（最多7人）",
+      changeNote: "给店家的留言（选填）",
+      changeSend: "送出变更",
+      changeDone: "已收到变更要求。我们会向餐厅确认后通知您。",
+      tagChange: "变更处理中",
+      titleChange: "已收到变更要求",
+      descChange: "正在向餐厅确认，请稍候。",
+      errChangeParty: "8人以上属于团体预订，请另外联系我们。",
+      errChangePast: "无法选择过去的时间。",
       tagCancelled: "已取消",
       titleCancelled: "已完成取消",
       descCancelled: "我们也已通知餐厅。感谢您的使用。",
@@ -353,6 +408,21 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      changeBtn: "Change time or party",
+      changeTitle: "Change your booking",
+      changeSame: "You can change the time and party size at the same restaurant. For a different restaurant, cancel and send a new request.",
+      changeFree: "Your first change is free.",
+      changePaid: "A second change counts as a new request and costs ₩9,900.",
+      changeDate: "New date and time",
+      changeParty: "People (up to 7)",
+      changeNote: "Message for the restaurant (optional)",
+      changeSend: "Request the change",
+      changeDone: "We received your change request. We will call the restaurant and let you know.",
+      tagChange: "Changing",
+      titleChange: "We received your change request",
+      descChange: "We are checking with the restaurant. Please wait for the result.",
+      errChangeParty: "Groups of 8 or more need a separate arrangement.",
+      errChangePast: "You cannot choose a time in the past.",
       tagCancelled: "Cancelled",
       titleCancelled: "Your booking is cancelled",
       descCancelled: "We told the restaurant as well. Thank you for using us.",
@@ -397,6 +467,21 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      changeBtn: "일시·인원 변경",
+      changeTitle: "예약 변경",
+      changeSame: "같은 식당의 일시와 인원만 바꿀 수 있습니다. 다른 식당을 원하시면 취소하고 새로 요청해 주세요.",
+      changeFree: "첫 번째 변경은 무료입니다.",
+      changePaid: "두 번째부터는 새 요청으로 9,900원이 부과됩니다.",
+      changeDate: "새 일시",
+      changeParty: "인원 (7명까지)",
+      changeNote: "식당에 전할 말 (선택)",
+      changeSend: "변경 요청하기",
+      changeDone: "변경 요청을 받았습니다. 식당에 확인하고 결과를 알려드리겠습니다.",
+      tagChange: "변경 처리 중",
+      titleChange: "변경 요청을 받았습니다",
+      descChange: "식당에 확인하고 있습니다. 결과가 나올 때까지 기다려 주세요.",
+      errChangeParty: "8명 이상은 단체 예약이라 별도로 문의해 주세요.",
+      errChangePast: "지난 일시는 선택할 수 없습니다.",
       tagCancelled: "취소됨",
       titleCancelled: "취소되었습니다",
       descCancelled: "식당에도 전달했습니다. 이용해 주셔서 감사합니다.",
@@ -536,6 +621,13 @@
     return !kind;   // 결과가 아직 없는 상태 = 통화 전
   }
 
+  /* 변경할 수 있는 상태인가 — 같은 식당의 일시·인원만 바꾼다 */
+  function canChange(req, kind) {
+    if (!req) return false;
+    if (["cancel_requested", "cancelled", "change_requested"].indexOf(req.status) >= 0) return false;
+    return kind === "confirmed" || kind === "alt_confirmed" || !kind;
+  }
+
   /* 통화 전이면 언제 취소해도 전액 환불이다 */
   function beforeCall(kind) { return !kind || kind === "hold"; }
 
@@ -551,13 +643,85 @@
     return new Date() < cutoff;
   }
 
+  /* 변경 요청 화면 — 같은 식당의 일시·인원만 바꾼다 */
+  function openChange(req, res) {
+    var free = (req.change_count || 0) === 0 && refundable(res);
+    var kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    var minD = kst.getFullYear() + "-" +
+      String(kst.getMonth() + 1).padStart(2, "0") + "-" +
+      String(kst.getDate()).padStart(2, "0");
+
+    $("root").innerHTML =
+      "<div class='card'><h2>" + L("changeTitle") + "</h2>" +
+      "<p class='sub' style='margin-top:0'>" + L("changeSame") + "</p>" +
+      "<p class='sub' style='color:" + (free ? "var(--teal)" : "var(--coral)") + ";font-weight:600'>" +
+        (free ? L("changeFree") : L("changePaid")) + "</p>" +
+
+      "<div class='kv' style='margin-bottom:14px'><b>" + L("venue") + "</b><span>" +
+        esc((req.venue_name_raw || "").split(" | ")[0]) + "</span></div>" +
+
+      "<label class='fl'>" + L("changeDate") + "</label>" +
+      "<div class='two'>" +
+        "<input type='date' id='cgDate' min='" + minD + "'>" +
+        "<input type='time' id='cgTime' step='600'>" +
+      "</div>" +
+
+      "<label class='fl'>" + L("changeParty") + "</label>" +
+      "<input type='number' id='cgParty' min='1' max='7' value='" + (req.party_size || 2) + "'>" +
+
+      "<label class='fl'>" + L("changeNote") + "</label>" +
+      "<input type='text' id='cgNote' value='" + esc(req.note_to_venue || "") + "'>" +
+
+      "<div class='btns' style='margin-top:16px'>" +
+        "<button class='btn' id='cgSend' type='button'>" + L("changeSend") + "</button>" +
+        "<button class='btn ghost' id='cgBack' type='button'>" + L("againBtn") + "</button>" +
+      "</div></div>";
+    window.scrollTo(0, 0);
+
+    $("cgBack").addEventListener("click", function () { load(req.lookup_code); });
+
+    $("cgSend").addEventListener("click", function () {
+      var d = $("cgDate").value, tm = $("cgTime").value;
+      var p = parseInt($("cgParty").value, 10);
+      if (!d || !tm) { alert(L("changeDate")); return; }
+      if (!p || p < 1 || p > 7) { alert(L("errChangeParty")); return; }
+      var at = new Date(d + "T" + tm + ":00+09:00");
+      if (at.getTime() < Date.now()) { alert(L("errChangePast")); return; }
+
+      var btn = $("cgSend");
+      btn.disabled = true;
+      rpc("request_change", { p_code: req.lookup_code, p_at: at.toISOString(),
+                              p_party: p, p_note: ($("cgNote").value || "").trim() || null })
+        .then(function (out) {
+          if (!out || !out.ok) throw new Error((out && out.msg) || "failed");
+          try {
+            fetch(cfg.url + "/functions/v1/notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "apikey": cfg.key },
+              body: JSON.stringify({ kind: "change", code: req.lookup_code || "",
+                venue: req.venue_name_raw || "", party: p, name: req.booking_name || "",
+                lang: lang, refundable: !!out.free }),
+              keepalive: true
+            }).catch(function () {});
+          } catch (e) {}
+          alert(L("changeDone"));
+          load(req.lookup_code);
+        })
+        .catch(function () { btn.disabled = false; alert(L("failed") || "failed"); });
+    });
+  }
+
   function render(req, res, venue) {
     var kind = res ? res.outcome : null;
     var hero, title, desc, tag;
 
     // 취소된 건은 결과와 무관하게 취소 상태로 보여준다
     var st = req && req.status;
-    if (st === "cancelled" || st === "cancel_requested") {
+    if (st === "change_requested") {
+      hero = " hold";
+      tag = L("tagChange"); title = L("titleChange"); desc = L("descChange");
+      kind = "changing";
+    } else if (st === "cancelled" || st === "cancel_requested") {
       var done = st === "cancelled";
       hero = " unavailable";
       tag = done ? L("tagCancelled") : L("tagCancelReq");
@@ -665,6 +829,9 @@
     html += "<div class='btns'>" +
       (venue && venue.address ? "<a class='btn ghost' target='_blank' rel='noopener' href='https://map.naver.com/p/search/" +
         encodeURIComponent(venue.name + " " + venue.address) + "'>" + L("mapBtn") + "</a>" : "") +
+      (canChange(req, kind)
+        ? "<button class='btn ghost' id='changeBtn' type='button'>" + L("changeBtn") + "</button>"
+        : "") +
       (canCancel(req, kind)
         ? "<button class='btn ghost' id='cancelBtn' type='button'>" + L("cancelBtn") + "</button>"
         : "") +
@@ -713,6 +880,9 @@
       if (!window.confirm(L("cancelAsk") + "\n\n" + L("cancelFree2"))) return;
       holdReply(false, hn);
     });
+
+    var chg = $("changeBtn");
+    if (chg) chg.addEventListener("click", function () { openChange(req, res); });
 
     var cm = $("copyMine");
     if (cm) cm.addEventListener("click", function () {

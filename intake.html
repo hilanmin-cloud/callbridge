@@ -406,6 +406,10 @@
 
   var T = {
     ja: {
+      errEmail: "メールアドレスを正しく入力してください。",
+      errName: "予約者名を入力してください。",
+      errPast: "過去の日時は選べません。",
+      errParty: "8名以上は団体予約のため、別途ご相談ください。",
       planTitle: "お支払い方法",
       plan1: "今回の1件",
       plan1d: "1件のご依頼",
@@ -506,6 +510,10 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
+      errEmail: "請輸入正確的電子郵件。",
+      errName: "請輸入訂位人姓名。",
+      errPast: "無法選擇過去的時間。",
+      errParty: "8人以上屬於團體訂位，請另外聯繫我們。",
       planTitle: "付款方式",
       plan1: "本次1件",
       plan1d: "單次委託",
@@ -606,6 +614,10 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
+      errEmail: "请输入正确的电子邮件。",
+      errName: "请输入预订人姓名。",
+      errPast: "无法选择过去的时间。",
+      errParty: "8人以上属于团体预订，请另外联系我们。",
       planTitle: "付款方式",
       plan1: "本次1件",
       plan1d: "单次委托",
@@ -706,6 +718,10 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
+      errEmail: "Please enter a valid email address.",
+      errName: "Please enter the booking name.",
+      errPast: "You cannot choose a time in the past.",
+      errParty: "Groups of 8 or more need a separate arrangement. Please contact us.",
       planTitle: "How to pay",
       plan1: "This one booking",
       plan1d: "A single request",
@@ -806,6 +822,10 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
+      errEmail: "이메일을 올바르게 입력해 주세요.",
+      errName: "예약자명을 입력해 주세요.",
+      errPast: "지난 일시는 선택할 수 없습니다.",
+      errParty: "8명 이상은 단체 예약이라 별도로 문의해 주세요.",
       planTitle: "결제 방법",
       plan1: "이번 1건",
       plan1d: "한 건 요청",
@@ -1411,6 +1431,14 @@
     var d = collect();
     if (!d.venue.name && !d.venue.link) { toast("err", t("errVenue")); return; }
     if (!d.slots.length) { toast("err", t("errSlot")); return; }
+    if (!d.request.booking_name) { toast("err", t("errName")); $("bname").focus(); return; }
+    if (!d.customer.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.customer.email)) {
+      toast("err", t("errEmail")); $("email").focus(); return;
+    }
+    if (d.request.party_size >= 8) { toast("err", t("errParty")); return; }
+    var now = Date.now();
+    var past = d.slots.some(function (s) { return new Date(s.slot_at).getTime() < now; });
+    if (past) { toast("err", t("errPast")); return; }
 
     $("pay").disabled = true;
     toast("info", t("saving"));
@@ -1418,8 +1446,17 @@
     var ids = { customer: uuid() };
     d.customer.id = ids.customer;
 
-    api("customers", { method: "POST", body: d.customer, prefer: "return=minimal" })
-      .then(function () {
+    // 로그인한 사람은 같은 고객으로 묶는다 (노쇼 이력이 흩어지지 않게)
+    fetch(cfg.url + "/rest/v1/rpc/upsert_customer", {
+      method: "POST",
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
+                 "Content-Type": "application/json" },
+      body: JSON.stringify({ p_id: ids.customer, p_email: d.customer.email || "",
+                             p_name: d.customer.display_name || "", p_locale: d.customer.locale })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (cid) {
+        if (cid) { ids.customer = cid; d.request.customer_id = cid; }
         if (!d.venue.name) return [];
         var q = d.venue.name.replace(/\(.*?\)/g, "").trim().slice(0, 12);
         return api("venues?select=id&name=ilike.*" + encodeURIComponent(q) + "*&limit=1")
@@ -1497,6 +1534,18 @@
     bar.setAttribute("data-t", "testBanner");
     document.body.insertBefore(bar, document.body.firstChild);
   }
+
+  // 날짜 칸에 지난 날을 고르지 못하게 한다
+  (function setMinDate() {
+    var kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    var ymd = kst.getFullYear() + "-" +
+      String(kst.getMonth() + 1).padStart(2, "0") + "-" +
+      String(kst.getDate()).padStart(2, "0");
+    ["d1", "d2", "d3"].forEach(function (id) {
+      var el = $(id);
+      if (el) el.min = ymd;
+    });
+  })();
 
   applyLang();
   drawPlan();

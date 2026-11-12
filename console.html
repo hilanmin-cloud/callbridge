@@ -273,6 +273,9 @@
       <div id="holdReplyBox" style="display:none; margin-top:12px; border:1px solid var(--line);
            border-radius:10px; padding:12px"></div>
 
+      <div id="changeBox" style="display:none; margin-top:12px; border:1px solid var(--gold);
+           border-radius:10px; padding:12px"></div>
+
       <div id="cancelBox" style="display:none; margin-top:12px; border:1px solid var(--no);
            border-radius:10px; padding:12px">
         <b style="color:var(--no); font-size:13px">취소 요청 들어옴</b>
@@ -453,6 +456,7 @@
     checkNoShowHistory();
     drawCancel();
     drawHoldReply();
+    drawChange();
     if (window.innerWidth <= 760 && window.switchTab) window.switchTab("call");
     $("vq").value = vname.replace(/\(.*?\)/g, "").trim();
     $("nv-name").value = vname === "-" ? "" : vname;
@@ -510,6 +514,27 @@
     L.push("- 위약금이나 취소 수수료를 요구하면 금액만 받아 적고 즉시 보류합니다.");
 
     return L.join("\n");
+  }
+
+  /* 고객이 일시·인원 변경을 요청했는지 보여준다 */
+  function drawChange() {
+    var box = $("changeBox");
+    if (!box) return;
+    var cq = cur && cur.change_req;
+    if (!cq || cur.status !== "change_requested") { box.style.display = "none"; return; }
+
+    var at = cq.at ? new Date(cq.at) : null;
+    box.style.display = "block";
+    box.innerHTML =
+      "<b style='font-size:13px; color:var(--gold)'>변경 요청 (" +
+        (cq.free ? "무료 1회차" : "유료 — 9,900원 청구 대상") + ")</b>" +
+      "<p style='margin:7px 0 0; font-size:13px'>" +
+        "새 일시: " + (at ? dateKo(at) + " " + speak(at.getHours() * 60 + at.getMinutes()) : "-") +
+        "<br>인원: " + (cq.party || "-") + "명" +
+        (cq.note ? "<br>전달 메모: " + cq.note : "") + "</p>" +
+      "<p style='margin:6px 0 0; font-size:12px; color:var(--muted)'>" +
+        (cur.change_req_at ? new Date(cur.change_req_at).toLocaleString("ko-KR") : "") +
+        " · 같은 식당에 다시 전화해 변경을 요청하세요.</p>";
   }
 
   /* 고객이 보류 조건에 답했는지 보여준다 */
@@ -1189,7 +1214,8 @@
     $("utter").disabled = true; $("send").disabled = true;
     $("saveResult").disabled = true; $("handoff").disabled = true; $("saveMsg").textContent = "";
     $("copyLink").disabled = true;
-    $("sendMail").disabled = true;
+    $("sendMail").disabled = !cur;
+    $("sendMail").textContent = "결과 메일 보내기";
   }
 
 
@@ -1608,6 +1634,77 @@
     return (PARTY[lang] || PARTY.ja).replace("{n}", n);
   }
 
+  /* 새로고침 뒤에도 메일을 보낼 수 있게, DB에 저장된 결과로 발송한다 */
+  function sendFromSaved() {
+    var btn = $("sendMail");
+    btn.disabled = true;
+    $("saveMsg").textContent = "저장된 결과를 불러오는 중…";
+
+    Promise.all([
+      api("results?select=*&request_id=eq." + cur.id + "&order=created_at.desc&limit=1"),
+      api("customers?select=email,display_name,locale&id=eq." + cur.customer_id)
+    ])
+      .then(function (a) {
+        var res = (a[0] && a[0][0]) || null;
+        var cst = (a[1] && a[1][0]) || {};
+        if (!res) throw new Error("저장된 결과가 없습니다. 통화를 마치고 결과를 저장하세요.");
+        if (!cst.email) throw new Error("고객 이메일이 없습니다.");
+
+        var mlang = cst.locale || "ja";
+        var kind = res.outcome || "unavailable";
+        var when = res.confirmed_at ? whenForISO(mlang, res.confirmed_at) : "-";
+
+        var koText = "";
+        if (res.confirmed_at) {
+          var d0 = new Date(res.confirmed_at);
+          koText = dateKo(d0) + " " + speak(d0.getHours() * 60 + d0.getMinutes()) + "에 " +
+                   (cur.booking_name || "") + " 이름으로 " + cur.party_size + "명 예약했습니다.";
+        }
+
+        var d = {
+          lang: mlang, kind: kind,
+          venue: (matchedVenue ? matchedVenue.name : (cur.venue_name_raw || "").split(" | ")[0]),
+          when: when, party: partyFor(mlang, cur.party_size),
+          name: cur.booking_name || cst.display_name || "",
+          code: cur.lookup_code || "",
+          guides: guidesFor(mlang), asOf: asOfMail(mlang), koText: koText
+        };
+
+        var sk = kind === "confirmed" ? "s1" : kind === "alt_confirmed" ? "s2"
+               : kind === "hold" ? "s3" : "s4";
+        var subject = mt(mlang, sk).replace("{v}", d.venue).replace("{w}", d.when);
+
+        return fetch(cfg.url + "/functions/v1/sendmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": cfg.key,
+                     "Authorization": "Bearer " + authToken },
+          body: JSON.stringify({ to: cst.email, subject: subject, html: buildMailHtml(d) })
+        }).then(function (r) { return r.json(); });
+      })
+      .then(function (d) {
+        if (d && d.ok) {
+          $("saveMsg").textContent = "메일을 보냈습니다. (저장된 결과 기준)";
+          btn.textContent = "메일 보냄";
+        } else {
+          $("saveMsg").textContent = "메일 실패: " + ((d && d.msg) || "알 수 없음");
+          btn.disabled = false;
+        }
+      })
+      .catch(function (e) {
+        $("saveMsg").textContent = e.message;
+        btn.disabled = false;
+      });
+  }
+
+  function whenForISO(lang, iso) {
+    var d = new Date(iso);
+    try {
+      return new Intl.DateTimeFormat(LOCALE[lang] || "ja-JP", {
+        month: "long", day: "numeric", hour: "numeric", minute: "2-digit"
+      }).format(d);
+    } catch (e) { return iso; }
+  }
+
   function asOfMail(lang) {
     var u = matchedVenue && matchedVenue.guide_updated_at;
     if (!u) return "";
@@ -1621,7 +1718,8 @@
 
   function sendResultMail() {
     if (!cur) return;
-    if (!S || !S.done) { $("saveMsg").textContent = "통화를 먼저 마쳐주세요."; return; }
+    // 통화 직후면 그 결과를, 아니면 저장된 결과를 쓴다
+    if (!S || !S.done) { sendFromSaved(); return; }
 
     var btn = $("sendMail");
     btn.disabled = true;
