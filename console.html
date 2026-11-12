@@ -84,6 +84,7 @@
   .msg { font-size: 13px; color: var(--muted); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="guide-items.js"></script>
 </head>
 <body>
 
@@ -242,12 +243,20 @@
         <button id="saveResult" disabled>DB에 결과 저장</button>
       </div>
       <div style="margin-top:12px">
-        <label for="guides" style="display:block; font-size:12.5px; color:var(--muted);
-               font-weight:600; margin-bottom:5px">이 식당 이용 방법 (한 줄에 하나씩)</label>
-        <textarea id="guides" rows="4" placeholder="직원이 자리에서 고기를 구워줍니다&#10;고기는 2인분부터 주문합니다&#10;계산은 나갈 때 카운터에서. 팁 문화가 없습니다"
+        <label style="display:block; font-size:12.5px; color:var(--muted);
+               font-weight:600; margin-bottom:5px">이 식당 이용 방법 (고객 언어로 자동 전달)</label>
+        <div id="guidePick" style="display:flex; flex-direction:column; gap:3px;
+             max-height:210px; overflow-y:auto; border:1px solid var(--line);
+             border-radius:9px; padding:9px 11px"></div>
+
+        <label for="guideExtra" style="display:block; font-size:12.5px; color:var(--muted);
+               font-weight:600; margin:10px 0 5px">그 밖의 안내 (직접 입력 — AI가 번역합니다)</label>
+        <textarea id="guideExtra" rows="2" placeholder="지하 1층이고 간판이 작습니다"
                   style="width:100%; font-size:13px; line-height:1.6"></textarea>
+
         <div class="row" style="margin-top:6px">
           <button class="ghost small" id="saveGuides" style="flex:0 1 130px">가이드 저장</button>
+          <span id="guideMsg" style="flex:1 1 auto; align-self:center; font-size:12px; color:var(--muted)"></span>
         </div>
       </div>
 
@@ -347,6 +356,7 @@
             return;
           }
           showMain();
+          drawGuidePick();
           loadList();
           loadOps();
         })
@@ -759,7 +769,7 @@
     var q = ($("vq").value || "").trim();
     if (!connected() || q.length < 2) { $("vresult").innerHTML = "<p class='msg'>두 글자 이상 입력하세요.</p>"; return; }
     $("vresult").innerHTML = "<p class='msg'>검색 중…</p>";
-    api("venues?blocked=is.false&select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes&name=ilike.*" +
+    api("venues?blocked=is.false&select=id,name,phone,address,category,phone_verified_at,ai_call_blocked,guide_notes,guide_keys,guide_extra,guide_extra_t&name=ilike.*" +
         encodeURIComponent(q) + "*&limit=5")
       .then(function (rows) {
         if (!rows || !rows.length) {
@@ -1033,7 +1043,7 @@
     S.turns++;
 
     if (ex.human) { trace.push({ k: "fail", t: "사람 통화 요청 → 담당자 인계" });
-      say("담당자가 다시 연락드리겠습니다. 감사합니다."); return done("hold", "사람 인계 요청", trace, null, ex); }
+      say("담당자가 다시 연락드리겠습니다. 감사합니다."); return done("hold", "human", trace, null, ex); }
 
     if (ex.repeat && !ex.unavailable) {
       trace.push({ k: "info", t: "재확인 요청 → " + c.rank + "순위 정보 복창" });
@@ -1043,15 +1053,15 @@
     if (ex.wait && !ex.unavailable && !ex.times.length && !ex.ranges.length && !ex.seatType) {
       S.wait = (S.wait || 0) + 1;
       if (S.wait >= 3) { trace.push({ k: "fail", t: "확인 대기 3회 → 통화 종료" });
-        say("조금 뒤에 다시 연락드리겠습니다."); return done("hold", "확인 지연", trace, null, ex); }
+        say("조금 뒤에 다시 연락드리겠습니다."); return done("hold", "slow", trace, null, ex); }
       trace.push({ k: "info", t: "확인 대기 (" + S.wait + "회)" });
       say("네, 기다리겠습니다."); return render(trace, "run", "사장님 확인 대기 중");
     }
-    if (ex.limitMin) S.conds.push("이용 시간 " + ex.limitMin + "분 제한");
+    if (ex.limitMin) S.conds.push({ k: "time_limit", v: ex.limitMin });
 
     // 조건 되묻기
     if (ex.seatType || (ex.question && !ex.unavailable && !ex.times.length && !ex.ranges.length)) {
-      if (ex.seatType) S.conds.push("좌석 형태: " + ex.seatType);
+      if (ex.seatType) S.conds.push({ k: "seat_type", v: ex.seatType });
       var bad0 = condCheck(ex, md, trace);
       if (!bad0) { trace.push({ k: "pass", t: "위임 범위 내 → 확정 진행" });
         say("네, 괜찮습니다. " + (cur.booking_name || "") + " 이름으로 " + cur.party_size + "명 부탁드립니다.");
@@ -1109,7 +1119,7 @@
     }
     trace.push({ k: "fail", t: "모든 순위 소진 → 확정 불가" });
     say("알겠습니다. 혹시 가능한 시간이 언제일까요?");
-    done("no", "모든 순위가 위임 범위 밖", trace, null, ex);
+    done("no", "out_of_scope", trace, null, ex);
   }
 
   /* ---------- 출력 ---------- */
@@ -1140,7 +1150,7 @@
       L.push("확정 일시: " + dateKo(matched.slot.date) + " " + fmt(matched.at) + " (" + matched.slot.rank + "순위 기준)");
     } else if (kind === "hold") { L.push("결과: 보류 — " + reason); }
     else { L.push("결과: 예약 불가 — " + reason); }
-    L.push("식당 조건: " + (S.conds.length ? S.conds.join(" · ") : "없음"));
+    L.push("식당 조건: " + (S.conds.length ? S.conds.map(condKo).join(" · ") : "없음"));
     if (kind !== "ok" && S.offered.length) L.push("가능 시간: " + S.offered.join(", "));
     L.push("통화 턴 수: " + S.turns + "회");
     $("report").textContent = L.join("\n");
@@ -1163,37 +1173,266 @@
   }
 
 
-  /* ---------- 결과 메일 발송 ---------- */
-  function collectGuides() {
-    var txt = ($("guides").value || "").trim();
-    if (!txt) return [];
-    return txt.split(/\r?\n/).map(function (s) { return s.trim(); })
-              .filter(Boolean).slice(0, 6);
+  /* 저장은 코드로, 운영자 화면 표시는 한국어로 */
+  var REASON_KO = { human: "사람 인계 요청", slow: "확인 지연",
+                    manual: "운영자 수동 인계", out_of_scope: "모든 순위가 위임 범위 밖",
+                    deposit: "예약금 요구" };
+  function reasonKo(r) { return REASON_KO[r] || r || ""; }
+  function condKo(x) {
+    if (!x) return "";
+    if (typeof x === "string") return x;
+    if (x.k === "time_limit") return "이용 시간 " + x.v + "분 제한";
+    if (x.k === "seat_type") return "좌석 형태: " + x.v;
+    return "";
   }
 
-  /* 식당을 고르면 저장된 가이드를 불러온다 */
-  function fillGuides() {
-    var box = $("guides");
+  /* ---------- 결과 메일 발송 ---------- */
+  /* ---------- 식당 이용 가이드 ----------
+     자문항은 5개 언어가 준비돼 있어 고객 언어로 바로 나간다.
+     그 밖의 내용만 직접 적고, 저장할 때 AI가 번역한다. */
+  var GUIDE = window.CB_GUIDE || [];
+
+  function drawGuidePick() {
+    var box = $("guidePick");
     if (!box) return;
-    box.value = (matchedVenue && matchedVenue.guide_notes) ? matchedVenue.guide_notes : "";
+    box.innerHTML = GUIDE.map(function (g) {
+      return "<label style='display:flex; align-items:flex-start; gap:8px; " +
+        "padding:5px 0; font-size:13px; cursor:pointer'>" +
+        "<input type='checkbox' class='gk' value='" + g.k + "' " +
+        "style='width:17px; height:17px; min-height:17px; margin-top:1px; flex:0 0 auto'>" +
+        "<span>" + g.ko + "</span></label>";
+    }).join("");
+  }
+
+  function pickedKeys() {
+    return Array.prototype.slice.call(document.querySelectorAll(".gk"))
+      .filter(function (b) { return b.checked; })
+      .map(function (b) { return b.value; });
+  }
+
+  function fillGuides() {
+    var keys = (matchedVenue && matchedVenue.guide_keys) || [];
+    Array.prototype.forEach.call(document.querySelectorAll(".gk"), function (b) {
+      b.checked = keys.indexOf(b.value) >= 0;
+    });
+    var ex = $("guideExtra");
+    if (ex) ex.value = (matchedVenue && matchedVenue.guide_extra) || "";
+    var msg = $("guideMsg");
+    if (msg) msg.textContent = "";
+  }
+
+  /* 직접 입력한 문장을 네 언어로 번역한다 (AI 호출은 저장할 때 한 번만) */
+  function translateExtra(text) {
+    if (!text) return Promise.resolve(null);
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content:
+          "한국 식당 이용 안내 문장을 외국인 손님이 읽을 수 있게 번역해 주세요.\n" +
+          "직역하지 말고, 손님이 무엇을 해야 하는지 알 수 있게 자연스럽게 쓰세요.\n" +
+          "JSON만 출력하세요. 설명이나 코드 블록 없이.\n" +
+          '형식: {"ja":"...","zh-TW":"...","zh-CN":"...","en":"..."}\n\n' +
+          "문장: " + text }]
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var txt = (d.content || []).map(function (x) { return x.text || ""; }).join("");
+        return JSON.parse(txt.replace(/```json|```/g, "").trim());
+      })
+      .catch(function () { return null; });
   }
 
   $("saveGuides").addEventListener("click", function () {
     if (!connected()) return;
-    if (!matchedVenue) { $("saveMsg").textContent = "먼저 식당을 선택하세요."; return; }
-    var txt = ($("guides").value || "").trim();
+    if (!matchedVenue) { $("guideMsg").textContent = "먼저 식당을 선택하세요."; return; }
+
+    var keys = pickedKeys();
+    var extra = ($("guideExtra").value || "").trim();
+    var before = (matchedVenue.guide_extra || "").trim();
+
     $("saveGuides").disabled = true;
-    api("venues?id=eq." + matchedVenue.id, {
-      method: "PATCH", prefer: "return=minimal", body: { guide_notes: txt }
-    })
-      .then(function () {
-        matchedVenue.guide_notes = txt;
-        $("saveMsg").textContent = "가이드를 저장했습니다. 다음에 이 식당을 고르면 자동으로 채워집니다.";
+    $("guideMsg").textContent = extra && extra !== before ? "번역하는 중…" : "저장 중…";
+
+    // 직접 입력이 바뀐 경우에만 번역한다
+    var work = (extra && extra !== before)
+      ? translateExtra(extra)
+      : Promise.resolve(matchedVenue.guide_extra_t || null);
+
+    work
+      .then(function (tr) {
+        return api("venues?id=eq." + matchedVenue.id, {
+          method: "PATCH", prefer: "return=minimal",
+          body: { guide_keys: keys.length ? keys : null,
+                  guide_extra: extra || null,
+                  guide_extra_t: extra ? tr : null }
+        }).then(function () { return tr; });
       })
-      .catch(function (e) { $("saveMsg").textContent = "저장 실패: " + e.message; })
+      .then(function (tr) {
+        matchedVenue.guide_keys = keys;
+        matchedVenue.guide_extra = extra;
+        matchedVenue.guide_extra_t = tr;
+        $("guideMsg").textContent = "저장했습니다." +
+          (extra && !tr ? " (직접 입력은 번역하지 못해 한국어로 남습니다)" : "");
+      })
+      .catch(function (e) { $("guideMsg").textContent = "저장 실패: " + e.message; })
       .then(function () { $("saveGuides").disabled = false; });
   });
 
+  /* 메일에 넣을 가이드를 고객 언어로 만든다 */
+  function guidesFor(lang) {
+    var out = [];
+    var keys = (matchedVenue && matchedVenue.guide_keys) || [];
+    keys.forEach(function (k) {
+      var g = GUIDE.filter(function (x) { return x.k === k; })[0];
+      if (g) out.push(g[lang] || g.ko);
+    });
+    var t = matchedVenue && matchedVenue.guide_extra_t;
+    if (t && t[lang]) out.push(t[lang]);
+    else if (matchedVenue && matchedVenue.guide_extra) out.push(matchedVenue.guide_extra);
+    return out.slice(0, 8);
+  }
+
+  /* 저장은 코드로, 운영자 화면 표시는 한국어로 */
+  var REASON_KO = { human: "사람 인계 요청", slow: "확인 지연",
+                    manual: "운영자 수동 인계", out_of_scope: "모든 순위가 위임 범위 밖",
+                    deposit: "예약금 요구" };
+  function reasonKo(r) { return REASON_KO[r] || r || ""; }
+  function condKo(x) {
+    if (!x) return "";
+    if (typeof x === "string") return x;
+    if (x.k === "time_limit") return "이용 시간 " + x.v + "분 제한";
+    if (x.k === "seat_type") return "좌석 형태: " + x.v;
+    return "";
+  }
+
+  /* ---------- 결과 메일 발송 ---------- */
+  /* ---------- 식당 이용 가이드 ----------
+     자문항은 5개 언어가 준비돼 있어 고객 언어로 바로 나간다.
+     그 밖의 내용만 직접 적고, 저장할 때 AI가 번역한다. */
+  var GUIDE = window.CB_GUIDE || [];
+
+  function drawGuidePick() {
+    var box = $("guidePick");
+    if (!box) return;
+    box.innerHTML = GUIDE.map(function (g) {
+      return "<label style='display:flex; align-items:flex-start; gap:8px; " +
+        "padding:5px 0; font-size:13px; cursor:pointer'>" +
+        "<input type='checkbox' class='gk' value='" + g.k + "' " +
+        "style='width:17px; height:17px; min-height:17px; margin-top:1px; flex:0 0 auto'>" +
+        "<span>" + g.ko + "</span></label>";
+    }).join("");
+  }
+
+  function pickedKeys() {
+    return Array.prototype.slice.call(document.querySelectorAll(".gk"))
+      .filter(function (b) { return b.checked; })
+      .map(function (b) { return b.value; });
+  }
+
+  function fillGuides() {
+    var keys = (matchedVenue && matchedVenue.guide_keys) || [];
+    Array.prototype.forEach.call(document.querySelectorAll(".gk"), function (b) {
+      b.checked = keys.indexOf(b.value) >= 0;
+    });
+    var ex = $("guideExtra");
+    if (ex) ex.value = (matchedVenue && matchedVenue.guide_extra) || "";
+    var msg = $("guideMsg");
+    if (msg) msg.textContent = "";
+  }
+
+  /* 직접 입력한 문장을 네 언어로 번역한다 (AI 호출은 저장할 때 한 번만) */
+  function translateExtra(text) {
+    if (!text) return Promise.resolve(null);
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content:
+          "한국 식당 이용 안내 문장을 외국인 손님이 읽을 수 있게 번역해 주세요.\n" +
+          "직역하지 말고, 손님이 무엇을 해야 하는지 알 수 있게 자연스럽게 쓰세요.\n" +
+          "JSON만 출력하세요. 설명이나 코드 블록 없이.\n" +
+          '형식: {"ja":"...","zh-TW":"...","zh-CN":"...","en":"..."}\n\n' +
+          "문장: " + text }]
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var txt = (d.content || []).map(function (x) { return x.text || ""; }).join("");
+        return JSON.parse(txt.replace(/```json|```/g, "").trim());
+      })
+      .catch(function () { return null; });
+  }
+
+  $("saveGuides").addEventListener("click", function () {
+    if (!connected()) return;
+    if (!matchedVenue) { $("guideMsg").textContent = "먼저 식당을 선택하세요."; return; }
+
+    var keys = pickedKeys();
+    var extra = ($("guideExtra").value || "").trim();
+    var before = (matchedVenue.guide_extra || "").trim();
+
+    $("saveGuides").disabled = true;
+    $("guideMsg").textContent = extra && extra !== before ? "번역하는 중…" : "저장 중…";
+
+    // 직접 입력이 바뀐 경우에만 번역한다
+    var work = (extra && extra !== before)
+      ? translateExtra(extra)
+      : Promise.resolve(matchedVenue.guide_extra_t || null);
+
+    work
+      .then(function (tr) {
+        return api("venues?id=eq." + matchedVenue.id, {
+          method: "PATCH", prefer: "return=minimal",
+          body: { guide_keys: keys.length ? keys : null,
+                  guide_extra: extra || null,
+                  guide_extra_t: extra ? tr : null }
+        }).then(function () { return tr; });
+      })
+      .then(function (tr) {
+        matchedVenue.guide_keys = keys;
+        matchedVenue.guide_extra = extra;
+        matchedVenue.guide_extra_t = tr;
+        $("guideMsg").textContent = "저장했습니다." +
+          (extra && !tr ? " (직접 입력은 번역하지 못해 한국어로 남습니다)" : "");
+      })
+      .catch(function (e) { $("guideMsg").textContent = "저장 실패: " + e.message; })
+      .then(function () { $("saveGuides").disabled = false; });
+  });
+
+  /* 메일에 넣을 가이드를 고객 언어로 만든다 */
+  function guidesFor(lang) {
+    var out = [];
+    var keys = (matchedVenue && matchedVenue.guide_keys) || [];
+    keys.forEach(function (k) {
+      var g = GUIDE.filter(function (x) { return x.k === k; })[0];
+      if (g) out.push(g[lang] || g.ko);
+    });
+    var t = matchedVenue && matchedVenue.guide_extra_t;
+    if (t && t[lang]) out.push(t[lang]);
+    else if (matchedVenue && matchedVenue.guide_extra) out.push(matchedVenue.guide_extra);
+    return out.slice(0, 8);
+  }
+
+  /* 저장은 코드로, 운영자 화면 표시는 한국어로 */
+  var REASON_KO = { human: "사람 인계 요청", slow: "확인 지연",
+                    manual: "운영자 수동 인계", out_of_scope: "모든 순위가 위임 범위 밖",
+                    deposit: "예약금 요구" };
+  function reasonKo(r) { return REASON_KO[r] || r || ""; }
+  function condKo(x) {
+    if (!x) return "";
+    if (typeof x === "string") return x;
+    if (x.k === "time_limit") return "이용 시간 " + x.v + "분 제한";
+    if (x.k === "seat_type") return "좌석 형태: " + x.v;
+    return "";
+  }
+
+  /* ---------- 결과 메일 발송 ---------- */
   /* 고객 언어별 메일 문구 */
   var MAILT = {
     ja: { s1:"【予約確定】{v} {w}", s2:"【予約確定】{v} {w}（時間を調整しました）",
@@ -1317,6 +1556,28 @@
       "</table></td></tr></table></body></html>";
   }
 
+  /* 메일에 넣을 일시·인원을 고객 언어로 만든다 */
+  var LOCALE = { ja: "ja-JP", "zh-TW": "zh-TW", "zh-CN": "zh-CN", en: "en-US", ko: "ko-KR" };
+  var PARTY = { ja: "{n}名", "zh-TW": "{n}位", "zh-CN": "{n}位",
+                en: "{n} people", ko: "{n}명" };
+
+  function whenFor(lang, d, min) {
+    if (!d) return "-";
+    var dt = new Date(d.getFullYear(), d.getMonth(), d.getDate(),
+                      Math.floor(min / 60), min % 60);
+    try {
+      return new Intl.DateTimeFormat(LOCALE[lang] || "ja-JP", {
+        month: "long", day: "numeric", hour: "numeric", minute: "2-digit"
+      }).format(dt);
+    } catch (e) {
+      return dateKo(d) + " " + speak(min);
+    }
+  }
+
+  function partyFor(lang, n) {
+    return (PARTY[lang] || PARTY.ja).replace("{n}", n);
+  }
+
   function sendResultMail() {
     if (!cur) return;
     if (!S || !S.done) { $("saveMsg").textContent = "통화를 먼저 마쳐주세요."; return; }
@@ -1333,25 +1594,28 @@
         var kind = S.kind === "ok" ? (S.matched.gap === 0 ? "confirmed" : "alt_confirmed")
                  : S.kind === "hold" ? "hold" : "unavailable";
         var slots = slotList();
+        var mlang = c.locale || "ja";
         var when = S.matched
-          ? dateKo(S.matched.slot.date) + " " + speak(S.matched.at)
-          : (slots[0] ? dateKo(slots[0].date) + " " + speak(slots[0].min) : "-");
+          ? whenFor(mlang, S.matched.slot.date, S.matched.at)
+          : (slots[0] ? whenFor(mlang, slots[0].date, slots[0].min) : "-");
 
+        // 식당에서 보여줄 문장은 한국어여야 한다 (고객 언어가 아니라)
         var koText = "";
-        if (S.kind === "ok") {
-          koText = when + "에 " + (cur.booking_name || "") + " 이름으로 " +
+        if (S.kind === "ok" && S.matched) {
+          koText = dateKo(S.matched.slot.date) + " " + speak(S.matched.at) + "에 " +
+                   (cur.booking_name || "") + " 이름으로 " +
                    cur.party_size + "명 예약했습니다.";
         }
 
         var d = {
-          lang: c.locale || "ja",
+          lang: mlang,
           kind: kind,
           venue: (matchedVenue ? matchedVenue.name : (cur.venue_name_raw || "").split(" | ")[0]),
           when: when,
-          party: cur.party_size + "명",
+          party: partyFor(mlang, cur.party_size),
           name: cur.booking_name || c.display_name || "",
           code: cur.lookup_code || "",
-          guides: collectGuides(),
+          guides: guidesFor(d.lang),
           koText: koText
         };
 
@@ -1359,9 +1623,11 @@
                : kind === "hold" ? "s3" : "s4";
         var subject = mt(d.lang, sk).replace("{v}", d.venue).replace("{w}", d.when);
 
+        // 운영자 로그인 토큰을 함께 보낸다. 토큰이 없으면 서버가 거절한다.
         return fetch(cfg.url + "/functions/v1/sendmail", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "apikey": cfg.key },
+          headers: { "Content-Type": "application/json", "apikey": cfg.key,
+                     "Authorization": "Bearer " + authToken },
           body: JSON.stringify({ to: c.email, subject: subject, html: buildMailHtml(d) })
         }).then(function (r) { return r.json(); });
       })
@@ -1373,7 +1639,9 @@
           var m = (d && d.msg) || "알 수 없음";
           $("saveMsg").textContent = "메일 실패: " + m;
           // 도메인 인증 전 흔한 오류는 따로 안내
-          if (/testing email address|Invalid .to. field/.test(m)) {
+          if (/not staff|no auth/.test(m)) {
+            alert("메일 발송 권한이 없습니다.\n\n로그아웃되었을 수 있습니다. 새로고침 후 다시 로그인해 주세요.");
+          } else if (/testing email address|Invalid .to. field/.test(m)) {
             alert("Resend 도메인 인증 전이라 가입 때 쓴 본인 이메일로만 발송됩니다.\n\n" +
                   "받는 주소: " + m.slice(0, 120));
           } else {
@@ -1418,7 +1686,7 @@
         // 통화가 연결된 건이면 해당 식당의 번호를 검증됨으로 기록
         if (matchedVenue && S.turns > 0) {
           var vp = { phone_verified_at: new Date().toISOString() };
-          if (S.reason === "사람 인계 요청") vp.ai_call_blocked = true;
+          if (S.reason === "human") vp.ai_call_blocked = true;
           return api("venues?id=eq." + matchedVenue.id, { method: "PATCH", body: vp });
         }
       })
@@ -1455,7 +1723,7 @@
 
   $("handoff").addEventListener("click", function () {
     if (!S || S.done) return;
-    done("hold", "운영자 수동 인계", [{ k: "info", t: "운영자가 수동으로 인계 처리" }], null, null);
+    done("hold", "manual", [{ k: "info", t: "운영자가 수동으로 인계 처리" }], null, null);
   });
 
   /* 식당 DB 등록 */

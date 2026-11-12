@@ -127,6 +127,7 @@
   .lookup button { flex: 0 1 110px; min-height: 48px; }
   footer { text-align: center; font-size: 13px; color: var(--muted); padding: 24px 0 0; }
 </style>
+<script src="guide-items.js"></script>
 </head>
 <body>
 <div class="page">
@@ -213,6 +214,13 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      rHuman: "お店が担当者との直接のやり取りを希望しています。",
+      rSlow: "お店が確認に時間が必要とのことです。",
+      rManual: "担当者が直接確認しています。",
+      rOutOfScope: "ご希望の日時ではお席をご用意できませんでした。",
+      rDeposit: "お店から予約金を求められました。",
+      cTimeLimit: "ご利用時間は{n}分までです。",
+      cSeatType: "席の種類：{v}",
       yourCode: "確認コード",
       codeKeep: "このコードで、いつでもこの画面を開けます。",
       copyCode: "コピー",
@@ -238,6 +246,13 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      rHuman: "餐廳希望直接與負責人聯繫。",
+      rSlow: "餐廳表示需要時間確認。",
+      rManual: "負責人正在直接確認。",
+      rOutOfScope: "您希望的時段無法安排座位。",
+      rDeposit: "餐廳要求訂金。",
+      cTimeLimit: "用餐時間限{n}分鐘。",
+      cSeatType: "座位類型：{v}",
       yourCode: "查詢代碼",
       codeKeep: "用這組代碼隨時可以打開這個畫面。",
       copyCode: "複製",
@@ -263,6 +278,13 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      rHuman: "餐厅希望直接与负责人联系。",
+      rSlow: "餐厅表示需要时间确认。",
+      rManual: "负责人正在直接确认。",
+      rOutOfScope: "您希望的时段无法安排座位。",
+      rDeposit: "餐厅要求订金。",
+      cTimeLimit: "用餐时间限{n}分钟。",
+      cSeatType: "座位类型：{v}",
       yourCode: "查询代码",
       codeKeep: "用这组代码随时可以打开这个画面。",
       copyCode: "复制",
@@ -288,6 +310,13 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      rHuman: "The restaurant wants to speak with a person directly.",
+      rSlow: "The restaurant needs time to check.",
+      rManual: "We are checking this directly.",
+      rOutOfScope: "We could not get a table for the times you gave us.",
+      rDeposit: "The restaurant asks for a deposit.",
+      cTimeLimit: "Your table is for up to {n} minutes.",
+      cSeatType: "Seating: {v}",
       yourCode: "Your code",
       codeKeep: "This code opens this page any time.",
       copyCode: "Copy",
@@ -313,6 +342,13 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      rHuman: "식당에서 담당자와 직접 통화를 원합니다.",
+      rSlow: "식당에서 확인할 시간이 필요하다고 합니다.",
+      rManual: "담당자가 직접 확인하고 있습니다.",
+      rOutOfScope: "희망하신 일시로는 자리를 잡지 못했습니다.",
+      rDeposit: "식당에서 예약금을 요구했습니다.",
+      cTimeLimit: "이용 시간은 {n}분까지입니다.",
+      cSeatType: "좌석 형태: {v}",
       yourCode: "조회 코드",
       codeKeep: "이 코드로 언제든 이 화면을 여실 수 있습니다.",
       copyCode: "복사",
@@ -361,7 +397,46 @@
           base:["물과 수저는 보통 셀프입니다.","반찬이 함께 나오며 대부분 무료입니다.","직원을 부를 때는 호출 버튼을 누릅니다.","계산은 나갈 때 카운터에서 합니다. 팁 문화가 없습니다."] }
   };
 
-  function guideFor(cat) {
+  /* 운영자가 저장한 코드를 고객 언어로 바꾼다 */
+  var REASON_KEY = { human: "rHuman", slow: "rSlow", manual: "rManual",
+                     out_of_scope: "rOutOfScope", deposit: "rDeposit" };
+
+  function reasonText(x) {
+    if (!x) return "";
+    var k = REASON_KEY[x];
+    return k ? L(k) : "";      // 모르는 코드는 보여주지 않는다
+  }
+
+  function condText(x) {
+    if (!x) return "";
+    if (typeof x === "string") return "";   // 옛 한국어 데이터는 숨긴다
+    if (x.k === "time_limit") return L("cTimeLimit").replace("{n}", x.v);
+    if (x.k === "seat_type") return L("cSeatType").replace("{v}", x.v);
+    return "";
+  }
+
+  function mapClean(arr, fn) {
+    return (arr || []).map(fn).filter(function (s) { return s; });
+  }
+
+  /* 운영자가 이 식당에 직접 저장한 가이드를 우선 쓴다.
+     없으면 업종으로 추측한 기본 문구를 보여준다. */
+  function guideFor(venue) {
+    var list = window.CB_GUIDE || [];
+    var out = [];
+
+    var keys = (venue && venue.guide_keys) || [];
+    keys.forEach(function (k) {
+      var g = list.filter(function (x) { return x.k === k; })[0];
+      if (g) out.push(g[lang] || g.ko);
+    });
+
+    var t = venue && venue.guide_extra_t;
+    if (t && t[lang]) out.push(t[lang]);
+
+    if (out.length) return out.slice(0, 8);
+
+    var cat = venue ? venue.category : "";
     var g = GUIDE_T[lang] || GUIDE_T.ja;
     if (!cat) return g.base;
     if (/갈비|구이|등심|삼겹|고기/.test(cat)) return g.galbi;
@@ -393,7 +468,8 @@
     } else if (kind === "hold") {
       hero = " hold"; tag = L("tagHold");
       title = L("titleHold");
-      desc = (res.pending_items && res.pending_items.length) ? res.pending_items.join(" · ") : L("descHold");
+      var ph = mapClean(res.pending_items, reasonText);
+      desc = ph.length ? ph.join(" · ") : L("descHold");
     } else if (kind === "unavailable") {
       hero = " unavailable"; tag = L("tagNo");
       title = L("titleNo");
@@ -422,16 +498,17 @@
     }
 
     // 식당 조건
-    var conds = res && res.venue_conditions;
-    if (conds && conds.length) {
+    var conds = mapClean(res && res.venue_conditions, condText);
+    if (conds.length) {
       html += "<div class='card'><h2>" + L("condTitle") + "</h2><p style='margin:0;font-size:15px'>" +
         esc(conds.join(" · ")) + "</p></div>";
     }
 
     // 미확정 항목
-    if (res && res.pending_items && res.pending_items.length && kind !== "hold") {
+    var pend = (kind !== "hold") ? mapClean(res && res.pending_items, reasonText) : [];
+    if (pend.length) {
       html += "<div class='card'><h2>" + L("pendTitle") + "</h2><p style='margin:0;font-size:15px'>" +
-        esc(res.pending_items.join(" · ")) + "</p>" +
+        esc(pend.join(" · ")) + "</p>" +
         "<div class='note'>" + L("pendNote") + "</div></div>";
     }
 
@@ -444,7 +521,7 @@
 
     // 이용 가이드 + 한국어 카드 (확정일 때만)
     if (kind === "confirmed" || kind === "alt_confirmed") {
-      var lines = guideFor(venue ? venue.category : "");
+      var lines = guideFor(venue);
       html += "<div class='guide'><h2>" + L("guideTitle") + "</h2>" +
         lines.map(function (t, i) {
           return "<div class='line'><b>" + (i + 1 < 10 ? "0" : "") + (i + 1) + "</b><span>" + esc(t) + "</span></div>";
