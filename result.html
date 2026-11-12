@@ -124,6 +124,21 @@
     key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW"
   };
 
+  function rpc(name, body) {
+    return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/rpc/" + name, {
+      method: "POST",
+      headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
+                 "Content-Type": "application/json" },
+      body: JSON.stringify(body || {})
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) { d = t; }
+        if (!res.ok) throw new Error((d && d.message) ? d.message : "HTTP " + res.status);
+        return d;
+      });
+    });
+  }
+
   function api(path) {
     return fetch(cfg.url.replace(/\/+$/, "") + "/rest/v1/" + path, {
       headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key }
@@ -378,13 +393,8 @@
       }
       if (!window.confirm(L("cancelAsk") + "\n\n" + (free ? L("cancelFree") : L("cancelPaid")))) return;
       cb.disabled = true;
-      fetch(cfg.url + "/rest/v1/requests?id=eq." + req.id, {
-        method: "PATCH",
-        headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
-                   "Content-Type": "application/json", "Prefer": "return=minimal" },
-        body: JSON.stringify({ status: "cancel_requested",
-                               cancel_requested_at: new Date().toISOString() })
-      }).then(function () {
+      rpc("request_cancel", { p_code: req.lookup_code }).then(function (out) {
+        if (!out || !out.ok) throw new Error("cancel failed");
         cb.textContent = L("cancelDone");
         // 운영자 알림 (실패해도 고객 흐름에 영향 없음)
         try {
@@ -415,10 +425,10 @@
 
     // 조회 코드로 정확히 한 건만 조회한다
     var code = rid.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
-    api("requests?select=*&lookup_code=eq." + encodeURIComponent(code) + "&limit=1")
-      .then(function (rs) {
-        if (!rs || !rs.length) throw new Error(L("notFound"));
-        var req = rs[0];
+    // 코드를 정확히 아는 경우에만 그 한 건을 돌려주는 서버 함수를 쓴다
+    rpc("get_request_by_code", { p_code: code })
+      .then(function (req) {
+        if (!req || !req.id) throw new Error(L("notFound"));
         return Promise.all([
           req,
           api("results?select=*&request_id=eq." + req.id).catch(function () { return []; }),
