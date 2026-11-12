@@ -108,15 +108,33 @@
       <p class="hint">처리할 요청을 선택하세요.</p>
       <div id="opsBar" style="display:none; margin-bottom:10px; border:1px solid var(--line);
            border-radius:10px; padding:11px 13px">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap">
-          <span id="opsState" style="font-size:13px; font-weight:600"></span>
-          <button class="ghost small" id="opsToggle" style="flex:0 1 110px">접수 중단</button>
+        <div class="row" id="opsMode">
+          <button class="ghost small" data-m="normal">정상</button>
+          <button class="ghost small" data-m="delay">지연 안내</button>
+          <button class="ghost small" data-m="paused">접수 중단</button>
         </div>
-        <p id="opsDetail" style="margin:6px 0 0; font-size:12px; color:var(--muted)"></p>
-        <div class="row" style="margin-top:8px">
-          <input type="time" id="opsFrom" style="flex:1 1 90px; min-height:36px; font-size:13px">
-          <input type="time" id="opsTo" style="flex:1 1 90px; min-height:36px; font-size:13px">
-          <input type="number" id="opsLimit" min="0" max="200" placeholder="한도"
+        <p id="opsDetail" style="margin:8px 0 0; font-size:12px; color:var(--muted); line-height:1.6"></p>
+
+        <div id="opsDelayRow" style="display:none; margin-top:8px">
+          <label for="opsDelay" style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px">고객에게 안내할 지연 시간</label>
+          <select id="opsDelay" style="min-height:36px; font-size:13px">
+            <option value="6">약 6시간</option>
+            <option value="12">약 12시간</option>
+            <option value="24">약 24시간</option>
+            <option value="48">약 48시간</option>
+          </select>
+        </div>
+
+        <div id="opsResumeRow" style="display:none; margin-top:8px">
+          <label for="opsResume" style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px">재개 예정일 (적으면 고객 화면에 표시됩니다)</label>
+          <input type="date" id="opsResume" style="min-height:36px; font-size:13px">
+        </div>
+
+        <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px">통화 가능 시간 · 하루 처리 한도</label>
+        <div class="row">
+          <input type="time" id="opsFrom" aria-label="통화 시작 시각" style="flex:1 1 90px; min-height:36px; font-size:13px">
+          <input type="time" id="opsTo" aria-label="통화 종료 시각" style="flex:1 1 90px; min-height:36px; font-size:13px">
+          <input type="number" id="opsLimit" min="0" max="200" placeholder="한도" aria-label="하루 처리 한도"
                  style="flex:0 1 80px; min-height:36px; font-size:13px">
           <button class="ghost small" id="opsSave" style="flex:0 1 70px">저장</button>
         </div>
@@ -548,7 +566,9 @@
   });
 
 
-  /* ---------- 운영 설정 ---------- */
+  /* ---------- 운영 설정 ----------
+     정상 / 지연 안내 / 접수 중단 세 단계.
+     시간 외·한도 초과는 접수를 막지 않고 고객에게 '늦어진다'고만 알린다. */
   var ops = null;
 
   function hhmm(s) { return (s || "").slice(0, 5); }
@@ -558,35 +578,46 @@
     if (!bar || !ops) return;
     bar.style.display = "block";
 
-    var on = ops.accepting !== false;
-    $("opsState").innerHTML = on
-      ? "<span style='color:var(--ok)'>● 접수 중</span>"
-      : "<span style='color:var(--no)'>● 접수 중단</span>";
-    $("opsToggle").textContent = on ? "접수 중단" : "접수 재개";
+    var mode = ops.mode || "normal";
+    Array.prototype.forEach.call($("opsMode").querySelectorAll("button"), function (b) {
+      var on = b.getAttribute("data-m") === mode;
+      var color = b.getAttribute("data-m") === "paused" ? "var(--no)"
+                : b.getAttribute("data-m") === "delay" ? "var(--gold)" : "var(--teal)";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.style.background = on ? color : "transparent";
+      b.style.color = on ? "#fff" : "";
+      b.style.borderColor = on ? color : "";
+    });
 
+    $("opsDelayRow").style.display = mode === "delay" ? "block" : "none";
+    $("opsResumeRow").style.display = mode === "paused" ? "block" : "none";
+    $("opsDelay").value = String(ops.delay_hours || 24);
+    $("opsResume").value = ops.resume_at || "";
     $("opsFrom").value = hhmm(ops.open_from);
     $("opsTo").value = hhmm(ops.open_to) === "24:00" ? "23:59" : hhmm(ops.open_to);
     $("opsLimit").value = ops.daily_limit || 0;
 
-    // 오늘 접수 건수
+    var seen = mode === "paused" ? "고객 화면: 접수 폼 대신 '잠시 쉬고 있습니다' 안내가 뜹니다. 새 요청이 들어오지 않습니다."
+             : mode === "delay" ? "고객 화면: '전화까지 약 " + (ops.delay_hours || 24) + "시간' 안내가 뜨고, 접수는 계속 받습니다."
+             : "고객 화면: 평소대로. 통화 가능 시간 밖이거나 한도를 넘으면 '늦어진다'는 안내만 뜹니다.";
+
+    // 오늘(한국 시간) 접수 건수
     var kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
     var start = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
-    var iso = new Date(start.getTime() - 9 * 3600000).toISOString();
+    var iso = new Date(start.getTime() - (kst.getTime() - Date.now())).toISOString();
 
-    fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + iso + "&service_type=neq.test", {
+    $("opsDetail").textContent = seen;
+    fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + encodeURIComponent(iso) + "&service_type=neq.test", {
       headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
                  "Prefer": "count=exact", "Range": "0-0" }
     })
       .then(function (r) {
-        var cr = r.headers.get("content-range") || "0/0";
-        var n = parseInt(cr.split("/")[1], 10) || 0;
+        var n = parseInt(((r.headers.get("content-range") || "0/0").split("/")[1]), 10) || 0;
         var lim = ops.daily_limit || 0;
-        $("opsDetail").textContent =
-          "오늘 " + n + "건" + (lim ? " / 한도 " + lim + "건" : "") +
-          " · 접수 시간 " + hhmm(ops.open_from) + "~" + hhmm(ops.open_to) +
-          (lim && n >= lim ? " · 한도 도달, 신규 접수 차단 중" : "");
+        $("opsDetail").textContent = "오늘 " + n + "건" + (lim ? " / 한도 " + lim + "건" : "") +
+          (lim && n >= lim ? " (한도 초과 — 새 요청에는 '내일 이후 통화' 안내 중)" : "") + " · " + seen;
       })
-      .catch(function () { $("opsDetail").textContent = ""; });
+      .catch(function () {});
   }
 
   function loadOps() {
@@ -606,11 +637,25 @@
       .catch(function (e) { alert("설정 저장 실패: " + e.message); });
   }
 
-  $("opsToggle").addEventListener("click", function () {
-    if (!ops) return;
-    var on = ops.accepting !== false;
-    if (on && !window.confirm("접수를 중단합니다. 고객에게 '지금은 요청을 받지 않습니다' 화면이 표시됩니다.")) return;
-    saveOps({ accepting: !on });
+  Array.prototype.forEach.call($("opsMode").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () {
+      if (!ops) return;
+      var m = b.getAttribute("data-m");
+      if (m === (ops.mode || "normal")) return;
+      if (m === "paused" && !window.confirm(
+          "새 요청 접수를 완전히 멈춥니다.\n\n" +
+          "하루 이틀 늦어지는 정도라면 '지연 안내'가 낫습니다. 고객이 스스로 판단해 요청할 수 있습니다.\n\n" +
+          "그래도 중단할까요?")) return;
+      // accepting 칸은 예전 화면과의 호환을 위해 함께 맞춰 둔다
+      saveOps({ mode: m, accepting: m !== "paused" });
+    });
+  });
+
+  $("opsDelay").addEventListener("change", function () {
+    saveOps({ delay_hours: parseInt(this.value, 10) || 24 });
+  });
+  $("opsResume").addEventListener("change", function () {
+    saveOps({ resume_at: this.value || null });
   });
 
   $("opsSave").addEventListener("click", function () {

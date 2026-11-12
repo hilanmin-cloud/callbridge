@@ -267,6 +267,8 @@
 
   <div class="form">
 
+    <div class="opsNote" id="opsNote" style="display:none" role="status"></div>
+
     <div class="title">
       <h1 data-t="formTitle"></h1>
       <p data-t="formLead"></p>
@@ -402,10 +404,13 @@
 
   var T = {
     ja: {
-      closedTitle: "現在リクエストを受け付けていません",
-      closedHours: "受付時間は韓国時間 {from} ～ {to} です。この時間内にもう一度お試しください。",
-      closedFull: "本日の受付が上限に達しました。明日またお越しください。",
-      closedOff: "ただいま受付を停止しています。再開までしばらくお待ちください。",
+      closedTitle: "ただいま新しいご依頼の受付をお休みしています",
+      closedOff: "一時的なお休みです。再開までしばらくお待ちください。",
+      closedResume: "{date} に再開する予定です。",
+      noteAfter: "ただいま受付時間外です。今ご依頼いただくと、韓国時間 {from} 以降に順次お電話します。",
+      noteDelay: "現在、通常よりお時間をいただいています。お電話まで約{n}時間かかる見込みです。",
+      noteBusy: "本日は多くのご依頼をいただいており、お電話は明日以降になります。",
+      noteTail: "ご希望日が近い場合はご注意ください。お急ぎでなければ、このままお進みいただけます。",
       closedBack: "トップへ戻る",
       myAcct: "マイページ",
       notSigned: "ログインしていません",
@@ -490,10 +495,13 @@
       footer: "パスポート番号やクレジットカード情報はお預かりしません。"
     },
     "zh-TW": {
-      closedTitle: "目前暫停接受委託",
-      closedHours: "受理時間為韓國時間 {from} ～ {to}。請在此時段內再試一次。",
-      closedFull: "今日受理已達上限，請明天再來。",
-      closedOff: "目前暫停受理，請稍候再試。",
+      closedTitle: "目前暫停受理新的委託",
+      closedOff: "這是暫時性的休息，請稍候再來。",
+      closedResume: "預計於 {date} 恢復受理。",
+      noteAfter: "目前為非受理時段。現在送出委託，我們會在韓國時間 {from} 之後依序致電。",
+      noteDelay: "目前處理時間比平常長，預計約 {n} 小時後才能致電。",
+      noteBusy: "今日委託較多，致電時間將延至明天之後。",
+      noteTail: "若希望的日期很近，請特別留意。不急的話可以直接繼續。",
       closedBack: "返回首頁",
       myAcct: "我的",
       notSigned: "尚未登入",
@@ -578,10 +586,13 @@
       footer: "我們不會收集護照號碼或信用卡資訊。"
     },
     "zh-CN": {
-      closedTitle: "目前暂停接受委托",
-      closedHours: "受理时间为韩国时间 {from} ～ {to}。请在此时段内再试一次。",
-      closedFull: "今日受理已达上限，请明天再来。",
-      closedOff: "目前暂停受理，请稍后再试。",
+      closedTitle: "目前暂停受理新的委托",
+      closedOff: "这是暂时性的休息，请稍后再来。",
+      closedResume: "预计于 {date} 恢复受理。",
+      noteAfter: "目前为非受理时段。现在提交委托，我们会在韩国时间 {from} 之后依次致电。",
+      noteDelay: "目前处理时间比平时长，预计约 {n} 小时后才能致电。",
+      noteBusy: "今日委托较多，致电时间将延至明天之后。",
+      noteTail: "若希望的日期很近，请特别留意。不急的话可以直接继续。",
       closedBack: "返回首页",
       myAcct: "我的",
       notSigned: "尚未登录",
@@ -666,10 +677,13 @@
       footer: "我们不会收集护照号码或信用卡信息。"
     },
     en: {
-      closedTitle: "We are not taking requests right now",
-      closedHours: "We take requests between {from} and {to} Korean time. Please try again within those hours.",
-      closedFull: "We have reached today’s limit. Please come back tomorrow.",
-      closedOff: "Requests are paused at the moment. Please check back shortly.",
+      closedTitle: "We have paused new requests for now",
+      closedOff: "This is a temporary break. Please check back soon.",
+      closedResume: "We plan to reopen on {date}.",
+      noteAfter: "We are outside calling hours. If you send a request now, we will call from {from} Korean time onward.",
+      noteDelay: "We are running slower than usual. Expect the call in about {n} hours.",
+      noteBusy: "We have many requests today, so your call will be made tomorrow or later.",
+      noteTail: "Please keep this in mind if your date is close. If you are not in a hurry, you can carry on.",
       closedBack: "Back to home",
       myAcct: "Account",
       notSigned: "Not signed in",
@@ -754,10 +768,13 @@
       footer: "We never collect passport numbers or card details."
     },
     ko: {
-      closedTitle: "지금은 요청을 받지 않습니다",
-      closedHours: "접수 시간은 한국 시간 {from} ~ {to} 입니다. 그 시간에 다시 시도해 주세요.",
-      closedFull: "오늘 접수가 한도에 찼습니다. 내일 다시 와주세요.",
-      closedOff: "지금은 접수를 멈춘 상태입니다. 잠시 후 다시 확인해 주세요.",
+      closedTitle: "지금은 새 요청 접수를 잠시 쉬고 있습니다",
+      closedOff: "일시적인 휴무입니다. 잠시 후 다시 찾아주세요.",
+      closedResume: "{date}에 다시 시작할 예정입니다.",
+      noteAfter: "지금은 통화 가능 시간이 아닙니다. 지금 요청하시면 한국 시간 {from} 이후에 순서대로 전화합니다.",
+      noteDelay: "현재 평소보다 처리가 늦어지고 있습니다. 전화까지 약 {n}시간이 걸릴 예정입니다.",
+      noteBusy: "오늘은 요청이 많아 전화가 내일 이후로 넘어갑니다.",
+      noteTail: "희망 날짜가 가까우면 유의해 주세요. 급하지 않으시면 그대로 진행하셔도 됩니다.",
       closedBack: "메인으로",
       myAcct: "내 정보",
       notSigned: "로그인하지 않았습니다",
@@ -1025,7 +1042,7 @@
     $("note").placeholder = t("notePh");
     if (langNow) langNow.textContent = T[lang].label;
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
-    drawAuth(); drawSummary(); loadCredits();
+    drawAuth(); drawSummary(); loadCredits(); drawOps();
   }
 
   var langBtn = $("langBtn"), langNow = $("langNow");
@@ -1116,72 +1133,93 @@
   /* ---------- 동의 ---------- */
   $("ok").addEventListener("change", function () { $("pay").disabled = !this.checked; });
 
-  /* ---------- 접수 가능 여부 확인 ---------- */
+  /* ---------- 운영 상태 반영 ----------
+     정상  : 아무것도 표시하지 않는다
+     지연  : 안내만 하고 접수는 받는다 (시간 외 · 수동 지연 · 하루 한도 초과)
+     중단  : 운영자가 직접 멈춘 경우에만 접수를 막는다 */
+  var opsState = null;   // { kind: "after" | "delay" | "busy" | "paused", cfg: {...} }
+
   function hhmm(s) { return (s || "").slice(0, 5); }
+  function toMin(s) {
+    var p = hhmm(s).split(":");
+    return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+  }
 
-  function showClosed(kind, cfgRow) {
-    var main = document.querySelector(".main");
-    if (!main) return;
+  function drawOps() {
+    var note = $("opsNote");
+    if (!opsState) { if (note) note.style.display = "none"; return; }
+    var c = opsState.cfg || {};
 
-    var msg = kind === "full" ? t("closedFull")
-            : kind === "off" ? t("closedOff")
-            : t("closedHours").replace("{from}", hhmm(cfgRow && cfgRow.open_from))
-                              .replace("{to}", hhmm(cfgRow && cfgRow.open_to));
+    if (opsState.kind === "paused") {
+      var main = document.querySelector(".main");
+      if (!main) return;
+      var extra = "";
+      if (c.resume_at) {
+        var d = new Date(c.resume_at + "T00:00:00+09:00"), ds = c.resume_at;
+        try {
+          ds = new Intl.DateTimeFormat(
+            { ja: "ja-JP", "zh-TW": "zh-TW", "zh-CN": "zh-CN", en: "en-US", ko: "ko-KR" }[lang] || "ja-JP",
+            { month: "long", day: "numeric", timeZone: "Asia/Seoul" }).format(d);
+        } catch (e) {}
+        extra = "<p>" + t("closedResume").replace("{date}", ds) + "</p>";
+      }
+      main.innerHTML =
+        "<div class='closedBox'>" +
+          "<div class='closedIcon'><svg viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/></svg></div>" +
+          "<h1>" + t("closedTitle") + "</h1>" +
+          "<p>" + t("closedOff") + "</p>" + extra +
+          "<a href='index.html'>" + t("closedBack") + "</a>" +
+        "</div>";
+      return;
+    }
 
-    main.innerHTML =
-      "<div class='closedBox'>" +
-        "<div class='closedIcon'>" +
-          "<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='9'/>" +
-          "<path d='M12 7v5l3 2'/></svg>" +
-        "</div>" +
-        "<h1>" + t("closedTitle") + "</h1>" +
-        "<p>" + msg + "</p>" +
-        "<a href='index.html'>" + t("closedBack") + "</a>" +
-      "</div>";
-    window.scrollTo(0, 0);
+    if (!note) return;
+    var msg = opsState.kind === "delay" ? t("noteDelay").replace("{n}", c.delay_hours || 24)
+            : opsState.kind === "busy" ? t("noteBusy")
+            : t("noteAfter").replace("{from}", hhmm(c.open_from));
+    note.innerHTML =
+      "<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='9'/>" +
+      "<path d='M12 7v5l3 2'/></svg>" +
+      "<div><b>" + msg + "</b><span>" + t("noteTail") + "</span></div>";
+    note.style.display = "flex";
   }
 
   function checkOpen() {
-    // 테스트 모드는 차단하지 않는다
-    if (TEST_MODE) return;
+    if (TEST_MODE) return;   // 테스트 모드는 운영 상태와 무관하게 열어둔다
 
     api("ops_config?select=*&id=eq.1")
       .then(function (rs) {
         var c = (rs && rs[0]) || null;
         if (!c) return;
 
-        if (c.accepting === false) { showClosed("off", c); return; }
+        if (c.mode === "paused") { opsState = { kind: "paused", cfg: c }; drawOps(); window.scrollTo(0, 0); return; }
+        if (c.mode === "delay") { opsState = { kind: "delay", cfg: c }; drawOps(); return; }
 
         // 한국 시간 기준 현재 시각
-        var now = new Date();
-        var kst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+        var kst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
         var cur = kst.getHours() * 60 + kst.getMinutes();
-        var from = parseInt(hhmm(c.open_from).split(":")[0], 10) * 60 +
-                   parseInt(hhmm(c.open_from).split(":")[1], 10);
-        var toH = parseInt(hhmm(c.open_to).split(":")[0], 10);
-        var to = (toH >= 24 ? 24 * 60 : toH * 60) +
-                 parseInt(hhmm(c.open_to).split(":")[1], 10);
+        if (cur < toMin(c.open_from) || cur >= toMin(c.open_to)) {
+          opsState = { kind: "after", cfg: c }; drawOps(); return;
+        }
 
-        if (cur < from || cur >= to) { showClosed("hours", c); return; }
-
-        // 오늘 접수 건수 확인
+        // 오늘 접수 건수가 한도를 넘으면 '내일 이후 통화'로 안내한다 (접수는 받는다)
         if (!c.daily_limit || c.daily_limit < 1) return;
         var start = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
-        var iso = new Date(start.getTime() - 9 * 3600000).toISOString();
+        var iso = new Date(start.getTime() - (kst.getTime() - Date.now())).toISOString();
 
-        fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + iso +
+        fetch(cfg.url + "/rest/v1/requests?select=id&created_at=gte." + encodeURIComponent(iso) +
               "&service_type=neq.test", {
           headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key,
                      "Prefer": "count=exact", "Range": "0-0" }
         })
           .then(function (r) {
-            var cr = r.headers.get("content-range") || "0/0";
-            var n = parseInt(cr.split("/")[1], 10) || 0;
-            if (n >= c.daily_limit) showClosed("full", c);
+            var n = parseInt(((r.headers.get("content-range") || "0/0").split("/")[1]), 10) || 0;
+            if (n >= c.daily_limit) { opsState = { kind: "busy", cfg: c }; drawOps(); }
           })
           .catch(function () {});
       })
-      .catch(function () { /* 설정을 못 읽으면 접수를 막지 않는다 */ });
+      .catch(function () { /* 설정을 못 읽으면 평소대로 접수를 받는다 */ });
   }
 
   /* ---------- 접수 완료 화면 ---------- */
