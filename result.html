@@ -886,7 +886,8 @@
     }
 
     // 미확정 항목
-    var pend = (kind !== "hold") ? mapClean(res && res.pending_items, reasonText) : [];
+    var pend = (kind !== "hold" && kind !== "cancelled" && kind !== "changing")
+      ? mapClean(res && res.pending_items, reasonText) : [];
     if (pend.length) {
       html += "<div class='card'><h2>" + L("pendTitle") + "</h2><p style='margin:0;font-size:15px'>" +
         esc(pend.join(" · ")) + "</p>" +
@@ -1063,7 +1064,9 @@
           }).catch(function () {});
         } catch (e) {}
       }).catch(function () {
+        // 취소가 접수되지 않았으면 조용히 넘어가지 않고 알린다
         cb.disabled = false;
+        alert(L("failed"));
       });
     });
   }
