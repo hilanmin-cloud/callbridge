@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>이용약관｜TamoCall</title>
+<meta name="description" content="TamoCall 서비스 이용약관 / Terms of Service">
+<meta name="theme-color" content="#0F5E5C">
+<style>
+  :root {
+    color-scheme: light only;
+    --teal: #0F5E5C; --teal-d: #0A4443;
+    --coral: #F0603F; --coral-d: #D4482A;
+    --gold: #C9962F;
+    --ink: #1A2422; --muted: #6B7A77; --line: #E6E2DD;
+    --mist: #F3F7F6; --bg: #FFFBF8; --card: #FFFFFF;
+    --warm: #FFF6E8; --warmink: #5C4410;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; font-size: 16px; line-height: 1.7; }
+  .page { max-width: 720px; margin: 0 auto; padding: 0 18px 72px; }
+  header { padding: 22px 0 10px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between; }
+  .brand { font-size: 18px; font-weight: 800; color: var(--teal);
+    display: inline-flex; align-items: center; gap: 9px; text-decoration: none; }
+  .brand::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: var(--coral); }
+  .langs { display: flex; gap: 6px; }
+  .langs button { font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); transition: background .18s, color .18s, border-color .18s; }
+  .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+  h1 { font-size: 27px; line-height: 1.35; margin: 18px 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .note { background: var(--warm); color: var(--warmink); border-radius: 12px; padding: 14px 16px;
+    font-size: 14.5px; line-height: 1.65; margin: 0 0 26px; }
+  h2 { font-size: 17px; margin: 30px 0 8px; padding-top: 18px; border-top: 1px solid var(--line); }
+  h2:first-of-type { border-top: 0; padding-top: 0; }
+  p { margin: 8px 0; }
+  ol, ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  .tbl { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+  .tbl th, .tbl td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; }
+  .tbl th { background: var(--mist); font-weight: 600; width: 38%; }
+  .ph { background: var(--mist); border-radius: 4px; padding: 1px 6px; color: var(--muted);
+    font-size: 14px; white-space: nowrap; }
+  footer { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 14px; }
+  footer a { color: var(--teal); }
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) {
+    h1 { font-size: 23px; }
+    .tbl th { width: 42%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a class="brand" href="/">TamoCall</a>
+    <div class="langs">
+      <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </header>
+
+  <!-- ====================== 한국어 ====================== -->
+  <section id="ko">
+    <h1>서비스 이용약관</h1>
+    <p class="meta">시행일 <span class="ph">[시행일]</span> · 최종 개정 <span class="ph">[개정일]</span></p>
+
+    <div class="note">
+      이 약관은 타모(TAMO)가 운영하는 전화 예약 대행 서비스 <b>TamoCall</b>의 이용 조건을 정합니다.
+      한국어본이 기준이며, 번역본과 뜻이 다를 경우 한국어본을 따릅니다.
+    </div>
+
+    <h2>제1조 (목적)</h2>
+    <p>이 약관은 타모(이하 "회사")가 제공하는 TamoCall 서비스(이하 "서비스")의 이용과 관련하여 회사와 이용자의 권리·의무 및 책임사항을 정함을 목적으로 합니다.</p>
+
+    <h2>제2조 (정의)</h2>
+    <ol>
+      <li><b>서비스</b>란 이용자를 대신하여 회사가 국내 음식점 등(이하 "식당")에 한국어로 전화하여 예약을 요청하고 그 결과를 이용자에게 전달하는 유상 용역을 말합니다.</li>
+      <li><b>이용자</b>란 이 약관에 동의하고 서비스를 이용하는 자를 말합니다.</li>
+      <li><b>요청</b>이란 이용자가 식당·일시·인원 등을 지정하여 회사에 예약 대행을 의뢰하는 1건의 단위를 말합니다.</li>
+      <li><b>패스</b>란 요청 3건을 미리 구매하는 형태의 이용권을 말합니다.</li>
+      <li><b>조회 코드</b>란 요청 1건마다 발급되는 식별 문자열로, 이용자가 결과를 조회·취소·변경할 때 사용합니다.</li>
+      <li><b>확정</b>이란 식당이 예약을 수락하여 일시와 인원이 정해진 상태를, <b>보류</b>란 식당이 추가 조건을 제시하여 이용자의 답변이 필요한 상태를 말합니다.</li>
+    </ol>
+
+    <h2>제3조 (약관의 명시와 개정)</h2>
+    <ol>
+      <li>회사는 이 약관을 서비스 화면에 게시하여 이용자가 언제든지 확인할 수 있도록 합니다.</li>
+      <li>회사는 관련 법령을 위반하지 않는 범위에서 이 약관을 개정할 수 있습니다.</li>
+      <li>약관을 개정하는 경우 적용일 7일 전부터 서비스 화면에 공지합니다. 다만 이용자에게 불리한 개정은 적용일 30일 전부터 공지하고, 이미 접수된 요청과 이미 구매한 패스에는 구매 당시의 약관을 적용합니다.</li>
+    </ol>
+
+    <h2>제4조 (서비스의 내용)</h2>
+    <ol>
+      <li>회사는 이용자의 요청에 따라 식당에 전화하여 예약 가능 여부를 확인하고, 가능한 경우 이용자의 이름으로 예약을 요청합니다.</li>
+      <li>회사는 예약 결과와 함께, 해당 식당을 이용할 때 알아 두어야 할 사항(이용 안내)을 이용자의 언어로 전달합니다. 이용 안내는 회사가 통화 등을 통해 확인한 시점의 정보이며, 화면에 그 기준 시점을 표시합니다.</li>
+      <li>식당이 예약 확인을 위해 거는 전화는 회사가 대신 받아 처리하고, 그로 인한 변경 사항을 이용자에게 전달합니다.</li>
+      <li><b>회사는 식당의 대리인이 아니며, 식당의 영업·음식·시설·서비스에 관하여 당사자가 아닙니다.</b> 회사가 제공하는 것은 예약을 위한 연락 대행 용역이며, 좌석 제공 자체를 보증하지 않습니다.</li>
+    </ol>
+
+    <h2>제5조 (이용계약의 성립)</h2>
+    <ol>
+      <li>이용계약은 이용자가 이 약관에 동의하고 요청 정보를 입력한 뒤 결제(또는 패스 차감)를 완료한 때에 성립합니다.</li>
+      <li>회사는 다음 각 호의 경우 요청을 접수하지 않거나 접수를 취소할 수 있으며, 이 경우 결제 금액을 전액 환불합니다.
+        <ul>
+          <li>식당 정보가 특정되지 않거나 허위인 경우</li>
+          <li>요청한 일시가 이미 지난 경우</li>
+          <li>8명 이상의 단체 예약인 경우(별도 문의 대상)</li>
+          <li>이용자가 지정한 희망 시간이 모두 접수 시점으로부터 3시간 이내인 경우</li>
+          <li>법령에 위반되거나 타인에게 피해를 줄 목적이 명백한 경우</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h2>제6조 (계정)</h2>
+    <ol>
+      <li>이용자는 구글 또는 애플 계정으로 로그인하여 서비스를 이용할 수 있습니다. 로그인하지 않고도 1건의 요청은 가능합니다.</li>
+      <li>이용자는 계정과 조회 코드를 제3자에게 제공해서는 안 되며, 이를 소홀히 하여 발생한 손해에 대하여 회사는 책임지지 않습니다.</li>
+    </ol>
+
+    <h2>제7조 (요금 및 결제)</h2>
+    <table class="tbl">
+      <tr><th>요청 1건</th><td>9,900원</td></tr>
+      <tr><th>패스 3건</th><td>19,900원</td></tr>
+    </table>
+    <ol>
+      <li>모든 금액은 대한민국 원화(KRW)를 기준으로 합니다.</li>
+      <li>해외 발행 카드로 결제하는 경우 실제 청구 금액은 카드사가 적용하는 환율과 해외 이용 수수료에 따라 달라질 수 있으며, 이는 카드사와 이용자 사이의 사항으로 회사가 관여하지 않습니다.</li>
+      <li>결제는 회사가 지정한 전자지급결제대행사를 통해 이루어집니다.</li>
+    </ol>
+
+    <h2>제8조 (패스)</h2>
+    <ol>
+      <li>패스는 요청 접수 화면에서 결제 수단으로 선택하여 구매하며, 구매와 동시에 해당 요청에 1건이 사용되고 2건이 남습니다.</li>
+      <li>패스의 유효기간은 <b>사용 횟수와 관계없이 구매일로부터 1년</b>입니다.</li>
+      <li>패스는 타인에게 양도하거나 현금화할 수 없습니다.</li>
+      <li>유효기간이 지난 잔여 횟수는 소멸하며, 소멸 30일 전과 7일 전에 이용자가 등록한 이메일로 안내합니다.</li>
+    </ol>
+
+    <h2>제9조 (운영 시간과 처리 기한)</h2>
+    <ol>
+      <li>회사의 운영 시간은 한국 시간 09:00부터 24:00까지입니다.</li>
+      <li>회사는 요청 접수 후 24시간 이내에 결과를 안내합니다. 다만 식당의 휴무, 영업시간, 통화 불능 등으로 지연될 수 있으며, 이 경우 진행 상황을 안내합니다.</li>
+      <li>회사는 접수량이 처리 가능 범위를 넘는 경우 일시적으로 접수를 제한할 수 있으며, 그 사실을 서비스 화면에 표시합니다.</li>
+    </ol>
+
+    <h2>제10조 (예약 확정과 보류)</h2>
+    <ol>
+      <li>이용자는 희망 일시를 1·2·3순위로 지정할 수 있으며, 회사는 지정한 순위 안에서 예약을 시도합니다.</li>
+      <li>이용자가 '30분 이내 조정 허용'을 선택한 경우, 회사는 지정 시각의 전후 30분 범위에서 예약을 확정할 수 있습니다.</li>
+      <li>식당이 예약금, 좌석 형태, 분리 착석, 코스 주문 등 추가 조건을 제시하는 경우 회사는 예약을 확정하지 않고 그 내용을 이용자에게 전달하여 답변을 받습니다.</li>
+      <li><b>회사는 어떠한 경우에도 이용자를 대신하여 식당에 예약금을 지급하지 않습니다.</b> 예약금이 필요한 경우 금액과 입금 방법만을 전달합니다.</li>
+      <li>이용자가 보류 조건을 거절하거나 24시간 이내에 답변하지 않아 예약이 성사되지 않은 경우, 제11조 제2호에 따라 처리합니다.</li>
+    </ol>
+
+    <h2>제11조 (예약이 성사되지 않은 경우)</h2>
+    <ol>
+      <li>식당의 폐업, 결번, 예약 미운영, 만석, 식당의 거절 등으로 예약이 성사되지 않은 경우 회사는 그 사유를 이용자에게 전달합니다.</li>
+      <li>이 경우 <b>회사는 요금을 받지 않습니다.</b> 이미 결제한 금액은 전액 환불하고, 패스로 결제한 경우 사용된 1건을 복구합니다.</li>
+    </ol>
+
+    <h2>제12조 (예약 변경)</h2>
+    <ol>
+      <li>변경은 <b>같은 식당의 일시 또는 인원</b>에 한하며, 예약일 전일까지 <b>1회 무료</b>입니다.</li>
+      <li>2회차 이후의 변경과 예약 당일의 변경은 새로운 요청으로 보아 9,900원이 부과됩니다.</li>
+      <li>다른 식당으로 바꾸는 것은 변경이 아니라 취소 후 새 요청으로 처리합니다.</li>
+      <li>인원은 7명까지 변경할 수 있으며, 8명 이상은 단체 예약으로 별도 문의 대상입니다.</li>
+      <li>변경 요청은 회사가 식당에 확인한 뒤에 확정되며, 식당이 거절하는 경우 기존 예약이 유지됩니다.</li>
+    </ol>
+
+    <h2>제13조 (취소와 환불)</h2>
+    <table class="tbl">
+      <tr><th>회사가 전화하기 전에 취소</th><td>전액 환불 (패스는 1건 복구)</td></tr>
+      <tr><th>예약이 성사되지 않은 경우</th><td>전액 환불 (패스는 1건 복구)</td></tr>
+      <tr><th>확정 후 예약일 전일까지 취소</th><td>전액 환불</td></tr>
+      <tr><th>예약 당일 취소</th><td>환불 불가</td></tr>
+    </table>
+    <ol>
+      <li>모든 기준 시각은 한국 시간(KST)을 따릅니다.</li>
+      <li>예약 당일 취소를 환불하지 않는 이유는, 그 시점에는 회사의 용역(식당과의 통화와 예약 확정)이 이미 완료되었기 때문입니다. 환불 여부와 관계없이 회사는 식당에 취소 사실을 전달합니다.</li>
+      <li><b>패스의 잔여 횟수 환불</b>은 사용한 횟수에 1건당 9,900원을 적용하여 공제한 뒤 남는 금액을 환불합니다.
+        <table class="tbl">
+          <tr><th>1건 사용 후 환불</th><td>19,900원 − 9,900원 = <b>10,000원</b></td></tr>
+          <tr><th>2건 사용 후 환불</th><td>19,900원 − 19,800원 = 100원 → <b>환불하지 않음</b></td></tr>
+        </table>
+        산정된 환불액이 500원 미만인 경우에는 환불하지 않습니다.
+      </li>
+      <li>회사는 환불 수수료를 받지 않습니다.</li>
+      <li>환불은 결제한 수단으로 취소하는 방식으로 처리하며, 회사의 처리 후 카드사·결제사의 일정에 따라 영업일 기준 3~7일이 걸릴 수 있습니다.</li>
+    </ol>
+
+    <h2>제14조 (청약철회의 제한)</h2>
+    <ol>
+      <li>이용자는 계약 내용에 관한 서면을 받은 날부터 7일 이내에 청약철회를 할 수 있습니다.</li>
+      <li>다만 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 제2항에 따라, <b>회사가 식당에 전화를 건 시점부터는 용역의 제공이 개시된 것</b>으로 보아 청약철회가 제한됩니다. 이 경우에도 제13조의 환불 규정은 그대로 적용됩니다.</li>
+      <li>회사는 용역 제공이 개시되기 전까지는 제13조에 따라 전액을 환불하므로, 이용자는 이 제한으로 불이익을 받지 않습니다.</li>
+    </ol>
+
+    <h2>제15조 (요금의 변경)</h2>
+    <ol>
+      <li>요금을 인상하는 경우 적용일 2주 전부터 공지하며, 이미 구매한 패스는 구매 당시의 조건으로 유효기간까지 사용할 수 있습니다.</li>
+      <li>요금을 인하하는 경우 적용일부터 거슬러 최근 30일 이내에 이용한 이용자에게 차액을 환불하거나 요청 1건을 지급합니다.</li>
+    </ol>
+
+    <h2>제16조 (이용자의 의무)</h2>
+    <ol>
+      <li>이용자는 요청 시 식당 정보, 일시, 인원, 이름, 연락처를 정확하게 입력하여야 합니다. 부정확한 정보로 인한 예약 오류의 책임은 이용자에게 있습니다.</li>
+      <li>이용자는 결과 안내를 받을 수 있도록 유효한 이메일 주소를 유지하여야 합니다.</li>
+      <li><b>이용자는 확정된 예약에 방문하지 않을 경우 예약일 전일까지 취소하여야 합니다.</b> 연락 없는 불방문(노쇼)은 식당에 직접적인 피해를 주며, 회사는 반복되는 경우 제17조에 따라 이용을 제한할 수 있습니다.</li>
+      <li>이용자는 실제로 방문할 의사 없이 요청하거나, 타인의 이름으로 요청하거나, 동일 식당에 중복 요청하여서는 안 됩니다.</li>
+    </ol>
+
+    <h2>제17조 (이용 제한)</h2>
+    <p>회사는 이용자가 제16조를 반복하여 위반하는 경우 사전 통지 후 서비스 이용을 제한할 수 있습니다. 다만 긴급한 경우에는 먼저 제한한 뒤 통지할 수 있으며, 이용자는 이에 대해 이의를 제기할 수 있습니다. 이용이 제한된 경우 잔여 패스는 제13조 제3호에 따라 환불합니다.</p>
+
+    <h2>제18조 (회사의 의무)</h2>
+    <ol>
+      <li>회사는 이 약관과 관련 법령을 준수하며, 계속적이고 안정적으로 서비스를 제공하기 위하여 노력합니다.</li>
+      <li>회사는 이용자의 개인정보를 개인정보처리방침에 따라 보호합니다.</li>
+      <li>회사는 이용자가 제기한 의견이 정당하다고 인정되는 경우 이를 처리하고 그 결과를 전달합니다.</li>
+    </ol>
+
+    <h2>제19조 (서비스의 중단)</h2>
+    <ol>
+      <li>회사는 설비 점검·교체, 통신 장애, 천재지변 등의 사유로 서비스 제공을 일시적으로 중단할 수 있습니다.</li>
+      <li>서비스를 종료하는 경우 회사는 종료일 30일 전까지 공지하며, 접수된 요청은 처리하고 잔여 패스는 사용하지 않은 횟수에 대해 1건당 9,900원을 기준으로 환불합니다.</li>
+    </ol>
+
+    <h2>제20조 (면책)</h2>
+    <ol>
+      <li>회사는 식당이 일방적으로 예약을 취소하거나 변경한 경우, 그 사실을 이용자에게 전달하고 제11조에 준하여 환불합니다. 다만 그로 인하여 이용자에게 발생한 여행 일정 변경 비용 등 간접 손해에 대하여는 회사의 고의 또는 중대한 과실이 없는 한 책임지지 않습니다.</li>
+      <li>회사는 식당에서 제공되는 음식과 서비스의 품질, 위생, 가격, 시설 안전에 관하여 책임지지 않습니다.</li>
+      <li>회사는 천재지변, 통신 두절, 식당의 휴업 등 회사의 통제를 벗어난 사유로 인한 불이행에 대하여 책임지지 않습니다.</li>
+      <li>이 조의 어떠한 내용도 회사의 고의 또는 중대한 과실로 인한 책임, 그 밖에 법령상 제한할 수 없는 책임을 배제하지 않습니다.</li>
+    </ol>
+
+    <h2>제21조 (개인정보의 보호)</h2>
+    <p>회사는 서비스 제공을 위하여 필요한 최소한의 개인정보를 수집하며, 예약 성사를 위하여 식당에 이용자의 이름과 인원, 일시를 제공합니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>에 따릅니다.</p>
+
+    <h2>제22조 (분쟁의 해결)</h2>
+    <ol>
+      <li>회사와 이용자는 분쟁이 발생한 경우 성실히 협의하여 해결합니다.</li>
+      <li>이 약관은 대한민국 법률에 따라 해석되고 적용됩니다.</li>
+      <li>다만 이용자가 거주하는 국가의 소비자보호 관련 강행규정이 이용자에게 더 유리한 경우에는 그 규정이 우선합니다.</li>
+      <li>소송이 제기되는 경우 민사소송법에 따른 관할 법원에 제기합니다.</li>
+      <li>이용자는 한국소비자원 또는 전자거래분쟁조정위원회에 분쟁조정을 신청할 수 있습니다.</li>
+    </ol>
+
+    <h2>부칙</h2>
+    <p>이 약관은 <span class="ph">[시행일]</span>부터 시행합니다.</p>
+
+    <table class="tbl">
+      <tr><th>상호</th><td>타모 (TAMO)</td></tr>
+      <tr><th>대표자</th><td>김민규</td></tr>
+      <tr><th>사업장 소재지</th><td><span class="ph">[사업장 주소]</span></td></tr>
+      <tr><th>사업자등록번호</th><td><span class="ph">[사업자등록번호]</span></td></tr>
+      <tr><th>통신판매업 신고번호</th><td><span class="ph">[통신판매업 신고번호]</span></td></tr>
+      <tr><th>문의</th><td><span class="ph">[문의 이메일]</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ====================== English ====================== -->
+  <section id="en" hidden>
+    <h1>Terms of Service</h1>
+    <p class="meta">Effective <span class="ph">[effective date]</span> · Last revised <span class="ph">[revision date]</span></p>
+
+    <div class="note">
+      These Terms govern your use of <b>TamoCall</b>, a phone reservation service operated by TAMO.
+      The Korean version is the governing text; if a translation differs in meaning, the Korean version prevails.
+    </div>
+
+    <h2>Article 1 (Purpose)</h2>
+    <p>These Terms set out the rights, obligations and responsibilities of TAMO ("the Company") and users in connection with the TamoCall service ("the Service").</p>
+
+    <h2>Article 2 (Definitions)</h2>
+    <ol>
+      <li><b>Service</b> means the paid service in which the Company calls a restaurant in Korea in Korean on your behalf, requests a reservation, and reports the outcome to you.</li>
+      <li><b>User</b> means a person who agrees to these Terms and uses the Service.</li>
+      <li><b>Request</b> means one unit of work in which you specify a restaurant, date, time and party size.</li>
+      <li><b>Pass</b> means a package of three Requests purchased in advance.</li>
+      <li><b>Lookup code</b> means the identifier issued for each Request, used to check, cancel or change it.</li>
+      <li><b>Confirmed</b> means the restaurant has accepted the reservation; <b>On hold</b> means the restaurant has raised a condition that requires your answer.</li>
+    </ol>
+
+    <h2>Article 3 (Posting and Amendment)</h2>
+    <ol>
+      <li>The Company posts these Terms on the Service so that you can read them at any time.</li>
+      <li>The Company may amend these Terms within the limits of applicable law.</li>
+      <li>Amendments are announced at least 7 days before they take effect, or 30 days before where the change is unfavourable to users. Requests already submitted and Passes already purchased remain governed by the Terms in force at the time of purchase.</li>
+    </ol>
+
+    <h2>Article 4 (What the Service does)</h2>
+    <ol>
+      <li>The Company calls the restaurant, checks availability, and requests a reservation in your name.</li>
+      <li>Along with the outcome, the Company gives you, in your language, the things you need to know when visiting that restaurant. This information reflects what the Company confirmed at a given point in time, and that date is shown on screen.</li>
+      <li>If the restaurant calls back to confirm, the Company takes that call and passes any changes on to you.</li>
+      <li><b>The Company is not an agent of the restaurant and is not a party to the restaurant's business, food, premises or service.</b> What the Company provides is the act of making contact on your behalf; it does not guarantee that a table will be available.</li>
+    </ol>
+
+    <h2>Article 5 (Formation of the contract)</h2>
+    <ol>
+      <li>The contract is formed when you accept these Terms, submit your Request and complete payment (or use a Pass).</li>
+      <li>The Company may decline or cancel a Request in the following cases and will refund the full amount:
+        <ul>
+          <li>the restaurant cannot be identified, or the details are false;</li>
+          <li>the requested date and time have already passed;</li>
+          <li>the party is 8 people or more (group reservations are handled separately);</li>
+          <li>every time you listed falls within 3 hours of submission;</li>
+          <li>the Request is unlawful or clearly intended to harm another person.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h2>Article 6 (Account)</h2>
+    <ol>
+      <li>You may sign in with a Google or Apple account. One Request can be made without signing in.</li>
+      <li>You must not give your account or lookup code to anyone else. The Company is not liable for loss arising from your failure to keep them secure.</li>
+    </ol>
+
+    <h2>Article 7 (Fees and payment)</h2>
+    <table class="tbl">
+      <tr><th>One Request</th><td>KRW 9,900</td></tr>
+      <tr><th>Pass (3 Requests)</th><td>KRW 19,900</td></tr>
+    </table>
+    <ol>
+      <li>All amounts are stated in Korean won (KRW).</li>
+      <li>If you pay with a card issued outside Korea, the amount actually billed depends on the exchange rate and foreign transaction fee applied by your card issuer. That is a matter between you and your issuer, and the Company has no part in it.</li>
+      <li>Payments are processed through the payment gateway designated by the Company.</li>
+    </ol>
+
+    <h2>Article 8 (Pass)</h2>
+    <ol>
+      <li>A Pass is bought as a payment method on the request form. One Request is used at the moment of purchase, leaving two.</li>
+      <li>A Pass is valid for <b>one year from the date of purchase, regardless of how many Requests have been used</b>.</li>
+      <li>A Pass may not be transferred or exchanged for cash.</li>
+      <li>Unused Requests expire at the end of the validity period. The Company sends a reminder to your registered email 30 days and 7 days before expiry.</li>
+    </ol>
+
+    <h2>Article 9 (Operating hours and turnaround)</h2>
+    <ol>
+      <li>The Company operates from 09:00 to 24:00, Korea Standard Time.</li>
+      <li>The Company reports the outcome within 24 hours of receiving a Request. This may take longer where the restaurant is closed or unreachable; in that case the Company tells you where things stand.</li>
+      <li>Where demand exceeds what the Company can handle, it may temporarily limit new Requests and will say so on the Service.</li>
+    </ol>
+
+    <h2>Article 10 (Confirmation and holds)</h2>
+    <ol>
+      <li>You may give first, second and third choices of date and time. The Company tries to secure a reservation within those choices.</li>
+      <li>If you select "allow adjustment within 30 minutes", the Company may confirm a reservation up to 30 minutes before or after your stated time.</li>
+      <li>Where the restaurant raises a condition — a deposit, a seat type, separate seating, a set course — the Company does not confirm. It passes the condition to you and waits for your answer.</li>
+      <li><b>The Company never pays a deposit to a restaurant on your behalf.</b> Where a deposit is required, the Company relays only the amount and the payment method.</li>
+      <li>If you decline the condition, or do not answer within 24 hours and the reservation fails as a result, Article 11(2) applies.</li>
+    </ol>
+
+    <h2>Article 11 (Where no reservation is secured)</h2>
+    <ol>
+      <li>Where no reservation can be secured — the restaurant has closed, the number is disconnected, it does not take reservations, it is fully booked, or it declines — the Company tells you why.</li>
+      <li>In that case <b>the Company does not charge you</b>. Any amount paid is refunded in full, and a Request used from a Pass is restored.</li>
+    </ol>
+
+    <h2>Article 12 (Changing a reservation)</h2>
+    <ol>
+      <li>A change covers <b>the date, time or party size at the same restaurant</b>, and is <b>free once</b>, up to the day before the reservation.</li>
+      <li>A second or later change, and any change on the day of the reservation, is treated as a new Request at KRW 9,900.</li>
+      <li>Changing to a different restaurant is not a change: it is a cancellation followed by a new Request.</li>
+      <li>Party size may be changed up to 7 people. Eight or more is a group reservation and is handled separately.</li>
+      <li>A change takes effect only once the Company has confirmed it with the restaurant. If the restaurant declines, the original reservation stands.</li>
+    </ol>
+
+    <h2>Article 13 (Cancellation and refunds)</h2>
+    <table class="tbl">
+      <tr><th>Cancelled before the Company calls</th><td>Full refund (Pass Request restored)</td></tr>
+      <tr><th>No reservation secured</th><td>Full refund (Pass Request restored)</td></tr>
+      <tr><th>Cancelled up to the day before</th><td>Full refund</td></tr>
+      <tr><th>Cancelled on the day</th><td>No refund</td></tr>
+    </table>
+    <ol>
+      <li>All cut-off times are in Korea Standard Time.</li>
+      <li>A cancellation on the day is not refunded because by then the Company's work — calling the restaurant and securing the reservation — is already complete. The Company still informs the restaurant of the cancellation, whether or not a refund is due.</li>
+      <li><b>Refund of unused Pass Requests</b> is calculated by deducting KRW 9,900 for each Request used.
+        <table class="tbl">
+          <tr><th>After 1 Request used</th><td>19,900 − 9,900 = <b>KRW 10,000</b></td></tr>
+          <tr><th>After 2 Requests used</th><td>19,900 − 19,800 = KRW 100 → <b>not refunded</b></td></tr>
+        </table>
+        Amounts below KRW 500 are not refunded.
+      </li>
+      <li>The Company charges no refund fee.</li>
+      <li>Refunds are issued by reversing the original payment. After the Company processes it, your card issuer or payment provider may take 3 to 7 business days.</li>
+    </ol>
+
+    <h2>Article 14 (Limits on withdrawal of subscription)</h2>
+    <ol>
+      <li>You may withdraw your subscription within 7 days of receiving the written contract terms.</li>
+      <li>However, under Article 17(2) of the Act on Consumer Protection in Electronic Commerce, <b>performance is deemed to begin when the Company places the call</b> to the restaurant, and withdrawal is limited from that point. The refund rules in Article 13 still apply.</li>
+      <li>Because the Company refunds in full up to the moment performance begins, this limit puts you at no disadvantage.</li>
+    </ol>
+
+    <h2>Article 15 (Price changes)</h2>
+    <ol>
+      <li>A price increase is announced at least 2 weeks before it takes effect. A Pass already purchased remains valid on its original terms until it expires.</li>
+      <li>Where prices are reduced, the Company refunds the difference, or grants one Request, to users who used the Service within the 30 days before the reduction.</li>
+    </ol>
+
+    <h2>Article 16 (Your obligations)</h2>
+    <ol>
+      <li>You must give accurate restaurant details, date, time, party size, name and contact details. Errors arising from inaccurate information are your responsibility.</li>
+      <li>You must keep a working email address so that the Company can reach you with the outcome.</li>
+      <li><b>If you will not be visiting a confirmed reservation, you must cancel by the day before.</b> Failing to show up without notice causes direct loss to the restaurant, and the Company may restrict your use of the Service under Article 17 where this is repeated.</li>
+      <li>You must not submit a Request without intending to visit, under another person's name, or more than once for the same restaurant.</li>
+    </ol>
+
+    <h2>Article 17 (Restriction of use)</h2>
+    <p>Where you repeatedly breach Article 16, the Company may restrict your use of the Service after giving notice. In urgent cases it may restrict first and give notice afterwards, and you may object. Where use is restricted, any remaining Pass is refunded under Article 13(3).</p>
+
+    <h2>Article 18 (The Company's obligations)</h2>
+    <ol>
+      <li>The Company complies with these Terms and applicable law, and works to provide the Service reliably and without interruption.</li>
+      <li>The Company protects your personal data in accordance with its Privacy Policy.</li>
+      <li>Where the Company finds your complaint to be justified, it resolves it and tells you the outcome.</li>
+    </ol>
+
+    <h2>Article 19 (Suspension of the Service)</h2>
+    <ol>
+      <li>The Company may suspend the Service temporarily for maintenance, equipment replacement, communication failures or events beyond its control.</li>
+      <li>Where the Service is discontinued, the Company gives at least 30 days' notice, completes Requests already received, and refunds unused Pass Requests at KRW 9,900 each.</li>
+    </ol>
+
+    <h2>Article 20 (Limitation of liability)</h2>
+    <ol>
+      <li>Where a restaurant cancels or changes a reservation of its own accord, the Company tells you and refunds as under Article 11. The Company is not liable for indirect loss arising from that, such as the cost of rearranging your travel, unless the Company acted intentionally or with gross negligence.</li>
+      <li>The Company is not responsible for the quality, hygiene, price or safety of what the restaurant provides.</li>
+      <li>The Company is not liable for failure to perform caused by events outside its control, such as natural disasters, communication outages, or a restaurant closing.</li>
+      <li>Nothing in this Article excludes liability for the Company's intentional acts or gross negligence, or any other liability that cannot be excluded by law.</li>
+    </ol>
+
+    <h2>Article 21 (Personal data)</h2>
+    <p>The Company collects the minimum personal data needed to provide the Service and, in order to secure your reservation, gives the restaurant your name, party size, date and time. See the <a href="/privacy.html">Privacy Policy</a> for details.</p>
+
+    <h2>Article 22 (Disputes)</h2>
+    <ol>
+      <li>The Company and you will try in good faith to resolve any dispute by agreement.</li>
+      <li>These Terms are governed by and construed in accordance with the laws of the Republic of Korea.</li>
+      <li>Where mandatory consumer protection rules of your country of residence are more favourable to you, those rules prevail.</li>
+      <li>Any action is brought before the court having jurisdiction under the Korean Civil Procedure Act.</li>
+      <li>You may also apply to the Korea Consumer Agency or the Electronic Commerce Mediation Committee for mediation.</li>
+    </ol>
+
+    <h2>Supplementary provision</h2>
+    <p>These Terms take effect on <span class="ph">[effective date]</span>.</p>
+
+    <table class="tbl">
+      <tr><th>Business name</th><td>TAMO</td></tr>
+      <tr><th>Representative</th><td>Kim Mingyu</td></tr>
+      <tr><th>Address</th><td><span class="ph">[business address]</span></td></tr>
+      <tr><th>Business registration no.</th><td><span class="ph">[registration number]</span></td></tr>
+      <tr><th>Mail-order sales reg. no.</th><td><span class="ph">[mail-order number]</span></td></tr>
+      <tr><th>Contact</th><td><span class="ph">[contact email]</span></td></tr>
+    </table>
+  </section>
+
+  <footer>
+    <a href="/">TamoCall</a> · <a href="/privacy.html">개인정보처리방침 / Privacy Policy</a> · <a href="contact.html">문의하기 / Contact</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var btns = document.querySelectorAll(".langs button");
+  var secs = { ko: document.getElementById("ko"), en: document.getElementById("en") };
+  function pick(lang) {
+    for (var k in secs) { secs[k].hidden = (k !== lang); }
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-lang") === lang ? "true" : "false");
+    }
+    document.documentElement.lang = lang;
+    try { localStorage.setItem("tc-legal-lang", lang); } catch (e) {}
+  }
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener("click", function () { pick(this.getAttribute("data-lang")); });
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("tc-legal-lang"); } catch (e) {}
+  if (!saved) { saved = (navigator.language || "").slice(0, 2) === "ko" ? "ko" : "en"; }
+  pick(saved === "ko" ? "ko" : "en");
+})();
+</script>
+</body>
+</html>

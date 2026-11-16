@@ -160,7 +160,7 @@
 
   <div id="root"></div>
 
-  <footer>TamoCall</footer>
+  <footer>TamoCall · <a href="terms.html" data-t="tosLink" style="color:inherit"></a> · <a href="privacy.html" data-t="privLink" style="color:inherit"></a> · <a href="contact.html" data-t="contactLink" style="color:inherit"></a></footer>
 </div>
 
 <script>
@@ -231,6 +231,9 @@
   /* ================= 다국어 ================= */
   var T = {
     ja: { label:"日本語",
+      tosLink: "利用規約",
+      contactLink: "お問い合わせ",
+      privLink: "プライバシーポリシー",
       failed: "処理できませんでした。しばらくしてからもう一度お試しください。",
       changeSameDay: "予約当日の変更は新しいご依頼として₩9,900かかります。",
       errChangeNeed: "新しい日時を入力してください。",
@@ -310,6 +313,9 @@
       showSub:"お店のスタッフにそのままお見せください。",
       mapBtn:"地図で開く", cancelBtn:"行けなくなりました（キャンセル）", cancelAsk:"キャンセルをお店に伝えます。よろしいですか？", cancelFree:"前日までのキャンセルのため、全額返金されます。", cancelPaid:"予約当日のキャンセルのため返金はありませんが、お店には必ずお伝えします。", cancelDone:"承りました。お店にお伝えします。", cancelNote:"行けなくなった場合は必ずご連絡ください。無断キャンセルはお店に迷惑がかかり、次回以降のご利用が制限される場合があります。", againBtn:"別のリクエストを照会" },
     "zh-TW": { label:"繁體中文",
+      tosLink: "服務條款",
+      contactLink: "聯絡我們",
+      privLink: "隱私權政策",
       failed: "處理失敗，請稍後再試一次。",
       changeSameDay: "預約當天變更視為新委託，需₩9,900。",
       errChangeNeed: "請輸入新的時間。",
@@ -389,6 +395,9 @@
       showSub:"直接出示給店員即可。",
       mapBtn:"在地圖開啟", cancelBtn:"無法前往（取消）", cancelAsk:"我們會替您通知餐廳取消。確定嗎？", cancelFree:"前一天以前取消，將全額退款。", cancelPaid:"預約當天取消不退款，但我們仍會通知餐廳。", cancelDone:"已收到，我們會通知餐廳。", cancelNote:"若無法前往請務必告知。未告知的缺席會造成餐廳困擾，日後可能限制使用。", againBtn:"查詢其他委託" },
     "zh-CN": { label:"简体中文",
+      tosLink: "服务条款",
+      contactLink: "联系我们",
+      privLink: "隐私政策",
       failed: "处理失败，请稍后再试一次。",
       changeSameDay: "预约当天变更视为新委托，需₩9,900。",
       errChangeNeed: "请输入新的时间。",
@@ -468,6 +477,9 @@
       showSub:"直接出示给店员即可。",
       mapBtn:"在地图打开", cancelBtn:"无法前往（取消）", cancelAsk:"我们会替您通知餐厅取消。确定吗？", cancelFree:"前一天以前取消，将全额退款。", cancelPaid:"预约当天取消不退款，但我们仍会通知餐厅。", cancelDone:"已收到，我们会通知餐厅。", cancelNote:"若无法前往请务必告知。未告知的缺席会给餐厅造成困扰，日后可能限制使用。", againBtn:"查询其他委托" },
     en: { label:"English",
+      tosLink: "Terms",
+      contactLink: "Contact",
+      privLink: "Privacy",
       failed: "Something went wrong. Please try again in a moment.",
       changeSameDay: "Changing on the day counts as a new request and costs ₩9,900.",
       errChangeNeed: "Please enter the new date and time.",
@@ -547,6 +559,9 @@
       showSub:"Show this to the staff as it is.",
       mapBtn:"Open in maps", cancelBtn:"I can\u0027t make it (cancel)", cancelAsk:"We will tell the restaurant you are cancelling. Continue?", cancelFree:"Cancelled before the day of your booking — you get a full refund.", cancelPaid:"Cancelling on the day means no refund, but we will still tell the restaurant.", cancelDone:"Got it. We will let the restaurant know.", cancelNote:"Please tell us if you cannot make it. Not showing up without notice causes real trouble for the restaurant and may limit your future use.", againBtn:"Check another request" },
     ko: { label:"한국어",
+      tosLink: "이용약관",
+      contactLink: "문의하기",
+      privLink: "개인정보처리방침",
       failed: "처리하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       changeSameDay: "예약 당일 변경은 새 요청으로 9,900원이 부과됩니다.",
       errChangeNeed: "새 일시를 입력해 주세요.",
@@ -810,7 +825,7 @@
               method: "POST",
               headers: { "Content-Type": "application/json", "apikey": cfg.key },
               body: JSON.stringify({ kind: "change", code: req.lookup_code || "",
-                venue: req.venue_name_raw || "", party: p, name: req.booking_name || "",
+                venue: req.venue_name_raw || "", party: p,
                 lang: lang, refundable: !!out.free }),
               keepalive: true
             }).catch(function () {});
@@ -991,7 +1006,7 @@
               body: JSON.stringify({
                 kind: accept ? "hold_accept" : "cancel",
                 code: req.lookup_code || "", venue: req.venue_name_raw || "",
-                party: req.party_size, name: req.booking_name || "",
+                party: req.party_size,
                 lang: lang, refundable: true, before_call: !accept
               }),
               keepalive: true
@@ -1055,7 +1070,6 @@
               code: req.lookup_code || "",
               venue: req.venue_name_raw || "",
               party: req.party_size,
-              name: req.booking_name || "",
               lang: lang,
               refundable: (pre || isHold) ? true : free,
               before_call: pre
@@ -1118,6 +1132,10 @@
       b.setAttribute("aria-pressed", b.getAttribute("data-l") === lang ? "true" : "false");
     });
     if (langNow) langNow.textContent = T[lang].label;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-t]"), function (el) {
+      var k = el.getAttribute("data-t");
+      if (T[lang] && T[lang][k]) el.textContent = T[lang][k];
+    });
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
     var cur = (location.hash || "").replace("#", "").trim();
     if (cur) { load(cur); } else { drawLookup(); }

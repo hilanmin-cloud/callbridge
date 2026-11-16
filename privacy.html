@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>개인정보처리방침｜TamoCall</title>
+<meta name="description" content="TamoCall 개인정보처리방침 / Privacy Policy">
+<meta name="theme-color" content="#0F5E5C">
+<style>
+  :root {
+    color-scheme: light only;
+    --teal: #0F5E5C; --coral: #F0603F;
+    --ink: #1A2422; --muted: #6B7A77; --line: #E6E2DD;
+    --mist: #F3F7F6; --bg: #FFFBF8; --card: #FFFFFF;
+    --warm: #FFF6E8; --warmink: #5C4410;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; font-size: 16px; line-height: 1.7; }
+  .page { max-width: 720px; margin: 0 auto; padding: 0 18px 72px; }
+  header { padding: 22px 0 10px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between; }
+  .brand { font-size: 18px; font-weight: 800; color: var(--teal);
+    display: inline-flex; align-items: center; gap: 9px; text-decoration: none; }
+  .brand::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: var(--coral); }
+  .langs { display: flex; gap: 6px; }
+  .langs button { font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); transition: background .18s, color .18s, border-color .18s; }
+  .langs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+  h1 { font-size: 27px; line-height: 1.35; margin: 18px 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .note { background: var(--warm); color: var(--warmink); border-radius: 12px; padding: 14px 16px;
+    font-size: 14.5px; line-height: 1.65; margin: 0 0 26px; }
+  h2 { font-size: 17px; margin: 30px 0 8px; padding-top: 18px; border-top: 1px solid var(--line); }
+  h2:first-of-type { border-top: 0; padding-top: 0; }
+  p { margin: 8px 0; }
+  ol, ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  .wrap { overflow-x: auto; margin: 12px 0; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 460px; }
+  .tbl th, .tbl td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; }
+  .tbl th { background: var(--mist); font-weight: 600; }
+  .tbl.kv th { width: 34%; }
+  .ph { background: var(--mist); border-radius: 4px; padding: 1px 6px; color: var(--muted);
+    font-size: 14px; white-space: nowrap; }
+  footer { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 14px; }
+  footer a { color: var(--teal); }
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) { h1 { font-size: 23px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a class="brand" href="/">TamoCall</a>
+    <div class="langs">
+      <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </header>
+
+  <!-- ====================== 한국어 ====================== -->
+  <section id="ko">
+    <h1>개인정보처리방침</h1>
+    <p class="meta">시행일 <span class="ph">[시행일]</span> · 최종 개정 <span class="ph">[개정일]</span></p>
+
+    <div class="note">
+      타모(TAMO)는 TamoCall 서비스를 제공하면서 꼭 필요한 정보만 수집합니다.
+      이 방침은 어떤 정보를 왜 받고, 어디에 보내고, 얼마나 두는지를 적은 것입니다.
+      한국어본이 기준이며, 번역본과 뜻이 다를 경우 한국어본을 따릅니다.
+    </div>
+
+    <h2>1. 수집하는 개인정보</h2>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>구분</th><th>항목</th><th>수집 시점</th></tr>
+      <tr>
+        <td>예약 요청</td>
+        <td>예약자명(로마자), 이메일 주소, 희망 식당(상호 또는 지도 링크), 희망 일시 1~3순위, 인원, 통화 중 결정 조건, 사용 언어</td>
+        <td>요청 접수 시 (필수)</td>
+      </tr>
+      <tr>
+        <td>계정</td>
+        <td>구글 또는 애플 계정 식별자, 이메일 주소, 프로필 이름</td>
+        <td>소셜 로그인 시 (선택)</td>
+      </tr>
+      <tr>
+        <td>결제</td>
+        <td>결제 승인 번호, 결제 금액, 결제 일시, 결제 수단 종류</td>
+        <td>결제 시 (필수)</td>
+      </tr>
+      <tr>
+        <td>처리 기록</td>
+        <td>통화 결과, 확정 또는 보류 내용, 취소·변경 이력, 조회 코드</td>
+        <td>서비스 처리 과정에서 자동 생성</td>
+      </tr>
+      <tr>
+        <td>문의</td>
+        <td>이메일 주소, 제목, 문의 내용, 관련 예약 조회 코드(입력한 경우)</td>
+        <td>문의 접수 시 (필수)</td>
+      </tr>
+      <tr>
+        <td>접속 정보</td>
+        <td>접속 일시, IP 주소, 브라우저·기기 정보</td>
+        <td>서비스 이용 시 자동 생성</td>
+      </tr>
+    </table>
+    </div>
+    <p><b>회사는 카드번호, 유효기간, 비밀번호를 수집하거나 보관하지 않습니다.</b> 결제 정보는 전자지급결제대행사가 직접 처리하며, 회사는 승인 결과만 받습니다.</p>
+    <p>회사는 주민등록번호 등 고유식별정보와 민감정보를 수집하지 않습니다.</p>
+    <p>만 14세 미만 아동은 서비스를 이용할 수 없으며, 회사는 만 14세 미만 아동의 개인정보를 수집하지 않습니다.</p>
+
+    <h2>2. 이용 목적</h2>
+    <ul>
+      <li>식당에 전화하여 예약을 요청하고 그 결과를 전달하는 서비스의 제공</li>
+      <li>요금 결제와 환불, 패스 잔여 횟수 관리</li>
+      <li>문의 응대, 분쟁 처리, 부정 이용 방지</li>
+      <li>식당 이용 안내 정보의 축적 — 이 목적으로는 개인을 식별할 수 있는 정보를 사용하지 않습니다</li>
+    </ul>
+
+    <h2>3. 보유 및 이용 기간</h2>
+    <p>회사는 아래 기간이 지나면 지체 없이 파기합니다. 다만 법령이 보존을 요구하는 경우 그 기간을 따릅니다.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>대상</th><th>기간</th><th>근거</th></tr>
+      <tr><td>계약 또는 청약철회 기록</td><td>5년</td><td>전자상거래 등에서의 소비자보호에 관한 법률</td></tr>
+      <tr><td>대금 결제 및 재화 공급 기록</td><td>5년</td><td>전자상거래 등에서의 소비자보호에 관한 법률</td></tr>
+      <tr><td>소비자 불만 또는 분쟁 처리 기록</td><td>3년</td><td>전자상거래 등에서의 소비자보호에 관한 법률</td></tr>
+      <tr><td>접속 기록</td><td>3개월</td><td>통신비밀보호법</td></tr>
+      <tr><td>문의와 답변</td><td>3년</td><td>전자상거래 등에서의 소비자보호에 관한 법률</td></tr>
+      <tr><td>계정 정보</td><td>탈퇴 요청 시까지</td><td>이용자의 동의</td></tr>
+    </table>
+    </div>
+
+    <h2>4. 제3자 제공</h2>
+    <p>회사는 예약을 성사시키기 위하여 아래와 같이 개인정보를 제공합니다. 이 제공은 서비스의 본질적인 부분이며, 동의하지 않는 경우 서비스를 이용할 수 없습니다.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>제공받는 자</th><th>제공 항목</th><th>목적</th><th>보유 기간</th></tr>
+      <tr>
+        <td>이용자가 지정한 식당</td>
+        <td>예약자명, 인원, 예약 일시, 이용자가 선택한 통화 중 결정 조건</td>
+        <td>예약의 체결과 확인</td>
+        <td>식당이 자체 기준에 따라 보유</td>
+      </tr>
+    </table>
+    </div>
+    <p>그 밖에는 법령에 근거가 있거나 수사기관이 적법한 절차에 따라 요구하는 경우를 제외하고 개인정보를 제3자에게 제공하지 않습니다.</p>
+
+    <h2>5. 처리 위탁</h2>
+    <p>회사는 서비스 운영에 필요한 범위에서 아래와 같이 개인정보 처리를 위탁합니다.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>수탁자</th><th>위탁 업무</th></tr>
+      <tr><td>나이스정보통신 주식회사</td><td>결제 처리와 환불</td></tr>
+      <tr><td>Supabase, Inc.</td><td>데이터베이스 운영, 로그인 인증</td></tr>
+      <tr><td>Vercel, Inc.</td><td>웹사이트 호스팅</td></tr>
+      <tr><td>Plus Five Five, Inc. (Resend)</td><td>결과 안내 메일 발송</td></tr>
+      <tr><td>Telegram FZ-LLC</td><td>운영자에 대한 처리 알림</td></tr>
+      <tr><td>OpenAI, L.P.</td><td>AI 음성 통화의 처리 <span class="ph">[도입 시점부터]</span></td></tr>
+    </table>
+    </div>
+
+    <h2>6. 국외 이전</h2>
+    <p>위 수탁자 중 일부는 대한민국 밖에서 개인정보를 처리합니다. 이전은 이용자가 서비스를 이용하는 시점에 네트워크를 통해 자동으로 이루어집니다.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>이전받는 자</th><th>국가</th><th>이전 항목</th><th>보유 기간</th></tr>
+      <tr>
+        <td>Supabase, Inc.<br><span class="ph">support@supabase.io</span></td>
+        <td>미국<br>(데이터는 대한민국 서울 리전에 저장)</td>
+        <td>제1항의 모든 항목</td>
+        <td>제3항의 기간</td>
+      </tr>
+      <tr>
+        <td>Vercel, Inc.<br><span class="ph">privacy@vercel.com</span></td>
+        <td>미국</td>
+        <td>접속 일시, IP 주소, 브라우저·기기 정보</td>
+        <td>최대 30일</td>
+      </tr>
+      <tr>
+        <td>Plus Five Five, Inc. (Resend)<br><span class="ph">support@resend.com</span></td>
+        <td>미국</td>
+        <td>이메일 주소, 메일 본문(예약자명, 식당, 일시, 인원 포함)</td>
+        <td>발송 후 최대 30일</td>
+      </tr>
+      <tr>
+        <td>Telegram FZ-LLC<br><span class="ph">dpo@telegram.org</span></td>
+        <td>아랍에미리트</td>
+        <td>식당명, 일시, 인원, 조회 코드, 문의 코드 — <b>예약자명과 문의 내용은 보내지 않습니다</b></td>
+        <td>운영자 확인 후 삭제</td>
+      </tr>
+      <tr>
+        <td>OpenAI, L.P.<br><span class="ph">privacy@openai.com</span></td>
+        <td>미국</td>
+        <td>통화에 필요한 예약 정보(예약자명, 식당, 일시, 인원)</td>
+        <td>통화 처리 기간</td>
+      </tr>
+    </table>
+    </div>
+    <p>이용자는 국외 이전을 거부할 수 있습니다. 다만 위 처리는 서비스 제공에 필수적이므로, 거부하는 경우 서비스를 이용할 수 없습니다. 거부 의사는 아래 연락처로 알려 주시기 바랍니다.</p>
+
+    <h2>7. 통화에 관한 사항</h2>
+    <p>회사는 식당과 통화할 때 이용자의 이름, 인원, 일시를 말합니다. 통화 내용 중 예약에 필요한 사항은 요약하여 기록하며, 이용자에게 전달하고 분쟁이 발생했을 때 확인하는 데 사용합니다.</p>
+
+    <h2>7-2. 문의 게시판</h2>
+    <p>문의 게시판에 남기신 글은 공개되지 않습니다. 글을 쓴 분에게 발급된 문의 코드를 아는 사람과 운영자만 볼 수 있으며, 목록이나 검색으로 노출되지 않습니다. 답변은 등록하신 이메일 주소로도 보내 드립니다.</p>
+
+    <h2>8. 파기</h2>
+    <p>보유 기간이 지나거나 처리 목적이 끝난 개인정보는 지체 없이 파기합니다. 전자적 파일은 복구할 수 없는 방법으로 삭제하고, 출력물이 있는 경우 분쇄하거나 소각합니다.</p>
+
+    <h2>9. 이용자의 권리</h2>
+    <ol>
+      <li>이용자는 언제든지 자신의 개인정보에 대하여 열람, 정정, 삭제, 처리정지를 요구할 수 있습니다.</li>
+      <li>요구는 아래 연락처로 하실 수 있으며, 회사는 10일 이내에 조치하고 그 결과를 알려 드립니다.</li>
+      <li>법정대리인이나 위임받은 자를 통하여도 요구할 수 있습니다.</li>
+      <li>다만 제3항의 법령상 보존 의무가 있는 정보는 그 기간 동안 삭제할 수 없습니다.</li>
+    </ol>
+
+    <h2>10. 쿠키와 브라우저 저장소</h2>
+    <p>회사는 다음 목적으로 쿠키와 브라우저 저장소를 사용합니다.</p>
+    <ul>
+      <li>로그인 상태의 유지</li>
+      <li>선택한 언어의 기억</li>
+      <li>이 기기에서 보낸 요청의 조회 코드 보관 — 이 정보는 이용자의 브라우저에만 저장되며 회사에 전송되지 않습니다</li>
+    </ul>
+    <p>이용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다. 다만 거부하는 경우 로그인과 조회 코드 보관 기능을 이용할 수 없습니다. 회사는 광고 목적의 추적이나 제3자 분석 도구를 사용하지 않습니다.</p>
+
+    <h2>11. 안전성 확보 조치</h2>
+    <ul>
+      <li>개인정보에 접근할 수 있는 인원을 최소한으로 제한하고, 접근 권한을 구분하여 부여합니다</li>
+      <li>모든 통신 구간을 HTTPS로 암호화합니다</li>
+      <li>데이터베이스에 행 단위 접근 제어를 적용하여, 권한 없는 조회를 차단합니다</li>
+      <li>운영자 기능은 인증된 관리자만 사용할 수 있도록 서버에서 검증합니다</li>
+      <li>접속 기록을 보관하고 정기적으로 점검합니다</li>
+    </ul>
+
+    <h2>12. 개인정보 보호책임자</h2>
+    <div class="wrap">
+    <table class="tbl kv">
+      <tr><th>보호책임자</th><td>김민규 (대표)</td></tr>
+      <tr><th>연락처</th><td><span class="ph">[문의 이메일]</span></td></tr>
+    </table>
+    </div>
+    <p>개인정보와 관련한 문의, 불만, 피해 구제는 위 연락처로 하실 수 있으며, 회사는 지체 없이 답변합니다.</p>
+
+    <h2>13. 권익침해 구제 방법</h2>
+    <p>개인정보 침해로 상담이나 피해 구제가 필요한 경우 아래 기관에 문의하실 수 있습니다.</p>
+    <ul>
+      <li>개인정보 분쟁조정위원회 — 1833-6972 (www.kopico.go.kr)</li>
+      <li>개인정보 침해신고센터 — 118 (privacy.kisa.or.kr)</li>
+      <li>대검찰청 사이버수사과 — 1301 (www.spo.go.kr)</li>
+      <li>경찰청 사이버수사국 — 182 (ecrm.police.go.kr)</li>
+    </ul>
+
+    <h2>14. 방침의 변경</h2>
+    <p>이 방침을 변경하는 경우 적용일 7일 전부터 서비스 화면에 공지합니다. 이용자에게 불리한 변경은 적용일 30일 전부터 공지합니다.</p>
+
+    <div class="wrap">
+    <table class="tbl kv">
+      <tr><th>상호</th><td>타모 (TAMO)</td></tr>
+      <tr><th>대표자</th><td>김민규</td></tr>
+      <tr><th>사업장 소재지</th><td><span class="ph">[사업장 주소]</span></td></tr>
+      <tr><th>사업자등록번호</th><td><span class="ph">[사업자등록번호]</span></td></tr>
+      <tr><th>문의</th><td><span class="ph">[문의 이메일]</span></td></tr>
+    </table>
+    </div>
+  </section>
+
+  <!-- ====================== English ====================== -->
+  <section id="en" hidden>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective <span class="ph">[effective date]</span> · Last revised <span class="ph">[revision date]</span></p>
+
+    <div class="note">
+      TAMO collects only what it needs to run TamoCall.
+      This policy sets out what we take, why, where it goes and how long we keep it.
+      The Korean version is the governing text; if a translation differs in meaning, the Korean version prevails.
+    </div>
+
+    <h2>1. What we collect</h2>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>Category</th><th>Data</th><th>When</th></tr>
+      <tr>
+        <td>Reservation request</td>
+        <td>Name for the booking (Latin script), email address, restaurant (name or map link), up to three preferred date-and-time choices, party size, the conditions you allow us to decide on the call, your language</td>
+        <td>When you submit a request (required)</td>
+      </tr>
+      <tr>
+        <td>Account</td>
+        <td>Google or Apple account identifier, email address, profile name</td>
+        <td>When you sign in (optional)</td>
+      </tr>
+      <tr>
+        <td>Payment</td>
+        <td>Authorisation number, amount, timestamp, payment method type</td>
+        <td>At payment (required)</td>
+      </tr>
+      <tr>
+        <td>Processing record</td>
+        <td>Call outcome, confirmation or hold details, cancellation and change history, lookup code</td>
+        <td>Generated as we work</td>
+      </tr>
+      <tr>
+        <td>Enquiry</td>
+        <td>Email address, subject, message, related booking lookup code (if given)</td>
+        <td>When you send an enquiry (required)</td>
+      </tr>
+      <tr>
+        <td>Access data</td>
+        <td>Access time, IP address, browser and device information</td>
+        <td>Generated automatically</td>
+      </tr>
+    </table>
+    </div>
+    <p><b>We never collect or store card numbers, expiry dates or passwords.</b> Card details go directly to the payment gateway; we receive only the authorisation result.</p>
+    <p>We do not collect national identification numbers or sensitive data.</p>
+    <p>Children under 14 may not use the Service, and we do not collect their personal data.</p>
+
+    <h2>2. Why we use it</h2>
+    <ul>
+      <li>To call the restaurant, request your reservation and report the outcome</li>
+      <li>To take payment, issue refunds and track remaining Pass Requests</li>
+      <li>To answer enquiries, resolve disputes and prevent misuse</li>
+      <li>To build up guidance about how each restaurant works — no personally identifiable data is used for this</li>
+    </ul>
+
+    <h2>3. How long we keep it</h2>
+    <p>We delete data without delay once the periods below have passed, except where the law requires us to keep it longer.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>Data</th><th>Period</th><th>Basis</th></tr>
+      <tr><td>Contract and withdrawal records</td><td>5 years</td><td>Act on Consumer Protection in Electronic Commerce</td></tr>
+      <tr><td>Payment and supply records</td><td>5 years</td><td>Act on Consumer Protection in Electronic Commerce</td></tr>
+      <tr><td>Complaint and dispute records</td><td>3 years</td><td>Act on Consumer Protection in Electronic Commerce</td></tr>
+      <tr><td>Access logs</td><td>3 months</td><td>Protection of Communications Secrets Act</td></tr>
+      <tr><td>Enquiries and replies</td><td>3 years</td><td>Act on Consumer Protection in Electronic Commerce</td></tr>
+      <tr><td>Account data</td><td>Until you ask us to delete it</td><td>Your consent</td></tr>
+    </table>
+    </div>
+
+    <h2>4. Sharing with third parties</h2>
+    <p>To secure your reservation we share the following. This is essential to the Service; if you do not agree, you cannot use it.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>Recipient</th><th>Data</th><th>Purpose</th><th>Retention</th></tr>
+      <tr>
+        <td>The restaurant you chose</td>
+        <td>Name for the booking, party size, date and time, the conditions you allowed</td>
+        <td>Making and confirming the reservation</td>
+        <td>As the restaurant determines</td>
+      </tr>
+    </table>
+    </div>
+    <p>We share nothing else, except where the law requires it or an investigative authority makes a lawful request.</p>
+
+    <h2>5. Processors</h2>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>Processor</th><th>Work</th></tr>
+      <tr><td>NICE Information &amp; Telecommunication, Inc.</td><td>Payments and refunds</td></tr>
+      <tr><td>Supabase, Inc.</td><td>Database and sign-in</td></tr>
+      <tr><td>Vercel, Inc.</td><td>Website hosting</td></tr>
+      <tr><td>Plus Five Five, Inc. (Resend)</td><td>Sending result emails</td></tr>
+      <tr><td>Telegram FZ-LLC</td><td>Operator notifications</td></tr>
+      <tr><td>OpenAI, L.P.</td><td>AI voice calls <span class="ph">[from launch]</span></td></tr>
+    </table>
+    </div>
+
+    <h2>6. Transfers outside Korea</h2>
+    <p>Some processors handle data outside Korea. Transfer happens automatically over the network as you use the Service.</p>
+    <div class="wrap">
+    <table class="tbl">
+      <tr><th>Recipient</th><th>Country</th><th>Data</th><th>Retention</th></tr>
+      <tr>
+        <td>Supabase, Inc.<br><span class="ph">support@supabase.io</span></td>
+        <td>United States<br>(stored in the Seoul region, Korea)</td>
+        <td>Everything in section 1</td>
+        <td>As in section 3</td>
+      </tr>
+      <tr>
+        <td>Vercel, Inc.<br><span class="ph">privacy@vercel.com</span></td>
+        <td>United States</td>
+        <td>Access time, IP address, browser and device information</td>
+        <td>Up to 30 days</td>
+      </tr>
+      <tr>
+        <td>Plus Five Five, Inc. (Resend)<br><span class="ph">support@resend.com</span></td>
+        <td>United States</td>
+        <td>Email address and message content (name, restaurant, date, party size)</td>
+        <td>Up to 30 days after sending</td>
+      </tr>
+      <tr>
+        <td>Telegram FZ-LLC<br><span class="ph">dpo@telegram.org</span></td>
+        <td>United Arab Emirates</td>
+        <td>Restaurant, date and time, party size, lookup code, enquiry code — <b>never your name or the text of your enquiry</b></td>
+        <td>Deleted once the operator has seen it</td>
+      </tr>
+      <tr>
+        <td>OpenAI, L.P.<br><span class="ph">privacy@openai.com</span></td>
+        <td>United States</td>
+        <td>Reservation details needed for the call (name, restaurant, date, party size)</td>
+        <td>For the duration of the call</td>
+      </tr>
+    </table>
+    </div>
+    <p>You may refuse transfer outside Korea. Because these transfers are essential to the Service, refusing means you cannot use it. Tell us at the contact address below.</p>
+
+    <h2>7. About the calls</h2>
+    <p>When we call a restaurant we say your name, party size, date and time. We record a summary of what matters to the reservation, so that we can report it to you and check it if a dispute arises.</p>
+
+    <h2>7-2. The enquiry board</h2>
+    <p>What you write on the enquiry board is not public. Only someone holding the enquiry code issued to you, and our operator, can read it; it never appears in a list or in search. We also send our reply to the email address you gave.</p>
+
+    <h2>8. Deletion</h2>
+    <p>Once the retention period ends or the purpose is served, we delete the data without delay. Electronic files are deleted so that they cannot be recovered; anything printed is shredded or incinerated.</p>
+
+    <h2>9. Your rights</h2>
+    <ol>
+      <li>You may ask at any time to see, correct or delete your personal data, or to stop us processing it.</li>
+      <li>Write to the address below. We act within 10 days and tell you the outcome.</li>
+      <li>A legal representative or an authorised person may make the request for you.</li>
+      <li>We cannot delete data we are required by law to keep, for the periods in section 3.</li>
+    </ol>
+
+    <h2>10. Cookies and browser storage</h2>
+    <p>We use cookies and browser storage to:</p>
+    <ul>
+      <li>keep you signed in;</li>
+      <li>remember the language you chose;</li>
+      <li>keep the lookup codes of requests sent from this device — this stays in your browser and is never sent to us.</li>
+    </ul>
+    <p>You can refuse cookies in your browser settings, but sign-in and saved lookup codes will then not work. We use no advertising trackers and no third-party analytics.</p>
+
+    <h2>11. Security</h2>
+    <ul>
+      <li>Access to personal data is limited to the minimum number of people, with separated permissions</li>
+      <li>All traffic is encrypted with HTTPS</li>
+      <li>Row-level access control in the database blocks unauthorised reads</li>
+      <li>Operator functions are verified on the server and available only to authenticated administrators</li>
+      <li>Access logs are retained and reviewed regularly</li>
+    </ul>
+
+    <h2>12. Data protection officer</h2>
+    <div class="wrap">
+    <table class="tbl kv">
+      <tr><th>Officer</th><td>Kim Mingyu (Representative)</td></tr>
+      <tr><th>Contact</th><td><span class="ph">[contact email]</span></td></tr>
+    </table>
+    </div>
+
+    <h2>13. Where else to complain</h2>
+    <ul>
+      <li>Personal Information Dispute Mediation Committee — +82-1833-6972 (www.kopico.go.kr)</li>
+      <li>Privacy Infringement Report Centre — 118 (privacy.kisa.or.kr)</li>
+      <li>Supreme Prosecutors' Office, Cyber Investigation — 1301 (www.spo.go.kr)</li>
+      <li>National Police Agency, Cyber Bureau — 182 (ecrm.police.go.kr)</li>
+    </ul>
+
+    <h2>14. Changes to this policy</h2>
+    <p>We announce changes on the Service at least 7 days before they take effect, or 30 days where the change is unfavourable to users.</p>
+
+    <div class="wrap">
+    <table class="tbl kv">
+      <tr><th>Business name</th><td>TAMO</td></tr>
+      <tr><th>Representative</th><td>Kim Mingyu</td></tr>
+      <tr><th>Address</th><td><span class="ph">[business address]</span></td></tr>
+      <tr><th>Business registration no.</th><td><span class="ph">[registration number]</span></td></tr>
+      <tr><th>Contact</th><td><span class="ph">[contact email]</span></td></tr>
+    </table>
+    </div>
+  </section>
+
+  <footer>
+    <a href="/">TamoCall</a> · <a href="/terms.html">이용약관 / Terms of Service</a> · <a href="contact.html">문의하기 / Contact</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var btns = document.querySelectorAll(".langs button");
+  var secs = { ko: document.getElementById("ko"), en: document.getElementById("en") };
+  function pick(lang) {
+    for (var k in secs) { secs[k].hidden = (k !== lang); }
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-lang") === lang ? "true" : "false");
+    }
+    document.documentElement.lang = lang;
+    try { localStorage.setItem("tc-legal-lang", lang); } catch (e) {}
+  }
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener("click", function () { pick(this.getAttribute("data-lang")); });
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("tc-legal-lang"); } catch (e) {}
+  if (!saved) { saved = (navigator.language || "").slice(0, 2) === "ko" ? "ko" : "en"; }
+  pick(saved === "ko" ? "ko" : "en");
+})();
+</script>
+</body>
+</html>

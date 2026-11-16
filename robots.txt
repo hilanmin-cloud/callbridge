@@ -1,7 +1,11 @@
 User-agent: *
 Allow: /
 Allow: /intake.html
+Allow: /terms.html
+Allow: /privacy.html
+Allow: /contact.html
 Disallow: /result.html
+Disallow: /inbox.html
 Disallow: /console.html
 Disallow: /loader.html
 

@@ -169,6 +169,8 @@
   .note .chk::after { content: ""; width: 4px; height: 7px; border: solid #fff;
     border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-.5px,-1px); }
 
+  .legal { margin-top: 12px; font-size: 12.5px; line-height: 1.7; color: var(--muted); text-align: center; }
+  .legal a { color: var(--teal); }
   .agree { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); cursor: pointer; }
   .agree input { width: 19px; height: 19px; min-height: 19px; margin-top: 2px; flex: 0 0 auto; accent-color: var(--teal); }
 
@@ -393,6 +395,9 @@
       <button type="button" class="pay" id="pay" disabled data-t="submitBtn"></button>
 
       <div class="note"><span class="chk"></span><span data-t="refundShort"></span></div>
+      <div class="legal"><span data-t="agreeTerms"></span>
+        <a href="terms.html" data-t="tosLink"></a> · <a href="privacy.html" data-t="privLink"></a>
+        · <a href="contact.html" data-t="contactLink"></a></div>
     </div>
   </aside>
 
@@ -468,6 +473,10 @@
       totalK: "合計",
       unfilled: "未入力",
       refundShort: "予約が取れなければ料金はいただきません",
+      tosLink: "利用規約",
+      contactLink: "お問い合わせ",
+      privLink: "プライバシーポリシー",
+      agreeTerms: "送信すると、以下に同意したものとみなされます:",
       testBanner: "テストモード — このリクエストはテストとして記録されます",
       myReqTitle: "マイリクエスト",
       label: "日本語",
@@ -575,6 +584,10 @@
       totalK: "合計",
       unfilled: "未填寫",
       refundShort: "訂不到就不收費",
+      tosLink: "服務條款",
+      contactLink: "聯絡我們",
+      privLink: "隱私權政策",
+      agreeTerms: "送出即表示您同意:",
       testBanner: "測試模式 — 此委託將被記錄為測試",
       myReqTitle: "我的委託",
       label: "繁體中文",
@@ -682,6 +695,10 @@
       totalK: "合计",
       unfilled: "未填写",
       refundShort: "订不到就不收费",
+      tosLink: "服务条款",
+      contactLink: "联系我们",
+      privLink: "隐私政策",
+      agreeTerms: "提交即表示您同意:",
       testBanner: "测试模式 — 此委托将被记录为测试",
       myReqTitle: "我的委托",
       label: "简体中文",
@@ -789,6 +806,10 @@
       totalK: "Total",
       unfilled: "Not set",
       refundShort: "No table, no charge",
+      tosLink: "Terms",
+      contactLink: "Contact",
+      privLink: "Privacy",
+      agreeTerms: "By submitting you agree to our",
       testBanner: "Test mode — this request is recorded as a test",
       myReqTitle: "My requests",
       label: "English",
@@ -896,6 +917,10 @@
       totalK: "합계",
       unfilled: "미입력",
       refundShort: "예약이 안 되면 요금을 받지 않습니다",
+      tosLink: "이용약관",
+      contactLink: "문의하기",
+      privLink: "개인정보처리방침",
+      agreeTerms: "요청을 보내면 다음에 동의한 것으로 봅니다:",
       testBanner: "테스트 모드 — 이 요청은 테스트로 기록됩니다",
       myReqTitle: "내 요청",
       label: "한국어",
@@ -1568,7 +1593,7 @@
             method: "POST",
             headers: { "Content-Type": "application/json", "apikey": cfg.key },
             body: JSON.stringify({ code: ids.code, venue: d.request.venue_name_raw,
-                                   party: d.request.party_size, name: d.request.booking_name, lang: lang }),
+                                   party: d.request.party_size, lang: lang }),
             keepalive: true
           }).catch(function () {});
           fetch(cfg.url + "/rest/v1/visits", {

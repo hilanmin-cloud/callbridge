@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>문의함｜TamoCall 운영</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F5E5C">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    color-scheme: light only;
+    --teal: #0F5E5C; --teal-d: #0A4443;
+    --coral: #F0603F; --coral-d: #D4482A;
+    --ink: #1A2422; --muted: #6B7A77; --line: #E6E2DD;
+    --mist: #F3F7F6; --bg: #FFFBF8; --card: #FFFFFF;
+    --warm: #FFF6E8; --warmink: #5C4410;
+    --bad: #B23B2E; --ok: #0D534F;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 64px; }
+
+  header { padding: 18px 0 12px; display: flex; flex-wrap: wrap; gap: 12px;
+    align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+  .brand { font-size: 17px; font-weight: 800; color: var(--teal);
+    display: inline-flex; align-items: center; gap: 9px; text-decoration: none; }
+  .brand::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: var(--coral); }
+  .who { font-size: 13px; color: var(--muted); }
+  .hlinks { display: flex; gap: 10px; font-size: 13.5px; }
+  .hlinks a { color: var(--teal); }
+
+  .gate { max-width: 420px; margin: 70px auto; text-align: center; }
+  .gate p { color: var(--muted); }
+  button { font-family: inherit; cursor: pointer; }
+  .btn { min-height: 46px; padding: 0 20px; border-radius: 10px; border: 0;
+    background: var(--teal); color: #fff; font-size: 15px; font-weight: 700; }
+  .btn:hover { background: var(--teal-d); }
+  .btn.coral { background: var(--coral); } .btn.coral:hover { background: var(--coral-d); }
+  .btn:disabled { background: #D8D3CD; cursor: default; }
+  .btn.ghost { background: var(--card); color: var(--muted); border: 1px solid var(--line); font-weight: 600; }
+
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 14px; }
+  .bar .sp { flex: 1; }
+  .filters { display: flex; gap: 6px; }
+  .filters button { min-height: 38px; padding: 0 14px; border-radius: 9px; font-size: 14px;
+    font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--muted); }
+  .filters button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .count { font-size: 13.5px; color: var(--muted); }
+
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+    padding: 15px 16px; margin: 0 0 12px; }
+  .item.new { border-color: #E8C98A; background: #FFFDF8; }
+  .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .pill { display: inline-flex; align-items: center; min-height: 23px; padding: 0 9px;
+    border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .pill.new { background: var(--warm); color: var(--warmink); }
+  .pill.ans { background: #E3F1EE; color: var(--ok); }
+  .pill.cls { background: var(--mist); color: var(--muted); }
+  .pill.lang { background: var(--mist); color: var(--muted); font-weight: 600; }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size: 13.5px; font-weight: 700; color: var(--teal); }
+  .when { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+  .subj { font-size: 16px; font-weight: 700; margin: 0 0 6px; word-break: break-word; }
+  .body { white-space: pre-wrap; word-break: break-word; background: var(--mist);
+    border-radius: 10px; padding: 12px 13px; margin: 0 0 10px; }
+  .meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .meta a { color: var(--teal); }
+  .ans { background: #EAF4F2; border: 1px solid #CFE4E0; border-radius: 10px;
+    padding: 12px 13px; white-space: pre-wrap; word-break: break-word; margin: 0 0 10px; }
+  textarea { width: 100%; font-family: inherit; font-size: 15px; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px;
+    min-height: 110px; resize: vertical; line-height: 1.6; background: #fff; }
+  textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .msg { font-size: 13.5px; color: var(--muted); }
+  .msg.bad { color: var(--bad); }
+  .msg.good { color: var(--ok); }
+  .empty { text-align: center; color: var(--muted); padding: 50px 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="brand" href="/">TamoCall 문의함</a>
+    <div class="hlinks">
+      <a href="console.html">운영자 화면</a>
+      <a href="survey.html">식당 조사</a>
+    </div>
+    <span class="who" id="who"></span>
+  </header>
+
+  <div class="gate" id="gate">
+    <p id="gateMsg">운영자 로그인이 필요합니다.</p>
+    <button class="btn" id="signIn">구글로 로그인</button>
+  </div>
+
+  <main id="main" hidden>
+    <div class="bar">
+      <div class="filters">
+        <button type="button" id="fAll" aria-pressed="true">전체</button>
+        <button type="button" id="fNew" aria-pressed="false">답변 대기</button>
+      </div>
+      <span class="count" id="count"></span>
+      <span class="sp"></span>
+      <button type="button" class="btn ghost" id="reload">새로고침</button>
+    </div>
+    <div id="list"></div>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var cfg = {
+    url: "https://knxggqpdsosmequgdawb.supabase.co",
+    key: "sb_publishable_zL_2WbMVSpIFTpIuGMMEAA_53Cp38OW"
+  };
+
+  var sb = null, me = null, authToken = null;
+  var onlyNew = false, rows = [];
+
+  function rpc(fn, args) {
+    return fetch(cfg.url + "/rest/v1/rpc/" + fn, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": cfg.key,
+                 "Authorization": "Bearer " + (authToken || cfg.key) },
+      body: JSON.stringify(args || {})
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {}
+        if (!r.ok) throw new Error((d && d.message) || ("HTTP " + r.status));
+        return d;
+      });
+    });
+  }
+
+  function showGate(msg) {
+    $("gate").hidden = false;
+    $("main").hidden = true;
+    if (msg) $("gateMsg").textContent = msg;
+  }
+  function showMain() {
+    $("gate").hidden = true;
+    $("main").hidden = false;
+  }
+
+  function fmt(iso) {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleString("ko-KR",
+        { timeZone: "Asia/Seoul", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit" });
+    } catch (e) { return String(iso).slice(0, 16).replace("T", " "); }
+  }
+  var LANGNAME = { ja: "일본어", "zh-TW": "번체", "zh-CN": "간체", en: "영어", ko: "한국어" };
+
+  /* ---------- 목록 ---------- */
+  function load() {
+    $("list").innerHTML = '<div class="empty">불러오는 중…</div>';
+    rpc("inquiry_list", { p_only_new: onlyNew })
+      .then(function (d) {
+        rows = d || [];
+        draw();
+      })
+      .catch(function (e) {
+        $("list").innerHTML = '<div class="empty">불러오지 못했습니다: ' + e.message + "</div>";
+      });
+  }
+
+  function draw() {
+    var box = $("list");
+    box.innerHTML = "";
+    var waiting = rows.filter(function (r) { return r.status === "new"; }).length;
+    $("count").textContent = rows.length + "건" + (waiting ? " · 답변 대기 " + waiting + "건" : "");
+    if (!rows.length) {
+      box.innerHTML = '<div class="empty">' + (onlyNew ? "답변을 기다리는 문의가 없습니다." : "문의가 없습니다.") + "</div>";
+      return;
+    }
+    rows.forEach(function (q) { box.appendChild(card(q)); });
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function card(q) {
+    var d = el("div", "item" + (q.status === "new" ? " new" : ""));
+
+    var top = el("div", "top");
+    var st = el("span", "pill " + (q.status === "new" ? "new" : q.status === "closed" ? "cls" : "ans"),
+      q.status === "new" ? "답변 대기" : q.status === "closed" ? "종료" : "답변 완료");
+    top.appendChild(st);
+    top.appendChild(el("span", "pill lang", LANGNAME[q.lang] || q.lang || "-"));
+    top.appendChild(el("span", "code", q.inquiry_code));
+    top.appendChild(el("span", "when", fmt(q.created_at)));
+    d.appendChild(top);
+
+    d.appendChild(el("p", "subj", q.subject));
+    d.appendChild(el("div", "body", q.body));
+
+    var meta = el("div", "meta");
+    var mail = el("a", null, q.email);
+    mail.href = "mailto:" + q.email;
+    meta.appendChild(mail);
+    if (q.lookup_code) {
+      var lk = el("a", null, "예약 " + q.lookup_code);
+      lk.href = "result.html#" + q.lookup_code;
+      lk.target = "_blank"; lk.rel = "noopener";
+      meta.appendChild(lk);
+    }
+    d.appendChild(meta);
+
+    if (q.reply) {
+      d.appendChild(el("div", "ans", q.reply));
+      d.appendChild(el("div", "msg", "답변 " + fmt(q.replied_at)));
+    }
+
+    if (q.status !== "closed") {
+      var ta = el("textarea");
+      ta.placeholder = q.reply ? "답변을 수정하거나 추가로 보냅니다." : "답변을 적으세요. 저장하면 고객에게 메일로도 보냅니다.";
+      if (q.reply) ta.value = q.reply;
+      d.appendChild(ta);
+
+      var acts = el("div", "acts");
+      var save = el("button", "btn coral", "답변 저장 + 메일 발송");
+      var noMail = el("button", "btn ghost", "저장만");
+      var close = el("button", "btn ghost", "종료 처리");
+      var msg = el("span", "msg");
+      acts.appendChild(save); acts.appendChild(noMail); acts.appendChild(close); acts.appendChild(msg);
+      d.appendChild(acts);
+
+      function doReply(withMail) {
+        var text = ta.value.trim();
+        if (!text) { msg.className = "msg bad"; msg.textContent = "답변을 입력하세요."; return; }
+        save.disabled = noMail.disabled = close.disabled = true;
+        msg.className = "msg"; msg.textContent = "저장 중…";
+        rpc("inquiry_reply", { p_code: q.inquiry_code, p_reply: text })
+          .then(function (res) {
+            if (!withMail) return { ok: true, mailed: false };
+            return sendMail(q, text).then(function (ok) { return { ok: true, mailed: ok }; });
+          })
+          .then(function (r) {
+            msg.className = "msg good";
+            msg.textContent = r.mailed ? "저장하고 메일을 보냈습니다." :
+              (withMail ? "저장했습니다. 메일 발송은 실패했습니다." : "저장했습니다.");
+            setTimeout(load, 900);
+          })
+          .catch(function (e) {
+            msg.className = "msg bad";
+            msg.textContent = "실패: " + e.message;
+            save.disabled = noMail.disabled = close.disabled = false;
+          });
+      }
+      save.addEventListener("click", function () { doReply(true); });
+      noMail.addEventListener("click", function () { doReply(false); });
+      close.addEventListener("click", function () {
+        if (!confirm("이 문의를 종료 처리할까요? 고객 화면에서 더 이상 답변을 받을 수 없게 표시됩니다.")) return;
+        close.disabled = true;
+        rpc("inquiry_close", { p_code: q.inquiry_code })
+          .then(function () { load(); })
+          .catch(function (e) { msg.className = "msg bad"; msg.textContent = "실패: " + e.message; close.disabled = false; });
+      });
+    }
+
+    return d;
+  }
+
+  /* ---------- 답변 메일 ---------- */
+  var MAIL = {
+    ja: { subj: "TamoCall｜お問い合わせへの回答", hi: "お問い合わせありがとうございます。", a: "回答", q: "お問い合わせ内容", foot: "このメールは送信専用です。続けてご質問がある場合は下のリンクからお願いします。", link: "お問い合わせページを開く" },
+    "zh-TW": { subj: "TamoCall｜您的詢問回覆", hi: "感謝您的來信。", a: "回覆", q: "您的詢問", foot: "此信件僅供發送。如需追問請使用下方連結。", link: "開啟詢問頁面" },
+    "zh-CN": { subj: "TamoCall｜您的咨询回复", hi: "感谢您的来信。", a: "回复", q: "您的咨询", foot: "此邮件仅供发送。如需追问请使用下方链接。", link: "打开咨询页面" },
+    en: { subj: "TamoCall — reply to your message", hi: "Thank you for writing to us.", a: "Our reply", q: "Your message", foot: "This mailbox is not monitored. To write again, use the link below.", link: "Open the contact page" },
+    ko: { subj: "TamoCall｜문의 답변", hi: "문의해 주셔서 감사합니다.", a: "답변", q: "보내신 문의", foot: "이 메일은 발신 전용입니다. 추가 문의는 아래 링크를 이용해 주세요.", link: "문의 페이지 열기" }
+  };
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function buildHtml(q, reply) {
+    var m = MAIL[q.lang] || MAIL.en;
+    var base = location.origin + "/contact.html#" + q.inquiry_code;
+    return '<div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1A2422">' +
+      '<div style="font-size:17px;font-weight:800;color:#0F5E5C;margin-bottom:18px">TamoCall</div>' +
+      '<p style="margin:0 0 16px">' + esc(m.hi) + '</p>' +
+      '<div style="background:#EAF4F2;border:1px solid #CFE4E0;border-radius:10px;padding:14px 15px;margin:0 0 16px">' +
+        '<div style="font-size:12px;font-weight:700;color:#6B7A77;margin-bottom:6px">' + esc(m.a) + '</div>' +
+        '<div style="white-space:pre-wrap">' + esc(reply) + '</div>' +
+      '</div>' +
+      '<div style="background:#F3F7F6;border-radius:10px;padding:14px 15px;margin:0 0 20px">' +
+        '<div style="font-size:12px;font-weight:700;color:#6B7A77;margin-bottom:6px">' + esc(m.q) + '</div>' +
+        '<div style="font-weight:700;margin-bottom:6px">' + esc(q.subject) + '</div>' +
+        '<div style="white-space:pre-wrap;color:#3C4B48">' + esc(q.body) + '</div>' +
+      '</div>' +
+      '<p style="margin:0 0 10px"><a href="' + esc(base) + '" style="color:#0F5E5C">' + esc(m.link) + '</a></p>' +
+      '<p style="font-size:12.5px;color:#6B7A77;margin:20px 0 0;padding-top:14px;border-top:1px solid #E6E2DD">' +
+        esc(m.foot) + '<br>TamoCall · TAMO</p>' +
+    '</div>';
+  }
+
+  function sendMail(q, reply) {
+    var m = MAIL[q.lang] || MAIL.en;
+    return fetch(cfg.url + "/functions/v1/sendmail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": cfg.key,
+                 "Authorization": "Bearer " + authToken },
+      body: JSON.stringify({ to: q.email, subject: m.subj, html: buildHtml(q, reply) })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { return !!(d && d.ok); })
+    .catch(function () { return false; });
+  }
+
+  /* ---------- 로그인 ---------- */
+  function initAuth() {
+    if (!sb && window.supabase) {
+      try { sb = window.supabase.createClient(cfg.url, cfg.key); } catch (e) { sb = null; }
+    }
+    if (!sb) { showGate("로그인 모듈을 불러오지 못했습니다."); return; }
+
+    $("signIn").addEventListener("click", function () {
+      sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: location.origin + location.pathname }
+      });
+    });
+
+    function apply(session) {
+      me = session ? session.user : null;
+      authToken = session ? session.access_token : null;
+      $("who").textContent = me ? me.email : "";
+      if (!me) { showGate("운영자 로그인이 필요합니다."); return; }
+      fetch(cfg.url + "/rest/v1/staff?select=role&user_id=eq." + me.id, {
+        headers: { "apikey": cfg.key, "Authorization": "Bearer " + authToken }
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (rs) {
+        if (!rs || !rs.length) {
+          showGate("이 계정은 운영자로 등록되어 있지 않습니다. (" + me.email + ")");
+          return;
+        }
+        showMain();
+        load();
+      })
+      .catch(function (e) { showGate("권한 확인에 실패했습니다: " + e.message); });
+    }
+
+    sb.auth.getSession().then(function (res) { apply(res.data && res.data.session); });
+    sb.auth.onAuthStateChange(function (_e, session) { apply(session); });
+  }
+
+  $("fAll").addEventListener("click", function () {
+    onlyNew = false;
+    $("fAll").setAttribute("aria-pressed", "true");
+    $("fNew").setAttribute("aria-pressed", "false");
+    load();
+  });
+  $("fNew").addEventListener("click", function () {
+    onlyNew = true;
+    $("fAll").setAttribute("aria-pressed", "false");
+    $("fNew").setAttribute("aria-pressed", "true");
+    load();
+  });
+  $("reload").addEventListener("click", load);
+
+  initAuth();
+})();
+</script>
+</body>
+</html>
