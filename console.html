@@ -143,6 +143,7 @@
 
       <div class="row" style="margin-bottom:10px">
         <button class="ghost small" id="refresh">새로고침</button>
+        <a class="ghost small" href="inbox.html" style="flex:0 1 92px; display:inline-flex;align-items:center; justify-content:center; text-decoration:none">문의함</a>
         <button class="ghost small" id="purgeTest" style="flex:0 1 110px">테스트 정리</button>
         <button class="ghost small" id="giveCredit" style="flex:0 1 110px">패스 지급</button>
         <select id="filter" style="min-height:36px">
@@ -154,7 +155,7 @@
           <option value="all">전체</option>
         </select>
       </div>
-      <div id="list"><p class="msg">연결 후 불러옵니다.</p></div>
+      <div id="list" style="max-height:min(58vh,620px); overflow-y:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:10px; padding:8px"><p class="msg">연결 후 불러옵니다.</p></div>
     </div>
 
 
@@ -406,8 +407,9 @@
     $("list").innerHTML = "<p class='msg'>불러오는 중…</p>";
     var f = $("filter").value;
     var q = "requests?select=*,request_slots(*),request_conditions(*)&order=created_at.desc&limit=30";
-    if (f === "test") q += "&service_type=eq.test";
-    else if (f !== "all") q += "&status=eq." + f + "&service_type=neq.test";
+    if (f === "test") q += "&is_test=is.true";
+    else if (f === "all") q += "&is_test=is.false";
+    else q += "&status=eq." + f + "&is_test=is.false";
     api(q).then(function (rows) {
       reqs = rows || [];
       if (!reqs.length) { $("list").innerHTML = "<p class='msg'>해당하는 요청이 없습니다.</p>"; return; }
@@ -415,7 +417,7 @@
         return "<div class='item' data-id='" + r.id + "'>" +
           "<b>" + ((r.venue_name_raw || "(식당명 없음)").split(" | ")[0] || "지도 링크만 제출") + "</b>" +
           "<span>" + r.party_size + "명 · " + (r.booking_name || "") + "</span><br>" +
-          (r.service_type === "test" ? "<span class='badge' style='background:var(--gold);color:#2E2305'>TEST</span> " : "") +
+          (r.is_test ? "<span class='badge' style='background:var(--gold);color:#2E2305'>TEST</span> " : "") +
           "<span class='badge " + r.status + "'>" + r.status + "</span> " +
           "<span>" + new Date(r.created_at).toLocaleString("ko-KR") + "</span></div>";
       }).join("");
@@ -2007,7 +2009,7 @@
     if (!connected()) return;
     if (!window.confirm("테스트로 표시된 요청을 모두 삭제합니다. 실제 고객 요청은 지워지지 않습니다.")) return;
     $("purgeTest").disabled = true;
-    api("requests?select=id&service_type=eq.test")
+    api("requests?select=id&is_test=is.true")
       .then(function (rows) {
         if (!rows || !rows.length) { alert("삭제할 테스트 건이 없습니다."); return null; }
         var ids = rows.map(function (r) { return r.id; });

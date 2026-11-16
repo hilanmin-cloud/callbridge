@@ -6,6 +6,7 @@
 <title>お問い合わせ｜TamoCall</title>
 <meta name="description" content="TamoCall contact — your message is private and visible only to you and our operator.">
 <meta name="theme-color" content="#0F5E5C">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     color-scheme: light only;
@@ -198,6 +199,8 @@
       failed: "送信できませんでした。しばらくしてからお試しください。",
       privacyNote: "回答のためメールアドレスを使用します。詳しくはプライバシーポリシーをご覧ください。",
       mineT: "この端末から送ったお問い合わせ",
+      mineAcct: "ログイン中のアカウントのお問い合わせ",
+      signedAs: "ログイン中",
       tosLink: "利用規約", privLink: "プライバシーポリシー" },
 
     "zh-TW": { label: "繁體中文",
@@ -222,6 +225,8 @@
       failed: "送出失敗，請稍後再試。",
       privacyNote: "我們會使用您的電子郵件回覆。詳情請見隱私權政策。",
       mineT: "從這台裝置送出的詢問",
+      mineAcct: "此帳號的詢問紀錄",
+      signedAs: "已登入",
       tosLink: "服務條款", privLink: "隱私權政策" },
 
     "zh-CN": { label: "简体中文",
@@ -246,6 +251,8 @@
       failed: "提交失败，请稍后再试。",
       privacyNote: "我们会使用您的邮箱回复。详情请见隐私政策。",
       mineT: "从这台设备提交的咨询",
+      mineAcct: "此账号的咨询记录",
+      signedAs: "已登录",
       tosLink: "服务条款", privLink: "隐私政策" },
 
     en: { label: "English",
@@ -270,6 +277,8 @@
       failed: "Could not send. Please try again in a moment.",
       privacyNote: "We use your email address to reply. See our Privacy Policy for details.",
       mineT: "Sent from this device",
+      mineAcct: "Inquiries on your account",
+      signedAs: "Signed in",
       tosLink: "Terms", privLink: "Privacy" },
 
     ko: { label: "한국어",
@@ -294,6 +303,8 @@
       failed: "보내지 못했습니다. 잠시 후 다시 시도해 주세요.",
       privacyNote: "답변을 위해 이메일 주소를 사용합니다. 자세한 내용은 개인정보처리방침을 확인해 주세요.",
       mineT: "이 기기에서 보낸 문의",
+      mineAcct: "로그인한 계정의 문의",
+      signedAs: "로그인됨",
       tosLink: "이용약관", privLink: "개인정보처리방침" }
   };
 
@@ -304,11 +315,11 @@
   function $(id) { return document.getElementById(id); }
   function L(k) { return (T[lang] && T[lang][k]) || (T.ja && T.ja[k]) || ""; }
 
-  function rpc(fn, args) {
+  function rpc(fn, args, token) {
     return fetch(cfg.url + "/rest/v1/rpc/" + fn, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": cfg.key,
-                 "Authorization": "Bearer " + cfg.key },
+                 "Authorization": "Bearer " + (token || cfg.key) },
       body: JSON.stringify(args || {})
     }).then(function (r) {
       return r.text().then(function (txt) {
@@ -376,20 +387,60 @@
       if (a.indexOf(code) === -1) { a.unshift(code); localStorage.setItem("tc-inq", JSON.stringify(a.slice(0, 10))); }
     } catch (e) {}
   }
+  var acctList = null, sb = null, session = null;
+
+  function openCode(c) { $("code").value = c; look(); }
+
   function drawMine() {
-    var box = $("mine"), a = myCodes();
+    var box = $("mine");
     box.innerHTML = "";
+
+    /* 로그인한 계정의 문의 — 코드를 몰라도 보인다 */
+    if (acctList && acctList.length) {
+      var h0 = document.createElement("div");
+      h0.innerHTML = "<b>" + L("mineAcct") + "</b>";
+      box.appendChild(h0);
+      acctList.forEach(function (q) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.style.display = "block";
+        b.style.textAlign = "left";
+        b.textContent = q.subject + "  ·  " +
+          (q.status === "new" ? L("stNew") : q.status === "closed" ? L("stClosed") : L("stAnswered"));
+        b.addEventListener("click", function () { openCode(q.inquiry_code); });
+        box.appendChild(b);
+      });
+    }
+
+    /* 이 기기에 남은 코드 */
+    var a = myCodes();
     if (!a.length) return;
     var h = document.createElement("div");
+    h.style.marginTop = acctList && acctList.length ? "10px" : "0";
     h.innerHTML = "<b>" + L("mineT") + "</b>";
     box.appendChild(h);
     a.forEach(function (c) {
       var b = document.createElement("button");
       b.type = "button";
       b.textContent = c;
-      b.addEventListener("click", function () { $("code").value = c; look(); });
+      b.addEventListener("click", function () { openCode(c); });
       box.appendChild(b);
     });
+  }
+
+  /* 로그인했으면 코드 없이도 자기 문의를 불러온다 */
+  function loadAccount() {
+    if (!window.supabase) return;
+    try { sb = window.supabase.createClient(cfg.url, cfg.key); } catch (e) { return; }
+    sb.auth.getSession().then(function (res) {
+      session = res.data && res.data.session;
+      if (!session) return;
+      if (!$("email").value) $("email").value = session.user.email || "";
+      return rpc("my_inquiries", {}, session.access_token).then(function (rows) {
+        acctList = rows || [];
+        drawMine();
+      });
+    }).catch(function () {});
   }
 
   /* ---------- 문의 보내기 ---------- */
@@ -413,7 +464,8 @@
 
     btn.disabled = true; btn.textContent = L("sending");
     rpc("create_inquiry", { p_email: email, p_subject: subject, p_body: body,
-                            p_lang: lang, p_lookup_code: ref || null })
+                            p_lang: lang, p_lookup_code: ref || null },
+        session ? session.access_token : null)
       .then(function (code) {
         if (!code) throw new Error("no code");
         remember(code);
@@ -527,6 +579,7 @@
 
   /* ---------- 시작 ---------- */
   applyLang();
+  loadAccount();
   var h = (location.hash || "").replace("#", "").trim().toUpperCase();
   if (h) { tab("check"); $("code").value = h; look(); } else { tab("new"); }
 })();

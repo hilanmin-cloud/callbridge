@@ -1323,6 +1323,7 @@
     var ICO_SEARCH = "<circle cx='11' cy='11' r='7'/><path d='M20 20l-3.5-3.5'/>";
     var ICO_OUT = "<path d='M15 4h4v16h-4'/><path d='M10 8l-4 4 4 4'/><path d='M6 12h9'/>";
     var ICO_IN = "<path d='M9 4H5v16h4'/><path d='M14 8l4 4-4 4'/><path d='M18 12H9'/>";
+    var ICO_ASK = "<path d='M4 5h16v11H9l-5 4z'/>";
 
     if (user) {
       var nm = (user.email || "").split("@")[0];
@@ -1333,6 +1334,7 @@
         "<div class='mineWrap' id='mineWrap'><p class='ttl'>" + t("myTitle") + "</p>" +
         "<p class='mineNone' id='mineList'>…</p></div>" +
         "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>" +
+        "<a href='contact.html'>" + icon(ICO_ASK) + t("contactLink") + "</a>" +
         "<button type='button' class='out' id='mOut'>" + icon(ICO_OUT) + t("signOut") + "</button>";
 
       if (badge) badge.hidden = passLeft <= 0;
@@ -1345,7 +1347,8 @@
       menu.innerHTML =
         "<div class='who'><b>" + t("notSigned") + "</b><span>" + t("signInHint") + "</span></div>" +
         "<button type='button' id='mIn'>" + icon(ICO_IN) + t("signIn") + "</button>" +
-        "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>";
+        "<a href='result.html'>" + icon(ICO_SEARCH) + t("checkNav") + "</a>" +
+        "<a href='contact.html'>" + icon(ICO_ASK) + t("contactLink") + "</a>";
 
       if (badge) badge.hidden = true;
 
