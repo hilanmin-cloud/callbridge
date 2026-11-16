@@ -649,7 +649,7 @@
     var n = parseInt(window.prompt("몇 건을 지급할까요?", "3"), 10);
     if (!n || n < 1) return;
 
-    fetch(cfg.url + "/rest/v1/rpc/grant_credit", {
+    fetch(cfg.url + "/rest/v1/rpc/grant_credit_staff", {
       method: "POST",
       headers: { "apikey": cfg.key, "Authorization": "Bearer " + (authToken || cfg.key),
                  "Content-Type": "application/json" },
