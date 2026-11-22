@@ -4,15 +4,15 @@
 
 방한 외국인 관광객을 위한 **식당 예약 대행 서비스**의 프런트엔드입니다.
 
-한국의 인기 식당 상당수는 온라인 예약 채널이 없고 전화로만 예약을 받습니다. 외국인 관광객은 언어 장벽 때문에 그 전화를 걸지 못하고, 한국 번호가 없어 식당의 확인 전화도 받을 수 없습니다. TamoCall는 이 연결을 대신합니다.
+한국의 인기 식당 상당수는 온라인 예약 채널이 없고 전화로만 예약을 받습니다. 외국인 관광객은 언어 장벽 때문에 그 전화를 걸지 못하고, 한국 번호가 없어 식당의 확인 전화도 받을 수 없습니다. TamoCall은 이 연결을 대신합니다.
 
-**배포 주소** → https://callbridge-kr.vercel.app
+**배포 주소** → https://tamocall.com  (이전 주소 callbridge-kr.vercel.app 은 이 주소로 연결됩니다)
 
 | 페이지 | 링크 |
 |---|---|
-| 랜딩 | https://callbridge-kr.vercel.app/ |
-| 요청 접수 | https://callbridge-kr.vercel.app/intake.html |
-| 결과 조회 | https://callbridge-kr.vercel.app/result.html |
+| 랜딩 | https://tamocall.com/ |
+| 요청 접수 | https://tamocall.com/intake.html |
+| 결과 조회 | https://tamocall.com/result.html |
 
 > 접수 폼은 실제 데이터베이스와 연결되어 동작합니다. 연결 설정이 비어 있는 상태에서는 입력 내용이 어떤 구조로 저장되는지 미리보기로 확인할 수 있습니다.
 

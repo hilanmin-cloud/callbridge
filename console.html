@@ -1632,7 +1632,7 @@
         "<p style='margin:0;font-size:17px;font-weight:700;color:#1A2422;line-height:1.65;" +
         "background:#F3F7F6;border-radius:9px;padding:14px'>" + esc(d.koText) + "</p></div>" : "";
 
-    var url = "https://callbridge-kr.vercel.app/result.html#" + encodeURIComponent(d.code || "");
+    var url = "https://tamocall.com/result.html#" + encodeURIComponent(d.code || "");
 
     return "<!doctype html><html><body style='margin:0;padding:0;background:#FFFBF8'>" +
       "<table width='100%' cellpadding='0' cellspacing='0' style='background:#FFFBF8;padding:28px 14px'>" +
@@ -1997,7 +1997,7 @@
   $("saveResult").addEventListener("click", saveResult);
   $("copyLink").addEventListener("click", function () {
     if (!cur) return;
-    var base = "https://callbridge-kr.vercel.app/result.html";
+    var base = "https://tamocall.com/result.html";
     var link = base + "#" + (cur.lookup_code || cur.id.slice(0, 8));
     if (navigator.clipboard) navigator.clipboard.writeText(link);
     $("saveMsg").textContent = "링크 복사됨 — " + link;

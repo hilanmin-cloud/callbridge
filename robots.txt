@@ -9,4 +9,4 @@ Disallow: /inbox.html
 Disallow: /console.html
 Disallow: /loader.html
 
-Sitemap: https://callbridge-kr.vercel.app/sitemap.xml
+Sitemap: https://tamocall.com/sitemap.xml
