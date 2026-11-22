@@ -415,7 +415,7 @@
       if (!reqs.length) { $("list").innerHTML = "<p class='msg'>해당하는 요청이 없습니다.</p>"; return; }
       $("list").innerHTML = reqs.map(function (r) {
         return "<div class='item' data-id='" + r.id + "'>" +
-          "<b>" + ((r.venue_name_raw || "(식당명 없음)").split(" | ")[0] || "지도 링크만 제출") + "</b>" +
+          "<b>" + (function (v) { return esc(v.name || (v.phone ? "☎ " + v.phone : "") || "지도 링크만 제출"); })(vparts(r.venue_name_raw)) + "</b>" +
           "<span>" + r.party_size + "명 · " + (r.booking_name || "") + "</span><br>" +
           (r.is_test ? "<span class='badge' style='background:var(--gold);color:#2E2305'>TEST</span> " : "") +
           "<span class='badge " + r.status + "'>" + r.status + "</span> " +
@@ -442,13 +442,21 @@
     if (c.course_only) allow.push("코스 가능");
     if (c.late_arrival) allow.push("지연 고지");
 
-    var rawv = cur.venue_name_raw || "";
-    var parts = rawv.split(" | ");
-    var vname = parts[0] || "-";
-    var vlink = parts[1] || "";
+    var vp = vparts(cur.venue_name_raw);
+    var vname = vp.name || "-";
+    var vlink = vp.link;
+    var vphone = vp.phone;
+    /* 외국어 이름은 구글 지도가, 전화번호는 네이버 지도가 잘 찾는다 */
+    var findQ = vphone || vp.name.replace(/^\[TEST\]\s*/, "");
+    var findBtns = findQ
+      ? "<a href='https://map.naver.com/p/search/" + encodeURIComponent(findQ) + "' target='_blank' rel='noopener' style='color:var(--teal)'>네이버 지도 ↗</a>" +
+        " · <a href='https://www.google.com/maps/search/" + encodeURIComponent(vp.name.replace(/^\[TEST\]\s*/, "") || findQ) + "' target='_blank' rel='noopener' style='color:var(--teal)'>구글 지도 ↗</a>"
+      : "";
 
     $("reqinfo").innerHTML =
-      "<div class='kv'><b>식당</b><span>" + vname + "</span></div>" +
+      "<div class='kv'><b>식당</b><span>" + esc(vname) + "</span></div>" +
+      (vphone ? "<div class='kv'><b>식당 전화</b><span><a href='tel:" + vphone.replace(/-/g, "") + "' style='color:var(--teal)'>" + esc(vphone) + "</a> (고객 입력)</span></div>" : "") +
+      (findBtns ? "<div class='kv'><b>지도에서 찾기</b><span>" + findBtns + "</span></div>" : "") +
       (vlink ? "<div class='kv'><b>지도 링크</b><span><a href='" + vlink +
         "' target='_blank' rel='noopener' style='color:var(--teal)'>지도에서 열기 ↗</a></span></div>" : "") +
       "<div class='kv'><b>인원·예약자</b><span>" + cur.party_size + "명 · " + (cur.booking_name || "-") + "</span></div>" +
@@ -497,7 +505,7 @@
   function buildCancelScript() {
     if (!cur) return "";
     var L = [], slots = slotList(), s0 = slots[0];
-    var vname = (cur.venue_name_raw || "").split(" | ")[0] || "(식당명 없음)";
+    var vname = vparts(cur.venue_name_raw).name || "(식당명 없음)";
 
     L.push("## 역할");
     L.push("손님을 대신해 이미 잡아둔 예약을 취소한다고 전하는 AI 비서입니다.");
@@ -506,6 +514,7 @@
     L.push("## 취소할 예약");
     L.push("- 식당: " + vname);
     if (matchedVenue && matchedVenue.phone) L.push("- 전화번호: " + matchedVenue.phone);
+    else if (vparts(cur.venue_name_raw).phone) L.push("- 전화번호: " + vparts(cur.venue_name_raw).phone + " (고객 입력)");
     L.push("- 일시: " + (s0 ? dateKo(s0.date) + " " + speak(s0.min) : "(확인 필요)"));
     L.push("- 인원: " + cur.party_size + "명");
     L.push("- 예약자명: " + (cur.booking_name || "(미입력)"));
@@ -918,8 +927,8 @@
     if (!cur) return "요청을 선택하면 생성됩니다.";
     var slots = slotList();
     var c = conds();
-    var vname = (cur.venue_name_raw || "").split(" | ")[0];
-    var vlink = (cur.venue_name_raw || "").split(" | ")[1] || "";
+    var vp = vparts(cur.venue_name_raw);
+    var vname = vp.name, vlink = vp.link;
     var L = [];
 
     L.push("# 통화 지시문");
@@ -939,6 +948,7 @@
     L.push("## 예약 정보 (이미 손님에게서 받은 것 — 상대에게 되묻지 마세요)");
     L.push("- 식당: " + (matchedVenue ? matchedVenue.name : vname));
     if (matchedVenue && matchedVenue.phone) L.push("- 전화번호: " + matchedVenue.phone);
+    else if (vp.phone) L.push("- 전화번호: " + vp.phone + " (고객 입력)");
     if (vlink) L.push("- 지도 링크: " + vlink);
     L.push("- 인원: " + cur.party_size + "명");
     L.push("- 예약자명: " + (cur.booking_name || "(미입력)"));
@@ -1030,6 +1040,15 @@
   }
 
   /* ---------- 통화 로직 ---------- */
+  /* 식당 정보 문자열 "이름 | 링크 | ☎ 번호" 를 나눈다. 옛 요청("이름 | 링크")도 그대로 읽힌다. */
+  function vparts(raw) {
+    var p = (raw || "").split(" | "), o = { name: p[0] || "", link: "", phone: "" };
+    p.slice(1).forEach(function (x) {
+      if (x.indexOf("☎ ") === 0) o.phone = x.slice(2).trim();
+      else if (x) o.link = x;
+    });
+    return o;
+  }
   function slotList() {
     return (cur.request_slots || []).slice().sort(function (a, b) { return a.rank - b.rank; })
       .map(function (s) {
@@ -1715,7 +1734,7 @@
 
         var d = {
           lang: mlang, kind: kind,
-          venue: (matchedVenue ? matchedVenue.name : (cur.venue_name_raw || "").split(" | ")[0]),
+          venue: (matchedVenue ? matchedVenue.name : (function (v) { return v.name || v.phone || "-"; })(vparts(cur.venue_name_raw))),
           when: when, party: partyFor(mlang, cur.party_size),
           name: cur.booking_name || cst.display_name || "",
           code: cur.lookup_code || "",
@@ -1801,7 +1820,7 @@
         var d = {
           lang: mlang,
           kind: kind,
-          venue: (matchedVenue ? matchedVenue.name : (cur.venue_name_raw || "").split(" | ")[0]),
+          venue: (matchedVenue ? matchedVenue.name : (function (v) { return v.name || v.phone || "-"; })(vparts(cur.venue_name_raw))),
           when: when,
           party: partyFor(mlang, cur.party_size),
           name: cur.booking_name || c.display_name || "",
@@ -1899,7 +1918,7 @@
     $("talk").innerHTML = ""; $("utter").disabled = false; $("send").disabled = false;
     $("handoff").disabled = false; $("saveResult").disabled = true; $("saveMsg").textContent = "";
     var d = document.createElement("div"); d.className = "sys";
-    d.textContent = "— 발신: " + (matchedVenue ? matchedVenue.name + " " + (matchedVenue.phone || "") : (cur.venue_name_raw || "").split(" | ")[0] + " (번호 미확인)") + " —";
+    d.textContent = "— 발신: " + (matchedVenue ? matchedVenue.name + " " + (matchedVenue.phone || "") : (function (v) { return v.name + (v.phone ? " " + v.phone + " (고객 입력)" : " (번호 미확인)"); })(vparts(cur.venue_name_raw))) + " —";
     $("talk").appendChild(d);
     var s0 = slots[0];
     say("안녕하세요, 손님을 대신해 예약 문의드리는 AI 비서입니다. " + dateKo(s0.date) + " " + speak(s0.min) +
