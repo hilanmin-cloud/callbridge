@@ -1698,6 +1698,17 @@
     });
   })();
 
+  /* 안내 페이지에서 넘어올 때 식당 정보 미리 채우기: ?venue=…&vphone=…&vlink=… */
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search);
+      [["venue", "venue"], ["vphone", "vphone"], ["vlink", "vlink"]].forEach(function (p) {
+        var v = (q.get(p[0]) || "").trim();
+        if (v && $(p[1]) && !$(p[1]).value) $(p[1]).value = v.slice(0, 200);
+      });
+    } catch (e) {}
+  })();
+
   applyLang();
   drawPlan();
   initAuth();
