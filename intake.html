@@ -228,6 +228,22 @@
     .chip:hover, .pay:hover { transform: none; }
   }
 </style>
+<!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "98c5f690cf8c470f8c30abceac907850"}'></script>
+<script>
+/* 유입 경로 기억(30일): 처음 들어온 페이지·이전 사이트·홍보 꼬리표(utm). 예약 요청을 보낼 때만 함께 전송된다. */
+(function () {
+  try {
+    var K = "tc-src", now = Date.now(), q = new URLSearchParams(location.search), u = {}, old = null, ref = "";
+    ["utm_source", "utm_medium", "utm_campaign"].forEach(function (k) { var v = q.get(k); if (v) u[k.slice(4)] = v.slice(0, 60); });
+    try { old = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}
+    try { var r = document.referrer && new URL(document.referrer); if (r && r.hostname !== location.hostname) ref = r.hostname; } catch (e) {}
+    if (!old || now - (old.t || 0) > 2592e6 || u.source) {
+      localStorage.setItem(K, JSON.stringify({ lp: location.pathname.slice(0, 100), ref: ref, utm: u, t: now }));
+    }
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -1524,6 +1540,16 @@
     return s.slice(0, a) + "-" + rest.slice(0, mid) + "-" + rest.slice(mid);
   }
 
+  /* 유입 경로: 페이지 머리의 기록(tc-src)을 읽어 요청과 함께 저장한다 */
+  function srcInfo() {
+    try {
+      var o = JSON.parse(localStorage.getItem("tc-src") || "null");
+      if (!o) return { lp: "/intake.html", ref: "", utm: {}, days: 0 };
+      return { lp: o.lp || "", ref: o.ref || "", utm: o.utm || {},
+               days: Math.max(0, Math.floor((Date.now() - (o.t || Date.now())) / 864e5)) };
+    } catch (e) { return null; }
+  }
+
   /* ---------- 제출 ---------- */
   function collect() {
     var slots = [];
@@ -1543,6 +1569,7 @@
         /* 형식: 이름 | 링크 | ☎ 번호 — 링크 자리는 비어 있어도 유지해 운영자 화면이 순서로 읽을 수 있게 한다 */
         venue_name_raw: (TEST_MODE ? "[TEST] " : "") + nm +
           (lk || ph ? " | " + lk : "") + (ph ? " | ☎ " + ph : ""),
+        src: srcInfo(),
         service_type: TEST_MODE ? "test" : "booking",
         party_size: party,
         booking_name: ($("bname").value || "").trim(),

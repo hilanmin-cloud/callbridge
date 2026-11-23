@@ -156,6 +156,19 @@
         </select>
       </div>
       <div id="list" style="max-height:min(58vh,620px); overflow-y:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:10px; padding:8px"><p class="msg">연결 후 불러옵니다.</p></div>
+
+      <details id="srcBox" style="margin-top:12px">
+        <summary style="cursor:pointer; font-weight:700">유입 분석 — 어디서 와서 접수·확정됐나</summary>
+        <div class="row" style="margin-top:8px">
+          <select id="srcDays" style="min-height:36px">
+            <option value="7">최근 7일</option>
+            <option value="30" selected>최근 30일</option>
+            <option value="90">최근 90일</option>
+          </select>
+          <button class="ghost small" id="srcLoad" style="flex:0 1 90px">불러오기</button>
+        </div>
+        <div id="srcOut" style="margin-top:8px"><p class="msg">테스트 건은 빼고 셉니다. 방문자 수는 Cloudflare → Web Analytics에서 같은 기간으로 보세요.</p></div>
+      </details>
     </div>
 
 
@@ -2024,6 +2037,61 @@
   $("vsearch").addEventListener("click", searchVenue);
   $("vq").addEventListener("keydown", function (e) { if (e.key === "Enter") searchVenue(); });
   /* 테스트 건 일괄 삭제 */
+  /* ---------- 유입 분석: 첫 방문 페이지·유입처별 접수/확정 ---------- */
+  function srcLabel(src) {
+    if (!src) return "(기록 없음)";
+    if (src.utm && src.utm.source) return "홍보 링크: " + src.utm.source + (src.utm.campaign ? " / " + src.utm.campaign : "");
+    if (src.ref) {
+      var h = src.ref.replace(/^www\./, "");
+      if (/(^|\.)google\./.test(h)) return "구글 검색";
+      if (/(^|\.)(yahoo\.co\.jp|search\.yahoo)/.test(h)) return "야후 재팬";
+      if (/naver\.com$/.test(h)) return "네이버";
+      if (/bing\.com$/.test(h)) return "빙";
+      return "사이트: " + h;
+    }
+    return "직접 방문·앱";
+  }
+  function srcTable(title, rows) {
+    var keys = Object.keys(rows).sort(function (a, b) { return rows[b].n - rows[a].n; });
+    if (!keys.length) return "";
+    return "<p style='margin:10px 0 4px; font-weight:700'>" + title + "</p>" +
+      "<table style='width:100%; border-collapse:collapse; font-size:13px'>" +
+      "<tr style='text-align:left; color:var(--muted)'><th style='padding:4px'>구분</th><th style='padding:4px; text-align:right'>접수</th><th style='padding:4px; text-align:right'>확정</th><th style='padding:4px; text-align:right'>확정률</th></tr>" +
+      keys.map(function (k) {
+        var r = rows[k];
+        return "<tr style='border-top:1px solid var(--line)'><td style='padding:4px; word-break:break-all'>" + esc(k) + "</td>" +
+          "<td style='padding:4px; text-align:right'>" + r.n + "</td>" +
+          "<td style='padding:4px; text-align:right'>" + r.ok + "</td>" +
+          "<td style='padding:4px; text-align:right'>" + Math.round(r.ok * 100 / r.n) + "%</td></tr>";
+      }).join("") + "</table>";
+  }
+  $("srcLoad").addEventListener("click", function () {
+    var days = parseInt($("srcDays").value, 10) || 30;
+    var since = new Date(Date.now() - days * 864e5).toISOString();
+    $("srcOut").innerHTML = "<p class='msg'>불러오는 중…</p>";
+    api("requests?select=status,src,created_at&is_test=is.false&created_at=gte." + encodeURIComponent(since) + "&limit=2000")
+      .then(function (rows) {
+        rows = rows || [];
+        var byPage = {}, bySrc = {}, tot = { n: 0, ok: 0 };
+        rows.forEach(function (r) {
+          var ok = r.status === "confirmed" ? 1 : 0;
+          var pg = (r.src && r.src.lp) || "(기록 없음)";
+          var sl = srcLabel(r.src);
+          [[byPage, pg], [bySrc, sl]].forEach(function (x) {
+            var o = x[0][x[1]] || (x[0][x[1]] = { n: 0, ok: 0 });
+            o.n++; o.ok += ok;
+          });
+          tot.n++; tot.ok += ok;
+        });
+        if (!tot.n) { $("srcOut").innerHTML = "<p class='msg'>이 기간에 접수된 요청이 없습니다.</p>"; return; }
+        $("srcOut").innerHTML =
+          "<p class='msg'>전체 접수 " + tot.n + "건 · 확정 " + tot.ok + "건 (" + Math.round(tot.ok * 100 / tot.n) + "%)</p>" +
+          srcTable("처음 들어온 페이지별", byPage) + srcTable("유입처별", bySrc) +
+          "<p class='msg' style='margin-top:8px'>유입 기록은 2026-11-23부터 저장됩니다. 그 전 요청은 '(기록 없음)'으로 나옵니다.</p>";
+      })
+      .catch(function (e) { $("srcOut").innerHTML = "<p class='msg'>불러오지 못했습니다: " + esc(String(e && e.message || e)) + "</p>"; });
+  });
+
   $("purgeTest").addEventListener("click", function () {
     if (!connected()) return;
     if (!window.confirm("테스트로 표시된 요청을 모두 삭제합니다. 실제 고객 요청은 지워지지 않습니다.")) return;

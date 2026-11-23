@@ -189,6 +189,22 @@
     .keybox dd { margin-bottom: 8px; }
   }
 </style>
+<!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "98c5f690cf8c470f8c30abceac907850"}'></script>
+<script>
+/* 유입 경로 기억(30일): 처음 들어온 페이지·이전 사이트·홍보 꼬리표(utm). 예약 요청을 보낼 때만 함께 전송된다. */
+(function () {
+  try {
+    var K = "tc-src", now = Date.now(), q = new URLSearchParams(location.search), u = {}, old = null, ref = "";
+    ["utm_source", "utm_medium", "utm_campaign"].forEach(function (k) { var v = q.get(k); if (v) u[k.slice(4)] = v.slice(0, 60); });
+    try { old = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}
+    try { var r = document.referrer && new URL(document.referrer); if (r && r.hostname !== location.hostname) ref = r.hostname; } catch (e) {}
+    if (!old || now - (old.t || 0) > 2592e6 || u.source) {
+      localStorage.setItem(K, JSON.stringify({ lp: location.pathname.slice(0, 100), ref: ref, utm: u, t: now }));
+    }
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -519,7 +535,7 @@
     try { localStorage.setItem("cb-lang", lang); } catch (e) {}
     /* 예약 버튼은 이 식당 이름·번호를 채운 접수 폼으로 (속초 같은 이름 가게와 혼동 방지) */
     var href = "../intake.html?lang=" + encodeURIComponent(lang) +
-      "&venue=" + encodeURIComponent(t("name") + " / 이모네생선찜 (강릉)") +
+      "&venue=" + encodeURIComponent((t("name") === "이모네생선찜" ? "" : t("name") + " / ") + "이모네생선찜 (강릉)") +
       "&vphone=" + encodeURIComponent("033-652-9959");
     Array.prototype.forEach.call(document.querySelectorAll("a[data-cta]"), function (a) { a.href = href; });
   }

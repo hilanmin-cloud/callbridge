@@ -53,6 +53,22 @@
   [hidden] { display: none !important; }
   @media (max-width: 520px) { h1 { font-size: 23px; } }
 </style>
+<!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "98c5f690cf8c470f8c30abceac907850"}'></script>
+<script>
+/* 유입 경로 기억(30일): 처음 들어온 페이지·이전 사이트·홍보 꼬리표(utm). 예약 요청을 보낼 때만 함께 전송된다. */
+(function () {
+  try {
+    var K = "tc-src", now = Date.now(), q = new URLSearchParams(location.search), u = {}, old = null, ref = "";
+    ["utm_source", "utm_medium", "utm_campaign"].forEach(function (k) { var v = q.get(k); if (v) u[k.slice(4)] = v.slice(0, 60); });
+    try { old = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}
+    try { var r = document.referrer && new URL(document.referrer); if (r && r.hostname !== location.hostname) ref = r.hostname; } catch (e) {}
+    if (!old || now - (old.t || 0) > 2592e6 || u.source) {
+      localStorage.setItem(K, JSON.stringify({ lp: location.pathname.slice(0, 100), ref: ref, utm: u, t: now }));
+    }
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <div class="page">
@@ -82,7 +98,7 @@
       <tr><th>구분</th><th>항목</th><th>수집 시점</th></tr>
       <tr>
         <td>예약 요청</td>
-        <td>예약자명(로마자), 이메일 주소, 희망 식당(상호 또는 지도 링크), 희망 일시 1~3순위, 인원, 통화 중 결정 조건, 사용 언어</td>
+        <td>예약자명(로마자), 이메일 주소, 희망 식당(상호·지도 링크·전화번호 중 입력한 것), 희망 일시 1~3순위, 인원, 통화 중 결정 조건, 사용 언어, 유입 경로(처음 방문한 페이지, 이전에 보던 사이트 주소, 홍보 링크의 꼬리표)</td>
         <td>요청 접수 시 (필수)</td>
       </tr>
       <tr>
@@ -163,6 +179,7 @@
       <tr><td>Vercel, Inc.</td><td>웹사이트 호스팅</td></tr>
       <tr><td>Plus Five Five, Inc. (Resend)</td><td>결과 안내 메일 발송</td></tr>
       <tr><td>Telegram FZ-LLC</td><td>운영자에 대한 처리 알림</td></tr>
+      <tr><td>Cloudflare, Inc.</td><td>도메인 관리, 문의 메일(contact@tamocall.com) 전달, 방문 통계 집계</td></tr>
       <tr><td>OpenAI, L.P.</td><td>AI 음성 통화의 처리 <span class="ph">[도입 시점부터]</span></td></tr>
     </table>
     </div>
@@ -189,6 +206,12 @@
         <td>미국</td>
         <td>이메일 주소, 메일 본문(예약자명, 식당, 일시, 인원 포함)</td>
         <td>발송 후 최대 30일</td>
+      </tr>
+      <tr>
+        <td>Cloudflare, Inc.<br><span class="ph">privacyquestions@cloudflare.com</span></td>
+        <td>미국</td>
+        <td>방문 통계: 방문한 페이지 주소, 이전에 보던 사이트 주소, 브라우저·기기 종류, 접속 국가 (쿠키를 쓰지 않으며 개인을 식별하지 않음)<br>문의 메일 전달: 보낸 사람 이메일 주소, 메일 내용</td>
+        <td>방문 통계는 집계된 형태로만 보관, 문의 메일은 전달 후 보관하지 않음</td>
       </tr>
       <tr>
         <td>Telegram FZ-LLC<br><span class="ph">dpo@telegram.org</span></td>
@@ -229,8 +252,9 @@
       <li>로그인 상태의 유지</li>
       <li>선택한 언어의 기억</li>
       <li>이 기기에서 보낸 요청의 조회 코드 보관 — 이 정보는 이용자의 브라우저에만 저장되며 회사에 전송되지 않습니다</li>
+      <li>유입 경로의 기억 — 처음 방문한 페이지와 이전에 보던 사이트 주소를 브라우저에 30일 동안 저장해 두었다가, 예약 요청을 보낼 때 함께 전송합니다</li>
     </ul>
-    <p>이용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다. 다만 거부하는 경우 로그인과 조회 코드 보관 기능을 이용할 수 없습니다. 회사는 광고 목적의 추적이나 제3자 분석 도구를 사용하지 않습니다.</p>
+    <p>이용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다. 다만 거부하는 경우 로그인과 조회 코드 보관 기능을 이용할 수 없습니다. 회사는 광고 목적의 추적을 하지 않습니다. 방문 통계는 쿠키를 쓰지 않고 개인을 식별하지 않는 Cloudflare Web Analytics로만 집계합니다.</p>
 
     <h2>11. 안전성 확보 조치</h2>
     <ul>
@@ -290,7 +314,7 @@
       <tr><th>Category</th><th>Data</th><th>When</th></tr>
       <tr>
         <td>Reservation request</td>
-        <td>Name for the booking (Latin script), email address, restaurant (name or map link), up to three preferred date-and-time choices, party size, the conditions you allow us to decide on the call, your language</td>
+        <td>Name for the booking (Latin script), email address, restaurant (whichever you give of name, map link or phone number), up to three preferred date-and-time choices, party size, the conditions you allow us to decide on the call, your language, how you reached us (first page you visited, the site you came from, campaign tags on promotional links)</td>
         <td>When you submit a request (required)</td>
       </tr>
       <tr>
@@ -370,6 +394,7 @@
       <tr><td>Vercel, Inc.</td><td>Website hosting</td></tr>
       <tr><td>Plus Five Five, Inc. (Resend)</td><td>Sending result emails</td></tr>
       <tr><td>Telegram FZ-LLC</td><td>Operator notifications</td></tr>
+      <tr><td>Cloudflare, Inc.</td><td>Domain management, forwarding mail sent to contact@tamocall.com, visit statistics</td></tr>
       <tr><td>OpenAI, L.P.</td><td>AI voice calls <span class="ph">[from launch]</span></td></tr>
     </table>
     </div>
@@ -396,6 +421,12 @@
         <td>United States</td>
         <td>Email address and message content (name, restaurant, date, party size)</td>
         <td>Up to 30 days after sending</td>
+      </tr>
+      <tr>
+        <td>Cloudflare, Inc.<br><span class="ph">privacyquestions@cloudflare.com</span></td>
+        <td>United States</td>
+        <td>Visit statistics: page address, the site you came from, browser and device type, country (no cookies, no identification of individuals)<br>Mail forwarding: sender's email address and message content</td>
+        <td>Statistics kept only in aggregate; forwarded mail is not stored</td>
       </tr>
       <tr>
         <td>Telegram FZ-LLC<br><span class="ph">dpo@telegram.org</span></td>
@@ -435,9 +466,10 @@
     <ul>
       <li>keep you signed in;</li>
       <li>remember the language you chose;</li>
-      <li>keep the lookup codes of requests sent from this device — this stays in your browser and is never sent to us.</li>
+      <li>keep the lookup codes of requests sent from this device — this stays in your browser and is never sent to us;</li>
+      <li>remember how you reached us — the first page you visited and the site you came from are kept in your browser for 30 days and sent along with a booking request.</li>
     </ul>
-    <p>You can refuse cookies in your browser settings, but sign-in and saved lookup codes will then not work. We use no advertising trackers and no third-party analytics.</p>
+    <p>You can refuse cookies in your browser settings, but sign-in and saved lookup codes will then not work. We use no advertising trackers. Visit statistics come only from Cloudflare Web Analytics, which uses no cookies and does not identify individuals.</p>
 
     <h2>11. Security</h2>
     <ul>
